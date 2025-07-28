@@ -4,7 +4,7 @@ import ComingSoon from '../../components/ComingSoon';
 const BecomeSeller = () => {
     return (
       <div>
-        <ComingSoon />
+        <h2>Become a seller</h2>
       </div>
     );
 };
