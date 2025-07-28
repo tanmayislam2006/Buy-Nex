@@ -1,0 +1,134 @@
+import { createBrowserRouter } from "react-router";
+import Home from "../Pages/public/Home";
+import MainLayout from "../Layouts/MainLayout/MainLayout";
+import AllProducts from "../Pages/public/AllProducts";
+import HelpSupport from "../Pages/public/HelpSupport";
+import About from "../Pages/public/About";
+import BecomeSeller from "../Pages/public/BecomeSeller";
+import DashboardLayout from "../Layouts/DashboardLayout/DashboardLayout";
+import ProductTracking from "../Pages/dashboard/User/ProductTracking";
+import OrderHistory from "../Pages/dashboard/User/OrderHistory";
+import PaymentHistory from "../Pages/dashboard/User/PaymentHistory";
+import UserOverview from "../Pages/dashboard/User/UserOverview";
+import SellerOverview from "../Pages/dashboard/Seller/SellerOverview";
+import AddProduct from "../Pages/dashboard/Seller/AddProduct";
+import ManageProducts from "../Pages/dashboard/Seller/ManageProducts";
+import OrderedProducts from "../Pages/dashboard/Seller/OrderedProducts";
+import PendingSellers from "../Pages/dashboard/Admin/PendingSellers";
+import AllUser from "../Pages/dashboard/Admin/AllUser";
+import AllSellers from "../Pages/dashboard/Admin/AllSellers";
+import TotalOrders from "../Pages/dashboard/Admin/TotalOrders";
+import AuthLayout from "../Layouts/AuthLayout/AuthLayout";
+import Login from "../Pages/Auth/Login";
+import Register from "../Pages/Auth/Register";
+
+const router = createBrowserRouter([
+  // Public routes
+  {
+    path: "/",
+    Component: MainLayout,
+    errorElement: <div>Error occurred</div>,
+    children: [
+      {
+        index: true,
+        Component: Home,
+      },
+      {
+        path: "/all-produts",
+        Component: AllProducts,
+      },
+      {
+        path: "/help-support",
+        Component: HelpSupport,
+      },
+      {
+        path: "/about",
+        Component: About,
+      },
+      {
+        path: "/become-seller",
+        Component: BecomeSeller,
+      },
+    ],
+  },
+  // Authentication routes
+  {
+    path: "/",
+    Component: AuthLayout,
+      children: [
+          {
+              path: "auth/login",
+              Component: Login,
+          },
+          {
+              path: "auth/register",
+              Component: Register,
+          },
+          {
+              path: "auth/reset-password",
+              Component: Register,
+          },
+    ],
+  },
+  //   Dashboard routes
+  {
+    path: "/",
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: "dashboard/user",
+        Component: UserOverview,
+      },
+      {
+        path: "product-tracking",
+        Component: ProductTracking,
+      },
+      {
+        path: "order-history",
+        Component: OrderHistory,
+      },
+      {
+        path: "payment-history",
+        Component: PaymentHistory,
+      },
+      {
+        path: "dashboard/seller",
+        Component: SellerOverview,
+      },
+      {
+        path: "add-product",
+        Component: AddProduct,
+      },
+      {
+        path: "manage-products",
+        Component: ManageProducts,
+      },
+      {
+        path: "ordered-products",
+        Component: OrderedProducts,
+      },
+      {
+        path: "dashboard/admin",
+        Component: Home,
+      },
+      {
+        path: "pending-sellers",
+        Component: PendingSellers,
+      },
+      {
+        path: "all-user",
+        Component: AllUser,
+      },
+      {
+        path: "all-seller",
+        Component: AllSellers,
+      },
+      {
+        path: "total-orders",
+        Component: TotalOrders,
+      },
+    ],
+  },
+]);
+
+export default router;
