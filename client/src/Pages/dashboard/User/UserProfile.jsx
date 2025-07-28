@@ -1,7 +1,9 @@
+import ComingSoon from "../../../components/ComingSoon";
+
 const UserProfile = () => {
     return (
         <section>
-            <p>User Profile</p>
+            <ComingSoon></ComingSoon>
         </section>
     );
 };
