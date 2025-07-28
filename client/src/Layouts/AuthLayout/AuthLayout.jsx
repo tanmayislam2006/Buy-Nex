@@ -1,17 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router';
-import Navbar from '../../components/Navbar';
 
 const AuthLayout = () => {
     return (
-        <div className='grid grid-cols-1 md:grid-cols-2 h-screen'>
-            <div className='col-span-2'>
-                <Navbar/>
-            </div>
-        <div>
+        <div className='grid grid-cols-1 md:grid-cols-2 h-screen border '>
+        <div className='border'>
           <Outlet />
         </div>
-        <div>
+        <div className='hidden md:block'>
           {/* alut image  */}
           <img
             src="https://web.justbeepit.com/authImg.png"
