@@ -40,14 +40,22 @@ const Login = () => {
         const profileInfo = {
           name: res.user.displayName,
           email: res.user.email,
-          profileImage: res.user.photoURL,
-          service_plan: "free",
+          createdAt: new Date(),
+          lastLogin: new Date(),
           isVerified: false,
           role: "user",
-          createdAt: new Date().toISOString(),
+          address: {
+            street: "string",
+            city: "string",
+            state: "string",
+            zipCode: "string",
+            country: "string",
+          },
+          phone: "string",
         };
-        await axiosInstance.post("/register", profileInfo);
-        await refetchUserData();
+        console.log(profileInfo);
+        // await axiosInstance.post("/register", profileInfo);
+        // await refetchUserData();
         toast.success("Logged in with Google");
         navigate(location?.state || "/");
       }
@@ -67,9 +75,7 @@ const Login = () => {
         &times;
       </Link>
 
-      <h2 className="text-2xl font-bold text-primary mb-6">
-        Login to Apply IQ
-      </h2>
+      <h2 className="text-2xl font-bold text-primary mb-6">Login to Buy Fix</h2>
 
       <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
         <input
