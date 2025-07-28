@@ -9,12 +9,12 @@ import {
   signOut,
 } from "firebase/auth";
 
-import useUserProfile from "../Hooks/useUserProfile";
-import { auth } from "../Firebase/Firebase.init.js";
-import Context from "./Context.jsx";
+import useUserProfile from "../../Hooks/useUserProfile.jsx";
+import Context from "../AuthContext/AuthContext.jsx";
+import { auth } from "../../Firebase/Firebase.init.js";
 
 const googleProvider = new GoogleAuthProvider();
-const Provider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [firebaseLoading, setFirebaseLoading] = useState(true);
 
@@ -84,4 +84,4 @@ const Provider = ({ children }) => {
   return <Context value={sharedData}>{children} </Context>;
 };
 
-export default Provider;
+export default AuthProvider;

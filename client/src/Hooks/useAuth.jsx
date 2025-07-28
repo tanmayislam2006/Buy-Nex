@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import Context from './../Context/Context';
+import Context from '../Context/AuthContext/AuthContext';
+
 
 const useAuth = () => {
  const sharedData=useContext(Context)

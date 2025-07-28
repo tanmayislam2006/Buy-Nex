@@ -125,7 +125,7 @@ const Login = () => {
         Don't have an account?{" "}
         <Link
           state={location.state}
-          to="/register"
+          to="/auth/register"
           className="text-primary font-semibold"
         >
           Register
