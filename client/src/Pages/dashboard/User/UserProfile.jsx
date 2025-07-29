@@ -4,6 +4,8 @@ const UserProfile = () => {
     return (
         <section>
             <ComingSoon></ComingSoon>
+            <p>This is user profile</p>
+            <p>Nothing</p>
         </section>
     );
 };
