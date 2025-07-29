@@ -37,6 +37,24 @@ const Login = () => {
     try {
       const res = await googleLogin();
       if (res?.user) {
+        const createdDate = new Date(res?.user?.metadata?.creationTime);
+        const lastLoginDate = new Date(res?.user?.metadata?.lastSignInTime);
+        const createdAt = new Date(
+          createdDate.getTime() - lastLoginDate.getTimezoneOffset() * 60000
+        ).toISOString();
+        const lastLogin = new Date(
+          lastLoginDate.getTime() - lastLoginDate.getTimezoneOffset() * 60000
+        ).toISOString();
+
+        const profileInfo = {
+          name: res.user.displayName,
+          email: res.user.email,
+          profileImage: res.user.photoURL,
+          role: "customer",
+          isVerified: false,
+          createdAt,
+          lastLogin,
+        };
         toast.success("Logged in with Google");
         navigate(location?.state || "/");
       }
@@ -61,13 +79,16 @@ const Login = () => {
             type="email"
             placeholder="Enter your email"
             className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-            value={"user@11.com"}
+            defaultValue={"user@11.com"}
             required
           />
         </div>
 
         <div className="relative">
-          <label htmlFor="password" className="block mb-1 text-sm font-semibold">
+          <label
+            htmlFor="password"
+            className="block mb-1 text-sm font-semibold"
+          >
             Password
           </label>
           <input
@@ -75,7 +96,7 @@ const Login = () => {
             type={showPass ? "text" : "password"}
             placeholder="Enter your password"
             className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-            value={"123456Aa@"}
+            defaultValue={"123456Aa@"}
             required
           />
           <span
@@ -121,7 +142,7 @@ const Login = () => {
 
       <Link
         to="/"
-        className="absolute top-4 right-4 text-gray-400 hover:text-[#F85606] text-2xl font-bold"
+        className="absolute top-4 right-4 text-gray-400 hover:text-[#F85606] text-4xl font-bold"
         aria-label="Go Home"
       >
         &times;
