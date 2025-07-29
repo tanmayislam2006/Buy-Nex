@@ -23,6 +23,7 @@ const Navbar = () => {
     { label: "All Products", to: "/all-products" },
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
+    { label: "Become A Seller", to: "/become-seller" },
   ];
 
   useEffect(() => {
