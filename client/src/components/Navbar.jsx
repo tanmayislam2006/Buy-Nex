@@ -33,7 +33,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="sticky top-0 z-50 w-full max-w-[2000px] mx-auto">
       {/* Initial Large Navbar */}
       <div
         className={`absolute left-0 top-0 w-full transition-all duration-500 ease-in-out
