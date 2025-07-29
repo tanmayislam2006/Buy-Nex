@@ -1,4 +1,4 @@
-form > div {
+.become-seller > div {
   display: flex;
   align-items: center;
   border: 1px solid rgba(211, 210, 210, 0.801); 
@@ -7,16 +7,16 @@ form > div {
   transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease; 
 }
 
-form > div:focus-within {
+.become-seller > div:focus-within {
   border-color: #F85606; 
   box-shadow: 0 0 6px rgba(248, 86, 6, 0.4); 
 }
 
-form > div > input::placeholder {
+.become-seller > div > input::placeholder {
   color: gray;
   font-size: small;
 }
-form > div > input {
+.become-seller > div > input {
   color: #08642d;
   font-size: small;
   border: none;
