@@ -15,7 +15,7 @@ import UserDropdown from "../shared/UserDropdown";
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, setUser,firebaseUser } = useAuth();
+  const { user, setUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const menu = [
     { label: "Home", to: "/" },
@@ -72,7 +72,7 @@ const Navbar = () => {
                   0
                 </span>
               </Link>
-              {firebaseUser ? (
+              {user ? (
                 <UserDropdown menu={menu} />
               ) : (
                 <Link to="auth/login">
@@ -155,11 +155,7 @@ const Navbar = () => {
                 </span>
               </Link>
               {user ? (
-                <img
-                  src={user.avatar || "https://i.ibb.co/2kR6YQk/user.png"}
-                  alt="User"
-                  className="w-8 h-8 rounded-full border-2 border-orange-500 cursor-pointer"
-                />
+                <UserDropdown menu={menu} />
               ) : (
                 <Link to="auth/login">
                   <FiUser className="text-2xl" />

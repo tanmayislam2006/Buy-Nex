@@ -34,7 +34,8 @@ const Register = () => {
           isVerified: false,
           role: "customer",
         };
-        // Optionally post to DB: await axiosInstance.post("/register", profileInfo);
+        await axiosInstance.post("/register", profileInfo);
+        await refetchUserData();
       }
     } catch (error) {
       toast.error(`Registration failed: ${error.message}`);
@@ -63,6 +64,8 @@ const Register = () => {
           createdAt,
           lastLogin,
         };
+        await axiosInstance.post("/register", profileInfo);
+        await refetchUserData();
         toast.success("Logged in with Google");
         navigate(location?.state || "/");
       }

@@ -3,7 +3,7 @@ import useAuth from "../Hooks/useAuth";
 
 const UserDropdown = ({ menu }) => {
   const { user, logoutUser} = useAuth();
-  const defaultAvtar = `https://ui-avatars.com/api/?name=Buy Nex&background=random&color=fff&bold=true`;
+  const defaultAvtar = `https://ui-avatars.com/api/?name=${user?.name || "Buy Nex"}&background=random&color=fff&bold=true`;
   return (
     <div className="dropdown dropdown-end mr-5">
       <div

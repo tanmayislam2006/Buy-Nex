@@ -55,6 +55,8 @@ const Login = () => {
           createdAt,
           lastLogin,
         };
+        await axiosInstance.post("/register", profileInfo);
+        await refetchUserData();
         toast.success("Logged in with Google");
         navigate(location?.state || "/");
       }
