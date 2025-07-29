@@ -21,6 +21,7 @@ import TotalOrders from "../Pages/dashboard/Admin/TotalOrders";
 import AuthLayout from "../Layouts/AuthLayout/AuthLayout";
 import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
+import Blogs from "../Pages/public/Blogs";
 
 const router = createBrowserRouter([
   // Public routes
@@ -34,8 +35,12 @@ const router = createBrowserRouter([
         Component: Home,
       },
       {
-        path: "/all-produts",
+        path: "/all-products",
         Component: AllProducts,
+      },
+      {
+        path: "/blogs",
+        Component: Blogs,
       },
       {
         path: "/help-support",

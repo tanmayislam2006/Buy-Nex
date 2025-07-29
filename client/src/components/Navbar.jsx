@@ -1,144 +1,255 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router';
-import { FiMenu, FiX, FiShoppingCart, FiUser } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
+import { Link, NavLink } from "react-router";
+import {
+  FiShoppingBag,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiHeadphones,
+  FiChevronDown,
+  FiSearch,
+} from "react-icons/fi";
+import MainLogo from "../shared/MainLogo";
+import useAuth from "../Hooks/useAuth";
 
 const Navbar = () => {
-  // Dummy user state (replace with your auth context)
-  const [user, setUser] = useState(null); // { name: "John Doe", avatar: "/src/assets/user.png" }
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const {user, setUser} = useAuth(); 
+  const [scrolled, setScrolled] = useState(false);
+
+  const menu = [
+    { label: "Home", to: "/" },
+    { label: "Blogs", to: "/blogs" },
+    { label: "All Products", to: "/all-products" },
+    { label: "Help & Support", to: "/help-support" },
+    { label: "About Us", to: "/about" },
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <>
-      {/* Navbar */}
-      <nav className="bg-white shadow sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-          {/* Logo & Menu */}
-          <div className="flex items-center gap-2">
-            <button
-              className="lg:hidden mr-2"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-            >
-              <FiMenu className="text-3xl text-orange-500" />
-            </button>
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-orange-500 tracking-wide">BuyNex</span>
-            </Link>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex-1 mx-6 max-w-xl hidden md:block">
-            <form className="flex">
+    <header className="sticky top-0 z-50 w-full">
+      {/* Initial Large Navbar */}
+      <div
+        className={`absolute left-0 top-0 w-full transition-all duration-500 ease-in-out
+        ${
+          scrolled
+            ? "-translate-y-10 opacity-0 pointer-events-none"
+            : "translate-y-0 opacity-100"
+        }
+        `}
+        style={{ willChange: "transform, opacity" }}
+      >
+        <div className="bg-white shadow">
+          <div className="flex items-center justify-between p-4">
+            {/* Logo */}
+            <MainLogo />
+            {/* Search */}
+            <form className="flex-1 mx-8 max-w-2xl hidden md:flex">
               <input
                 type="text"
-                placeholder="Search in BuyNex"
-                className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="I'm looking for..."
+                className="w-full px-4 py-2 border border-gray-200 rounded-l-full focus:outline-none"
               />
               <button
                 type="submit"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-r-full font-semibold"
+                className="flex items-center gap-1 bg-white border border-l-0 border-gray-200 px-5 py-2 rounded-r-full font-semibold text-gray-700 hover:text-primary transition duration-200"
               >
+                <FiSearch className="text-lg" />
                 Search
               </button>
             </form>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-4">
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <FiShoppingCart className="text-2xl text-gray-700 hover:text-orange-500" />
-              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full px-1">0</span>
-            </Link>
-            {/* User */}
-            {user ? (
-              <div className="relative group">
+            {/* Cart & User */}
+            <div className="flex items-center gap-8">
+              <Link to="/cart" className="relative">
+                <FiShoppingBag className="text-2xl" />
+                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
+                  0
+                </span>
+              </Link>
+              {user ? (
                 <img
                   src={user.avatar || "https://i.ibb.co/2kR6YQk/user.png"}
                   alt="User"
                   className="w-8 h-8 rounded-full border-2 border-orange-500 cursor-pointer"
                 />
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md py-2 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
-                  <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</Link>
-                  <Link to="/orders" className="block px-4 py-2 hover:bg-gray-100">Orders</Link>
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-                    onClick={() => setUser(null)}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Link to="auth/login" className="text-gray-700 hover:text-orange-500 font-medium">Login</Link>
-                <Link to="auth/register" className="text-gray-700 hover:text-orange-500 font-medium">Signup</Link>
-              </>
-            )}
+              ) : (
+                <Link to="auth/login">
+                  <FiUser className="text-2xl" />
+                </Link>
+              )}
+              {/* Mobile menu button */}
+              <button
+                className="lg:hidden ml-2"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <FiMenu className="text-2xl cursor-pointer" />
+              </button>
+            </div>
+          </div>
+          {/* Main menu & support */}
+          <div className="hidden lg:flex items-center justify-between px-4 py-2 bg-white">
+            <nav className="flex gap-6">
+              {menu.map((item) => (
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center gap-1 text-lg font-medium hover:text-orange-500 ${
+                      isActive ? "text-primary font-semibold" : ""
+                    }`
+                  }
+                >
+                  {item.label}
+                  {item.dropdown && <FiChevronDown className="text-sm" />}
+                </NavLink>
+              ))}
+            </nav>
+            <div className="hidden md:flex items-center gap-2 text-lg font-medium">
+              <FiHeadphones className="text-2xl" />
+              <span>(+01)-800-3456</span>
+            </div>
           </div>
         </div>
-        {/* Mobile Search */}
-        <div className="block md:hidden px-4 pb-2">
-          <form className="flex">
-            <input
-              type="text"
-              placeholder="Search in BuyNex"
-              className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-orange-400"
-            />
-            <button
-              type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-r-full font-semibold"
-            >
-              <FiShoppingCart />
-            </button>
-          </form>
-        </div>
-      </nav>
+      </div>
 
-      {/* Sidebar for small devices */}
+      {/* Compact Navbar on Scroll */}
       <div
-        className={`fixed inset-0 z-50 bg-black/30 bg-opacity-40 transition-opacity duration-300 ${
-          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        className={`absolute left-0 top-0 w-full transition-all duration-500 ease-in-out
+        ${
+          scrolled
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-10 opacity-0 pointer-events-none"
+        }
+        `}
+        style={{ willChange: "transform, opacity" }}
+      >
+        <div className="bg-white shadow">
+          <div className="flex items-center justify-between px-4 py-4">
+            {/* Logo */}
+            <MainLogo />
+            {/* Menu */}
+            <nav className="hidden lg:flex gap-6">
+              {menu.map((item) => (
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center gap-1 text-base font-medium hover:text-orange-500 ${
+                      isActive ? "text-orange-500 font-semibold" : ""
+                    }`
+                  }
+                >
+                  {item.label}
+                  {item.dropdown && <FiChevronDown className="text-sm" />}
+                </NavLink>
+              ))}
+            </nav>
+            {/* Cart, User, Support */}
+            <div className="flex items-center gap-6">
+              <Link to="/cart" className="relative">
+                <FiShoppingBag className="text-2xl" />
+                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
+                  0
+                </span>
+              </Link>
+              {user ? (
+                <img
+                  src={user.avatar || "https://i.ibb.co/2kR6YQk/user.png"}
+                  alt="User"
+                  className="w-8 h-8 rounded-full border-2 border-orange-500 cursor-pointer"
+                />
+              ) : (
+                <Link to="auth/login">
+                  <FiUser className="text-2xl" />
+                </Link>
+              )}
+              {/* Mobile menu button */}
+              <button
+                className="lg:hidden ml-2"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <FiMenu className="text-2xl" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div
+        className={`fixed inset-0 z-50 bg-black/40 transition-opacity duration-300 ${
+          sidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setSidebarOpen(false)}
       ></div>
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } lg:hidden`}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <span className="text-xl font-bold text-orange-500">BuyNex</span>
-          <button onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
-            <FiX className="text-2xl text-gray-700" />
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+          <MainLogo />
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <FiX className="text-2xl text-gray-700 cursor-pointer" />
           </button>
         </div>
         <nav className="flex flex-col gap-2 p-4">
-          <Link to="/" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Home</Link>
-          <Link to="/products" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>All Products</Link>
-          <Link to="/about" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>About</Link>
-          <Link to="/help" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Help & Support</Link>
-          <hr className="my-2" />
+          {menu.map((item) => (
+            <NavLink
+              key={item.label}
+              to={item.to}
+              className={({ isActive }) =>
+                `py-2 px-3 rounded hover:bg-orange-50 text-primary ${
+                  isActive ? "bg-secondary font-semibold" : ""
+                }`
+              }
+              onClick={() => setSidebarOpen(false)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <hr className="my-2 border-gray-200" />
+          <Link
+            to="/cart"
+            className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-50"
+          >
+            <FiShoppingBag className="text-xl" /> Cart
+          </Link>
           {user ? (
-            <>
-              <Link to="/profile" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Profile</Link>
-              <Link to="/orders" className="py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Orders</Link>
-              <button
-                className="text-left py-2 px-3 rounded hover:bg-orange-50 text-red-500"
-                onClick={() => { setUser(null); setSidebarOpen(false); }}
-              >
-                Logout
-              </button>
-            </>
+            <button
+              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-50 text-red-500"
+              onClick={() => {
+                setUser(null);
+                setSidebarOpen(false);
+              }}
+            >
+              <FiUser className="text-xl" /> Logout
+            </button>
           ) : (
-            <>
-              <Link to="auth/login" className="text-left py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Login</Link>
-              <Link to="auth/register" className="text-left py-2 px-3 rounded hover:bg-orange-50" onClick={() => setSidebarOpen(false)}>Signup</Link>
-            </>
+            <Link
+              to="auth/login"
+              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-50"
+            >
+              <FiUser className="text-xl" /> Login
+            </Link>
           )}
+          <div className="flex items-center gap-2 mt-4 text-lg font-medium">
+            <FiHeadphones className="text-2xl" />
+            <span>(+01)-800-3456</span>
+          </div>
         </nav>
       </aside>
-    </>
+    </header>
   );
 };
 
