@@ -21,21 +21,27 @@ import TotalOrders from "../Pages/dashboard/Admin/TotalOrders";
 import AuthLayout from "../Layouts/AuthLayout/AuthLayout";
 import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
+import Blogs from "../Pages/public/Blogs";
+import Error404 from "../Pages/ErrorPage/Error404";
 
 const router = createBrowserRouter([
   // Public routes
   {
     path: "/",
     Component: MainLayout,
-    errorElement: <div>Error occurred</div>,
+    errorElement: <Error404 />,
     children: [
       {
         index: true,
         Component: Home,
       },
       {
-        path: "/all-produts",
+        path: "/all-products",
         Component: AllProducts,
+      },
+      {
+        path: "/blogs",
+        Component: Blogs,
       },
       {
         path: "/help-support",
@@ -55,19 +61,19 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: AuthLayout,
-      children: [
-          {
-              path: "auth/login",
-              Component: Login,
-          },
-          {
-              path: "auth/register",
-              Component: Register,
-          },
-          {
-              path: "auth/reset-password",
-              Component: Register,
-          },
+    children: [
+      {
+        path: "auth/login",
+        Component: Login,
+      },
+      {
+        path: "auth/register",
+        Component: Register,
+      },
+      {
+        path: "auth/reset-password",
+        Component: Register,
+      },
     ],
   },
   //   Dashboard routes
