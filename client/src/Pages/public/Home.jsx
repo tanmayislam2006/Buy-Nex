@@ -3,7 +3,7 @@ import ComingSoon from '../../components/ComingSoon';
 
 const Home = () => {
     return (
-      <div>
+      <div className='min-h-[1000vh]'>
             <ComingSoon showBack={ false} />
       </div>
     );

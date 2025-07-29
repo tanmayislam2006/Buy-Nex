@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../seller.css";
+import "./Css/seller.css";
 import { FaUser, FaEnvelope, FaPhone, FaBirthdayCake } from "react-icons/fa";
 import banner from "../../assets/seller/seller-banner.png";
 import seller from '../../assets/seller/seller.jpg'
@@ -39,7 +39,7 @@ const BecomeSeller = () => {
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="become-seller space-y-5">
             {/* Full Name */}
             <div>
               <FaUser className=" mr-2" />

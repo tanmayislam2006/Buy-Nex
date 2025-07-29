@@ -1,10 +1,9 @@
 import { Link } from "react-router";
 import useAuth from "../Hooks/useAuth";
-import Logo from "../assets/logo.png"
 
 const UserDropdown = ({ menu }) => {
-  const { user, logoutUser } = useAuth()
-console.log(menu);
+  const { user, logoutUser} = useAuth();
+  const defaultAvtar = `https://ui-avatars.com/api/?name=Buy Nex&background=random&color=fff&bold=true`;
   return (
     <div className="dropdown dropdown-end mr-5">
       <div
@@ -13,11 +12,7 @@ console.log(menu);
         className="btn btn-ghost btn-circle avatar relative group"
       >
         <div className="w-10 rounded-full">
-          <img
-            alt="user"
-            src={Logo}
-            referrerPolicy="no-referrer"
-          />
+          <img alt="user" src={user?.profileImage || defaultAvtar} referrerPolicy="no-referrer" />
         </div>
         <p className="absolute left-1/2 -translate-x-1/2 -bottom-10  bg-gray-800 text-white text-xs rounded px-3 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-50">
           {user?.name || "Buy Nex"}
@@ -34,7 +29,10 @@ console.log(menu);
         ))}
 
         <li>
-          <button  onClick={() => logoutUser()} className="btn btn-primary rounded-full mx-3">
+          <button
+            onClick={() => logoutUser()}
+            className="btn btn-primary rounded-full mx-3"
+          >
             Log Out
           </button>
         </li>
