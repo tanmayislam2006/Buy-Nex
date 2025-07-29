@@ -75,7 +75,7 @@ const Login = () => {
         &times;
       </Link>
 
-      <h2 className="text-2xl font-bold text-primary mb-6">Login to Buy Fix</h2>
+      <h2 className="text-2xl font-bold text-primary mb-6">Login to Buy Nex</h2>
 
       <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
         <input
