@@ -21,9 +21,10 @@ const Navbar = () => {
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
     { label: "All Products", to: "/all-products" },
+    { label: "Become Seller", to: "/become-seller" },
+    { label: "Product Details", to: "/product-details" },
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
-    { label: "Become A Seller", to: "/become-seller" },
   ];
 
   useEffect(() => {
