@@ -193,6 +193,8 @@ const Navbar = () => {
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar"
           >
+
+            
             <FiX className="text-2xl text-gray-700 cursor-pointer" />
           </button>
         </div>
