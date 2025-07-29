@@ -24,6 +24,7 @@ const Navbar = () => {
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
     { label: "Become A Seller", to: "/become-seller" },
+    { label: "Dashboard", to: "/dashboard/user" },
   ];
 
   useEffect(() => {
