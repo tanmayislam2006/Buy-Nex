@@ -37,25 +37,6 @@ const Login = () => {
     try {
       const res = await googleLogin();
       if (res?.user) {
-        const profileInfo = {
-          name: res.user.displayName,
-          email: res.user.email,
-          createdAt: new Date(),
-          lastLogin: new Date(),
-          isVerified: false,
-          role: "user",
-          address: {
-            street: "string",
-            city: "string",
-            state: "string",
-            zipCode: "string",
-            country: "string",
-          },
-          phone: "string",
-        };
-        console.log(profileInfo);
-        // await axiosInstance.post("/register", profileInfo);
-        // await refetchUserData();
         toast.success("Logged in with Google");
         navigate(location?.state || "/");
       }
@@ -65,78 +46,86 @@ const Login = () => {
   };
 
   return (
-    <div className="relative max-w-md w-full mx-auto border-2 border-primary/20 rounded-2xl shadow-lg p-8 flex flex-col items-center my-3">
-      {/* Cross (×) Button to go back to home */}
-      <Link
-        to="/"
-        className="absolute top-4 right-4 text-gray-400 hover:text-primary text-2xl font-bold"
-        aria-label="Close and go to home"
-      >
-        &times;
-      </Link>
+    <div className="w-full max-w-md mx-auto relative">
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-[#F85606] mb-6">
+        Login to Buy Nex
+      </h2>
 
-      <h2 className="text-2xl font-bold text-primary mb-6">Login to Buy Fix</h2>
-
-      <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          className="w-full px-4 py-3 rounded-lg border border-primary/20 focus:outline-none focus:border-primary"
-          required
-        />
-
-        <div className="mb-4 relative">
-          <button
-            type="button"
-            onClick={() => setShowPass(!showPass)}
-            className="absolute right-4 bottom-3 cursor-pointer text-gray-500"
-          >
-            {showPass ? <FaRegEyeSlash size={20} /> : <FaRegEye size={20} />}
-          </button>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block mb-1 text-sm font-semibold">
+            Email
+          </label>
           <input
-            type={showPass ? "text" : "password"}
-            id="password"
-            name="password"
-            defaultValue={"123456Aa@"}
-            placeholder="Enter your password"
-            className="w-full px-4 py-3 rounded-lg border border-primary/20 focus:outline-none focus:border-primary"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+            value={"user@11.com"}
             required
           />
         </div>
 
+        <div className="relative">
+          <label htmlFor="password" className="block mb-1 text-sm font-semibold">
+            Password
+          </label>
+          <input
+            name="password"
+            type={showPass ? "text" : "password"}
+            placeholder="Enter your password"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+            value={"123456Aa@"}
+            required
+          />
+          <span
+            onClick={() => setShowPass(!showPass)}
+            className="absolute right-4 bottom-3 cursor-pointer text-gray-500"
+          >
+            {showPass ? <FaRegEyeSlash size={20} /> : <FaRegEye size={20} />}
+          </span>
+        </div>
+
         <button
           type="submit"
-          className="w-full bg-primary cursor-pointer text-white font-bold py-3 rounded-lg mt-2"
+          className="w-full bg-[#F85606] text-white font-semibold py-3 rounded-lg hover:bg-[#e54e04] transition cursor-pointer"
         >
           Login
         </button>
       </form>
 
-      <div className="my-4 w-full flex items-center">
-        <div className="flex-1 h-px bg-primary/20"></div>
-        <span className="mx-3 text-gray-400 text-sm">or</span>
-        <div className="flex-1 h-px bg-primary/20"></div>
+      <div className="my-6 flex items-center justify-between">
+        <hr className="flex-1 border-gray-300" />
+        <span className="px-3 text-gray-400 text-sm">Or</span>
+        <hr className="flex-1 border-gray-300" />
       </div>
 
       <button
         onClick={handleGoogleLogin}
-        className="w-full cursor-pointer flex items-center justify-center gap-3 border border-primary/30 py-3 rounded-lg font-semibold text-primary"
+        className="w-full flex items-center justify-center gap-3 border border-gray-200 py-3 rounded-lg transition cursor-pointer"
       >
         <FcGoogle className="text-2xl" />
         Continue with Google
       </button>
 
-      <p className="mt-6 text-sm">
+      <p className="mt-6 text-center text-sm">
         Don't have an account?{" "}
         <Link
           state={location.state}
           to="/auth/register"
-          className="text-primary font-semibold"
+          className="text-[#F85606] font-semibold"
         >
           Register
         </Link>
       </p>
+
+      <Link
+        to="/"
+        className="absolute top-4 right-4 text-gray-400 hover:text-[#F85606] text-2xl font-bold"
+        aria-label="Go Home"
+      >
+        &times;
+      </Link>
     </div>
   );
 };
