@@ -23,6 +23,7 @@ import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
 import Blogs from "../Pages/public/Blogs";
 import Error404 from "../Pages/ErrorPage/Error404";
+import Upcoming from "../Pages/public/Upcoming";
 
 const router = createBrowserRouter([
   // Public routes
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "/become-seller",
         Component: BecomeSeller,
+      },
+      {
+        path: "/upcoming",
+        Component: Upcoming,
       },
     ],
   },

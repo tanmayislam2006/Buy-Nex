@@ -231,8 +231,7 @@ const OrderHistory = () => {
                   {selectedOrder.trackingUrl && (
                     <div>
                       <a
-                        href={selectedOrder.trackingUrl}
-                        target="_blank"
+                        href="/upcoming"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline"
                       >
