@@ -7,7 +7,7 @@ const MainLogo = () => {
         <Link to="/" className="flex items-center">
           <img src={logo} alt="Logo" className="h-10 w-10" />
           <span className="text-2xl font-semibold text-primary mt-1">
-            BuyNext
+            BuyNex
           </span>
         </Link>
     );

@@ -11,18 +11,19 @@ import {
 } from "react-icons/fi";
 import MainLogo from "../shared/MainLogo";
 import useAuth from "../Hooks/useAuth";
+import UserDropdown from "../shared/UserDropdown";
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const {user, setUser} = useAuth(); 
+  const { user, setUser,firebaseUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
-
   const menu = [
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
     { label: "All Products", to: "/all-products" },
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
+    { label: "Become A Seller", to: "/become-seller" },
   ];
 
   useEffect(() => {
@@ -71,12 +72,8 @@ const Navbar = () => {
                   0
                 </span>
               </Link>
-              {user ? (
-                <img
-                  src={user.avatar || "https://i.ibb.co/2kR6YQk/user.png"}
-                  alt="User"
-                  className="w-8 h-8 rounded-full border-2 border-orange-500 cursor-pointer"
-                />
+              {firebaseUser ? (
+                <UserDropdown menu={menu} />
               ) : (
                 <Link to="auth/login">
                   <FiUser className="text-2xl" />
