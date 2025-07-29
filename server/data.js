@@ -29,21 +29,21 @@
  * @property {'Active'|'Inactive'|'Suspended'} status - Account status.
  */
 export const UserModel = {
-  name: "string",
-  profileImage: "string (URL)",
-  email: "string",
-  createdAt: "timestamp",
-  lastLogin: "timestamp",
-  isVerified: "boolean",
-  role: "enum/string", // 'Admin', 'Seller', 'Customer'
+  name: "string",//changable
+  profileImage: "string (URL)", //update
+  email: "string", //readOnly
+  createdAt: "timestamp",//dont show in modal
+  lastLogin: "timestamp",//dont show in modal
+  isVerified: "boolean",//dont show in modal
+  role: "enum/string", //dont show in modal
   address: {
     street: "string",
     city: "string",
     state: "string",
     zipCode: "string",
     country: "string",
-  },
-  phone: "string", //bd velidate
+  },//changable
+  phone: "string", //bd velidate (changable)
 };
 
 /**
