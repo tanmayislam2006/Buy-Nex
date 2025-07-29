@@ -16,7 +16,7 @@ const DataTable = ({ columns, data }) => {
   return (
     <div className="overflow-x-auto w-full border border-base-300 rounded-xl shadow-sm">
       <table className="min-w-full text-sm text-base-content">
-        <thead className="bg-primary text-white rounded-t-xl">
+        <thead className="bg-primary text-white rounded-t-xl text-center">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (

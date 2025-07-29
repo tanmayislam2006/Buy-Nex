@@ -29,12 +29,9 @@
  * @property {'Active'|'Inactive'|'Suspended'} status - Account status.
  */
 export const UserModel = {
-  id: "string/UUID",
   name: "string",
   profileImage: "string (URL)",
   email: "string",
-  passwordHash: "string",
-  uid: "string",
   createdAt: "timestamp",
   lastLogin: "timestamp",
   isVerified: "boolean",
@@ -46,8 +43,7 @@ export const UserModel = {
     zipCode: "string",
     country: "string",
   },
-  phone: "string",
-  status: "enum/string", // 'Active', 'Inactive', 'Suspended'
+  phone: "string", //bd velidate
 };
 
 /**
