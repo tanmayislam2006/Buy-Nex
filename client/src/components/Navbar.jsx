@@ -220,7 +220,7 @@ const Navbar = () => {
           </Link>
           {user ? (
             <button
-              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-50 text-red-500"
+              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-100 text-red-500 cursor-pointer"
               onClick={() => {
                 logoutUser();
                 setSidebarOpen(false);

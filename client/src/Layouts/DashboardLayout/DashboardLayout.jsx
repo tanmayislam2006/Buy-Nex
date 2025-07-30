@@ -70,7 +70,7 @@ const DashboardLayout = () => {
                 to={link.to}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded hover:bg-orange-50 text-gray-700 font-medium ${
-                    isActive ? "bg-orange-50 text-primary font-semibold" : ""
+                    isActive ? "bg-orange-100 text-primary font-semibold" : ""
                   }`
                 }
               >
@@ -147,7 +147,7 @@ const DashboardLayout = () => {
                 to={link.to}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded hover:bg-orange-50 text-gray-700 font-medium ${
-                    isActive ? "bg-orange-50 text-primary font-semibold" : ""
+                    isActive ? "bg-orange-100 text-primary font-semibold" : ""
                   }`
                 }
                 onClick={() => setSidebarOpen(false)}
