@@ -11,6 +11,7 @@ const DashboardLayout = () => {
   // Sidebar links by role
   const links = [
     { to: '/dashboard/user', label: 'Dashboard', icon: <FiHome /> },
+    { to: '/dashboard/user-profile', label: 'User Profile', icon: <FiUser /> },
     { to: '/product-tracking', label: 'Product Tracking', icon: <FiClipboard /> },
     { to: '/order-history', label: 'Order History', icon: <FiBox /> },
     { to: '/payment-history', label: 'Payment History', icon: <FiDollarSign /> },

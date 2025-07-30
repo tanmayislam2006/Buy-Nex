@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
-import ComingSoon from "../../../components/ComingSoon";
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-} from "@tanstack/react-table";
 import { FaEye, FaTrash } from "react-icons/fa";
 import DataTable from "../../../shared/DataTable";
+import DataCardGrid from "../../../shared/DataCardGrid";
+import OrderDetailsModal from "../../../components/User/OrderDetailsModal";
 
 const staticOrders = [
   {
@@ -128,13 +124,13 @@ const OrderHistory = () => {
           >
             <FaEye />
           </button>
-          <button
+          {/* <button
             className="btn btn-sm btn-error"
             onClick={() => handleDelete(row.original.id)}
             title="Delete"
           >
             <FaTrash />
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -142,114 +138,24 @@ const OrderHistory = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-r px-4 py-20 md:p-8">
+    <div className="px-4 py-16 lg:py-0 md:p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-orange-600">
           Order History
         </h1>
         <div className="max-w-6xl mx-auto card bg-base-100 shadow-xl p-4">
-          <DataTable columns={columns} data={staticOrders} />
+          <div className="hidden lg:block">
+            <DataTable columns={columns} data={staticOrders} />
+          </div>
+          <div className=" lg:hidden">
+            <DataCardGrid columns={columns} data={staticOrders} />
+          </div>
           {/* Modal */}
           {selectedOrder && (
-            <dialog open className="modal modal-open">
-              <div className="modal-box w-full max-w-2xl">
-                <h3 className="font-bold text-lg text-orange-600 mb-2">
-                  Order Details
-                </h3>
-                <div className="py-2 text-sm max-h-[70vh] overflow-y-auto space-y-3">
-                  <div>
-                    <strong>Order Number:</strong> {selectedOrder.orderNumber}
-                  </div>
-                  <div>
-                    <strong>Email:</strong> {selectedOrder.userEmail}
-                  </div>
-                  <div>
-                    <strong>Total:</strong> {selectedOrder.totalAmount}{" "}
-                    {selectedOrder.currency}
-                  </div>
-                  <div>
-                    <strong>Status:</strong> {selectedOrder.status}
-                  </div>
-                  <div>
-                    <strong>Payment Status:</strong>{" "}
-                    {selectedOrder.paymentStatus}
-                  </div>
-                  <div>
-                    <strong>Payment Method:</strong>{" "}
-                    {selectedOrder.paymentMethod}
-                  </div>
-
-                  {/* Responsive Address */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-3 rounded shadow">
-                      <h4 className="font-semibold mb-1">
-                        Shipping Address
-                      </h4>
-                      <p>{selectedOrder.shippingAddress.name}</p>
-                      <p>{selectedOrder.shippingAddress.street}</p>
-                      <p>
-                        {selectedOrder.shippingAddress.city},{" "}
-                        {selectedOrder.shippingAddress.state}{" "}
-                        {selectedOrder.shippingAddress.zipCode}
-                      </p>
-                      <p>{selectedOrder.shippingAddress.country}</p>
-                      <p>{selectedOrder.shippingAddress.phone}</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded shadow">
-                      <h4 className="font-semibold mb-1">Billing Address</h4>
-                      <p>{selectedOrder.billingAddress.name}</p>
-                      <p>{selectedOrder.billingAddress.street}</p>
-                      <p>
-                        {selectedOrder.billingAddress.city},{" "}
-                        {selectedOrder.billingAddress.state}{" "}
-                        {selectedOrder.billingAddress.zipCode}
-                      </p>
-                      <p>{selectedOrder.billingAddress.country}</p>
-                      <p>{selectedOrder.billingAddress.phone}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <strong>Notes:</strong> {selectedOrder.notes}
-                  </div>
-                  <div>
-                    <strong>Discount:</strong>{" "}
-                    {selectedOrder.discountCode
-                      ? `${selectedOrder.discountCode} ($${selectedOrder.discountAmount})`
-                      : "None"}
-                  </div>
-                  <div>
-                    <strong>Shipping Cost:</strong> ${selectedOrder.shippingCost}
-                  </div>
-                  <div>
-                    <strong>Tax:</strong> ${selectedOrder.taxAmount}
-                  </div>
-                  <div>
-                    <strong>Tracking:</strong>{" "}
-                    {selectedOrder.trackingNumber || "N/A"}
-                  </div>
-                  {selectedOrder.trackingUrl && (
-                    <div>
-                      <a
-                        href="/upcoming"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        Track Order
-                      </a>
-                    </div>
-                  )}
-                </div>
-                <div className="modal-action">
-                  <button
-                    className="btn"
-                    onClick={() => setSelectedOrder(null)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </dialog>
+            <OrderDetailsModal
+              order={selectedOrder}
+              onClose={() => setSelectedOrder(null)}
+            />
           )}
         </div>
       </div>

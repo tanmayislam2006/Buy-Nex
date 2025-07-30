@@ -25,6 +25,7 @@ import Blogs from "../Pages/public/Blogs";
 import Error404 from "../Pages/ErrorPage/Error404";
 import ProductDetails from "../Pages/public/ProductDetails";
 import Upcoming from "../Pages/public/Upcoming";
+import UserProfile from "../Pages/dashboard/User/UserProfile";
 
 
 const router = createBrowserRouter([
@@ -96,6 +97,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard/user",
         Component: UserOverview,
+      },
+      {
+        path: "dashboard/user-profile",
+        Component: UserProfile,
       },
       {
         path: "product-tracking",
