@@ -109,7 +109,7 @@ const AllProducts = () => {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 bg-[#fafbfc] max-w-[1600px] mx-auto lg:pt-32">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 max-w-[1600px] mx-auto lg:pt-32">
       {/* Sidebar Filters */}
       <aside className="w-full lg:w-64 bg-white rounded-lg p-6 shadow-sm mb-4 lg:mb-0">
         <h2 className="font-bold mb-4">Filters</h2>
