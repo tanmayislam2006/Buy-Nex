@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { FaShoppingCart, FaLaptop, FaTshirt, FaCouch, FaBasketballBall, FaBook, FaMobile } from "react-icons/fa";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import {
+  FaShoppingCart,
+  FaLaptop,
+  FaTshirt,
+  FaCouch,
+  FaBasketballBall,
+  FaBook,
+  FaMobile,
+} from "react-icons/fa";
 
 // Category data with icons
 const categories = [
@@ -13,7 +16,7 @@ const categories = [
   { name: "Home & Kitchen", count: 28, icon: <FaCouch /> },
   { name: "Sports & Outdoors", count: 19, icon: <FaBasketballBall /> },
   { name: "Books", count: 24, icon: <FaBook /> },
-//   { name: "Mobile", count: 34, icon: <FaMobile /> },
+    { name: "Mobile", count: 34, icon: <FaMobile /> },
 ];
 
 const brands = [
@@ -87,16 +90,23 @@ const AllProducts = () => {
   const [page, setPage] = useState(1);
 
   const filteredProducts = products.filter((p) => {
-    const inCategory = selectedCategory ? p.category === selectedCategory : true;
+    const inCategory = selectedCategory
+      ? p.category === selectedCategory
+      : true;
     const inBrand = selectedBrand ? p.brand === selectedBrand : true;
-    const inRating = selectedRating ? Math.floor(p.rating) >= selectedRating : true;
+    const inRating = selectedRating
+      ? Math.floor(p.rating) >= selectedRating
+      : true;
     const inPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
     return inCategory && inBrand && inRating && inPrice;
   });
 
   const perPage = 8;
   const totalPages = Math.ceil(filteredProducts.length / perPage);
-  const paginatedProducts = filteredProducts.slice((page - 1) * perPage, page * perPage);
+  const paginatedProducts = filteredProducts.slice(
+    (page - 1) * perPage,
+    page * perPage
+  );
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 bg-[#fafbfc] max-w-[1600px] mx-auto lg:pt-32">
@@ -106,7 +116,9 @@ const AllProducts = () => {
 
         {/* Price Range */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-2">Price Range</label>
+          <label className="block text-sm font-semibold mb-2">
+            Price Range
+          </label>
           <div className="flex gap-2 items-center">
             <input
               type="number"
@@ -137,7 +149,9 @@ const AllProducts = () => {
               <li key={cat.name}>
                 <button
                   className={`flex justify-between w-full text-left px-2 py-1 rounded ${
-                    selectedCategory === cat.name ? "bg-orange-100 text-[#F85606]" : ""
+                    selectedCategory === cat.name
+                      ? "bg-orange-100 text-primary"
+                      : ""
                   }`}
                   onClick={() => setSelectedCategory(cat.name)}
                 >
@@ -147,7 +161,10 @@ const AllProducts = () => {
               </li>
             ))}
             <li>
-              <button className="text-xs text-gray-500 mt-1" onClick={() => setSelectedCategory("")}>
+              <button
+                className="text-xs text-gray-500 mt-1"
+                onClick={() => setSelectedCategory("")}
+              >
                 Show all
               </button>
             </li>
@@ -162,7 +179,9 @@ const AllProducts = () => {
               <li key={brand.name}>
                 <button
                   className={`flex justify-between w-full text-left px-2 py-1 rounded ${
-                    selectedBrand === brand.name ? "bg-orange-100 text-[#F85606]" : ""
+                    selectedBrand === brand.name
+                      ? "bg-orange-100 text-primary"
+                      : ""
                   }`}
                   onClick={() => setSelectedBrand(brand.name)}
                 >
@@ -172,7 +191,10 @@ const AllProducts = () => {
               </li>
             ))}
             <li>
-              <button className="text-xs text-gray-500 mt-1" onClick={() => setSelectedBrand("")}>
+              <button
+                className="text-xs text-gray-500 mt-1"
+                onClick={() => setSelectedBrand("")}
+              >
                 Show all
               </button>
             </li>
@@ -181,13 +203,15 @@ const AllProducts = () => {
 
         {/* Ratings */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-2">Customer Ratings</label>
+          <label className="block text-sm font-semibold mb-2">
+            Customer Ratings
+          </label>
           <ul>
             {ratings.map((r) => (
               <li key={r}>
                 <button
                   className={`flex items-center gap-1 px-2 py-1 rounded ${
-                    selectedRating === r ? "bg-orange-100 text-[#F85606]" : ""
+                    selectedRating === r ? "bg-orange-100 text-primary" : ""
                   }`}
                   onClick={() => setSelectedRating(r)}
                 >
@@ -199,7 +223,10 @@ const AllProducts = () => {
               </li>
             ))}
             <li>
-              <button className="text-xs text-gray-500 mt-1" onClick={() => setSelectedRating(0)}>
+              <button
+                className="text-xs text-gray-500 mt-1"
+                onClick={() => setSelectedRating(0)}
+              >
                 Show all
               </button>
             </li>
@@ -208,7 +235,9 @@ const AllProducts = () => {
 
         {/* Tags */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold mb-2">Popular Tags</label>
+          <label className="block text-sm font-semibold mb-2">
+            Popular Tags
+          </label>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span key={tag} className="bg-gray-100 px-2 py-1 rounded text-xs">
@@ -223,43 +252,35 @@ const AllProducts = () => {
       <main className="flex-1">
         <div className="mb-4">
           <h1 className="text-xl sm:text-2xl font-bold">All Products</h1>
-          <p className="text-gray-500 text-sm">Browse our complete collection</p>
+          <p className="text-gray-500 text-sm">
+            Browse our complete collection
+          </p>
         </div>
 
         {/* Category Swiper */}
-        <div className="mb-6">
-          <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            spaceBetween={16}
-            slidesPerView={3}
-            breakpoints={{
-              640: { slidesPerView: 4 },
-              768: { slidesPerView: 5 },
-              1024: { slidesPerView: 6 },
-            }}
-            autoplay={{ delay: 2500, disableOnInteraction: false }}
-            className="!pb-4"
-          >
-            {categories.map((cat, index) => (
-              <SwiperSlide key={index}>
-                <button
-                  onClick={() => setSelectedCategory(cat.name)}
-                  className={`flex flex-col items-center justify-center text-sm p-3 rounded-xl shadow-md w-full h-24 transition hover:scale-105 ${
-                    selectedCategory === cat.name ? "bg-[#F85606] text-white" : "bg-white text-gray-700"
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{cat.icon}</div>
-                  <span>{cat.name}</span>
-                </button>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+        <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {categories.map((cat, index) => (
+            <div key={index}>
+              <div
+                onClick={() => setSelectedCategory(cat.name)}
+                className={`flex flex-col items-center justify-center text-sm p-3 rounded-xl shadow-md w-full h-24 transition hover:scale-105 cursor-pointer ${
+                  selectedCategory === cat.name
+                    ? "bg-primary text-white"
+                    : "bg-white text-gray-700"
+                }`}
+              >
+                <div className="text-2xl mb-1">{cat.icon}</div>
+                <span>{cat.name}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Products Header */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-gray-500">
-            Showing {paginatedProducts.length} of {filteredProducts.length} products
+            Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+            products
           </span>
           <select className="border rounded px-2 py-1 text-sm">
             <option>Newest</option>
@@ -271,9 +292,12 @@ const AllProducts = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {paginatedProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col">
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
+            >
               {product.tag && (
-                <span className="absolute top-3 left-3 bg-[#F85606] text-white text-xs px-2 py-1 rounded">
+                <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">
                   {product.tag}
                 </span>
               )}
@@ -282,21 +306,34 @@ const AllProducts = () => {
               </div>
               <div className="flex items-center gap-1 mb-1">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className={i < Math.round(product.rating) ? "text-yellow-400" : "text-gray-300"}>
+                  <span
+                    key={i}
+                    className={
+                      i < Math.round(product.rating)
+                        ? "text-yellow-400"
+                        : "text-gray-300"
+                    }
+                  >
                     ★
                   </span>
                 ))}
-                <span className="ml-1 text-xs text-gray-500">({product.reviews})</span>
+                <span className="ml-1 text-xs text-gray-500">
+                  ({product.reviews})
+                </span>
               </div>
               <div className="font-semibold text-sm">{product.name}</div>
               <div className="text-xs text-gray-500 mb-2">{product.desc}</div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-base font-bold">${product.price.toFixed(2)}</span>
+                <span className="text-base font-bold">
+                  ${product.price.toFixed(2)}
+                </span>
                 {product.oldPrice && (
-                  <span className="text-sm line-through text-gray-400">${product.oldPrice.toFixed(2)}</span>
+                  <span className="text-sm line-through text-gray-400">
+                    ${product.oldPrice.toFixed(2)}
+                  </span>
                 )}
               </div>
-              <button className="mt-auto bg-[#F85606] hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition">
+              <button className="mt-auto bg-primary hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition">
                 Add to Cart <FaShoppingCart className="inline ml-1" />
               </button>
             </div>
@@ -305,19 +342,29 @@ const AllProducts = () => {
 
         {/* Pagination */}
         <div className="flex justify-center mt-8 gap-2">
-          <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 rounded border">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 rounded border"
+          >
             &lt;
           </button>
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
               onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded border ${page === i + 1 ? "bg-[#F85606] text-white" : ""}`}
+              className={`px-3 py-1 rounded border ${
+                page === i + 1 ? "bg-primary text-white" : ""
+              }`}
             >
               {i + 1}
             </button>
           ))}
-          <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1 rounded border">
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 rounded border"
+          >
             &gt;
           </button>
         </div>
