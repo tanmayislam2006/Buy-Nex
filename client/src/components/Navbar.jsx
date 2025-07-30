@@ -202,8 +202,8 @@ const Navbar = () => {
               key={item.label}
               to={item.to}
               className={({ isActive }) =>
-                `py-2 px-3 rounded hover:bg-orange-50 text-primary ${
-                  isActive ? "bg-secondary font-semibold" : ""
+                `py-2 px-3 rounded hover:bg-orange-50 ${
+                  isActive ? "bg-secondary text-primary font-medium" : ""
                 }`
               }
               onClick={() => setSidebarOpen(false)}
