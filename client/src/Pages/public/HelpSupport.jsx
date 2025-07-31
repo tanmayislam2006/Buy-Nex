@@ -97,6 +97,7 @@ const HelpSupport = () => {
             rows={4}
             required
           ></textarea>
+          
           <button className="btn btn-primary">Submit</button>
         </form>
       </div>
