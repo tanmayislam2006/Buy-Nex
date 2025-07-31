@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
 import { FaStar, FaBoxOpen, FaComments } from "react-icons/fa";
+import useAuth from "../../Hooks/useAuth";
 
 const sampleProduct = {
   id: "b1f4a6c8-3a22-4d7e-9c55-8d73f6d0a123",
@@ -53,6 +54,8 @@ const sampleProduct = {
 const ProductDetails = () => {
   const { id } = useParams();
   const axiosInstance = useAxios();
+  const { user, firebaseUser } = useAuth();
+  console.log(user, firebaseUser);
 
   // const { data: product, isLoading, isError } = useQuery({
   //   queryKey: ["product", id],
@@ -77,12 +80,20 @@ const ProductDetails = () => {
     image: product.images[index] || product.images[0], // fallback first image
   }));
 
+// const handleAddToCart = (product) => {
+//   console.log("Added to cart:", product);
+// };
+
+// const handleBuyNow = (product) => {
+//   console.log("Buying now:", product);
+// };
+
   // selected image state
   const [selectedImage, setSelectedImage] = useState(product.images[0]);
 
   return (
     <div className="py-30 lg:pt-44 max-w-6xl mx-auto px-4">
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-10 border-b pb-5 border-gray-200 border-r rounded-lg">
         {/* Image Section */}
         <div className="flex-1 ">
           {/* product image */}
@@ -100,10 +111,10 @@ const ProductDetails = () => {
                 src={img}
                 alt={`Thumbnail ${i}`}
                 onClick={() => setSelectedImage(img)}
-                className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
+                className={`w-16 lg:w-20 h-16 lg:h-20 object-cover rounded cursor-pointer p-1 ${
                   selectedImage === img
-                    ? "border-orange-500"
-                    : "border-transparent"
+                    ? "border-orange-500 border-2"
+                    : "border border-gray-200"
                 }`}
               />
             ))}
@@ -111,11 +122,22 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Info */}
-        <div className="flex-1 space-y-4 text-gray-600 text-sm lg:text-base">
+        <div className="flex-1 space-y-2 lg:space-y-4 text-gray-600 text-sm ">
           <h1 className="text-2xl lg:text-3xl font-bold text-accent">
             {product.name}
           </h1>
           <p>{product.description}</p>
+          {/* Tags Section */}
+          <div className="flex flex-wrap gap-2">
+            {product.tags.map((tag, idx) => (
+              <span
+                key={idx}
+                className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full hover:bg-green-100 cursor-pointer transition"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
 
           {/* price section */}
           <div className="flex items-center gap-4">
@@ -198,94 +220,140 @@ const ProductDetails = () => {
               ))}
             </div>
           </div>
+          {product.specifications.warranty && (
+            <div className="">
+              <strong className="lg:text-base">Warranty :</strong>{" "}
+              <span className="text-primary">
+                {product.specifications.warranty} Warranty. (Please preserve
+                your box to claim warranty)
+              </span>
+            </div>
+          )}
+          {/* Action Buttons */}
+          {/* <div className="mt-10 flex flex-wrap gap-5 ">
+            <button
+              className=" shadow duration-500 transition btn btn-soft btn-primary px-10"
+              onClick={() => handleAddToCart(product)}
+            >
+              Add to Cart
+            </button>
+
+            <button
+              className="shadow duration-500 transition btn btn-accent text-white px-10"
+              onClick={() => handleBuyNow(product)}
+            >
+              Buy Now
+            </button>
+          </div> */}
+          
         </div>
       </div>
 
-      {/* Specification Title */}
-      <h3 className="font-bold text-xl mt-8 mb-4">Specification</h3>
+      <div className="space-y-4 pt-8">
+        {/* Specification Title */}
+        <h3 className="font-bold text-xl ">Specification</h3>
 
-      {/* Specification Table */}
-      <table className="w-full border-collapse text-sm">
-        <tbody>
-          {/* Technical Specification */}
-          <tr>
-            <td
-              colSpan="2"
-              className="bg-orange-100 text-orange-700 font-semibold px-4 py-2"
-            >
-              Technical Specification
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2 w-1/3">Connectivity</td>
-            <td className="px-4 py-2">{product.specifications.connectivity}</td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2">Battery Life</td>
-            <td className="px-4 py-2">{product.specifications.batteryLife}</td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2">Color</td>
-            <td className="px-4 py-2">{product.specifications.color}</td>
-          </tr>
+        {/* Specification Table */}
+        <table className="w-full border-collapse text-sm">
+          <tbody>
+            {/* Technical Specification */}
+            <tr>
+              <td
+                colSpan="2"
+                className="bg-orange-100 text-primary font-semibold px-4 py-2"
+              >
+                Technical Specification
+              </td>
+            </tr>
+            {product.specifications.connectivity && (
+              <tr className="border-b border-gray-200">
+                <td className="px-4 py-2 w-1/3">Connectivity</td>
+                <td className="px-4 py-2">
+                  {product.specifications.connectivity}
+                </td>
+              </tr>
+            )}
+            {product.specifications.batteryLife && (
+              <tr className="border-b border-gray-200">
+                <td className="px-4 py-2">Battery Life</td>
+                <td className="px-4 py-2">
+                  {product.specifications.batteryLife}
+                </td>
+              </tr>
+            )}
+            {product.specifications.color && (
+              <tr className="border-b border-gray-200">
+                <td className="px-4 py-2">Color</td>
+                <td className="px-4 py-2">{product.specifications.color}</td>
+              </tr>
+            )}
 
-          {/* Physical Specification */}
-          <tr>
-            <td
-              colSpan="2"
-              className="bg-orange-100 text-orange-700 font-semibold px-4 py-2"
-            >
-              Physical Specification
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2">Dimensions</td>
-            <td className="px-4 py-2">
-              {product.dimensions.length} x {product.dimensions.width} x{" "}
-              {product.dimensions.height} {product.dimensions.unit}
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2">Weight</td>
-            <td className="px-4 py-2">{product.weight} kg</td>
-          </tr>
+            {/* Physical Specification */}
+            <tr>
+              <td
+                colSpan="2"
+                className="bg-orange-100 text-primary font-semibold px-4 py-2"
+              >
+                Physical Specification
+              </td>
+            </tr>
+            {product.dimensions && (
+              <tr className="border-b border-gray-200">
+                <td className="px-4 py-2">Dimensions</td>
+                <td className="px-4 py-2">
+                  {product.dimensions.length} x {product.dimensions.width} x{" "}
+                  {product.dimensions.height} {product.dimensions.unit}
+                </td>
+              </tr>
+            )}
+            <tr className="border-b border-gray-200">
+              <td className="px-4 py-2">Weight</td>
+              <td className="px-4 py-2">{product?.weight} kg</td>
+            </tr>
 
-          {/* Warranty Information */}
-          <tr>
-            <td
-              colSpan="2"
-              className="bg-orange-100 text-orange-700 font-semibold px-4 py-2"
-            >
-              Warranty Information
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2">Warranty</td>
-            <td className="px-4 py-2">{product.specifications.warranty}</td>
-          </tr>
+            {/* Warranty Information */}
+            {product.specifications.warranty && (
+              <>
+                <tr>
+                  <td
+                    colSpan="2"
+                    className="bg-orange-100 text-primary font-semibold px-4 py-2"
+                  >
+                    Warranty Information
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-2">Warranty</td>
+                  <td className="px-4 py-2">
+                    {product.specifications.warranty}
+                  </td>
+                </tr>
+              </>
+            )}
 
-          {/* SEO Keywords */}
-          <tr className="border-b border-gray-200">
-            <td className="px-4 py-2 font-medium">SEO Keywords</td>
-            <td className="px-4 py-2">{product.seoKeywords.join(", ")}</td>
-          </tr>
+            {/* SEO Keywords */}
+            <tr className="border-b border-gray-200">
+              <td className="px-4 py-2 font-medium">SEO Keywords</td>
+              <td className="px-4 py-2">{product.seoKeywords.join(", ")}</td>
+            </tr>
 
-          {/* Description */}
-          <tr>
-            <td
-              colSpan="2"
-              className="bg-orange-100 text-orange-700 font-semibold px-4 py-2"
-            >
-              Description
-            </td>
-          </tr>
-          <tr>
-            <td colSpan="2" className="px-4 py-2 text-gray-700">
-              {product.description}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            {/* Description */}
+            <tr>
+              <td
+                colSpan="2"
+                className="bg-orange-100 text-primary font-semibold px-4 py-2"
+              >
+                Description
+              </td>
+            </tr>
+            <tr>
+              <td colSpan="2" className="px-4 py-2 text-gray-700">
+                {product.description}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
