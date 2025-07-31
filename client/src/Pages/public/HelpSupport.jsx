@@ -1,89 +1,66 @@
 import React from "react";
 import { FaPhoneAlt, FaEnvelope, FaQuestionCircle } from "react-icons/fa";
 import feedbackImage from "../../assets/contact-us.svg";
+
 const HelpSupport = () => {
   return (
-    <div className="px-4 py-20 container mx-auto space-y-12">
+    <div className="px-4 py-20 max-w-7xl mx-auto space-y-16">
       {/* Hero Section */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary">
-          How can we help you?
-        </h1>
-        <p className="mt-4 text-gray-600">
-          Welcome to Buynex Support Center. Find answers to common questions or
-          reach out directly.
+      <section className="text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-primary">How can we help you?</h1>
+        <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+          Welcome to Buynex Support Center. Find answers to common questions or reach out directly.
         </p>
-      </div>
+        <div className="h-1 w-24 bg-primary mx-auto mt-4 rounded-full"></div>
+      </section>
 
       {/* FAQ Section */}
-      <div>
+      <section>
         <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
           <FaQuestionCircle /> Frequently Asked Questions
         </h2>
         <div className="join join-vertical w-full space-y-2">
-          <div className="collapse collapse-arrow join-item border border-base-300">
-            <input type="checkbox" />
-            <div className="collapse-title text-lg font-medium">
-              How do I buy a product on Buynex?
+          {faqData.map((item, index) => (
+            <div
+              key={index}
+              className="collapse collapse-arrow join-item border border-base-300 bg-base-100"
+            >
+              <input type="checkbox" />
+              <div className="collapse-title text-lg font-medium">{item.question}</div>
+              <div className="collapse-content text-gray-700">
+                <p>{item.answer}</p>
+              </div>
             </div>
-            <div className="collapse-content">
-              <p>
-                First, create an account, browse listings, and directly contact
-                the seller to negotiate and buy.
-              </p>
-            </div>
-          </div>
-          <div className="collapse collapse-arrow join-item border border-base-300">
-            <input type="checkbox" />
-            <div className="collapse-title text-lg font-medium">
-              Can I sell my own products?
-            </div>
-            <div className="collapse-content">
-              <p>
-                Yes! After creating an account, go to the “Sell” section and
-                post your product with full details.
-              </p>
-            </div>
-          </div>
-          <div className="collapse collapse-arrow join-item border border-base-300">
-            <input type="checkbox" />
-            <div className="collapse-title text-lg font-medium">
-              How do I contact support if I face an issue?
-            </div>
-            <div className="collapse-content">
-              <p>
-                You can email us or call our hotline below. We're here 24/7 to
-                assist you.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
-      </div>
+      </section>
 
-      {/* Feedback or Message Form (optional) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 items-stretch justify-between gap-8">
-        {/* FeedBack Form */}
-        <div>
-          {/* Contact Section */}
-          <div className="bg-base-200 p-6  rounded-xl">
+      {/* Contact + Form Section */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        {/* Contact Info + Form */}
+        <div className="space-y-10">
+          {/* Contact Info */}
+          <div className="bg-base-200 p-6 rounded-xl shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="flex items-center gap-2">
-                <FaEnvelope className="text-[17px] text-primary" />
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="flex items-start gap-3">
+                <FaEnvelope className="text-primary text-xl mt-1" />
                 <div>
                   <p className="font-semibold">Email</p>
-                  <p>support@buynex.com</p>
+                  <p className="text-sm">support@buynex.com</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <FaPhoneAlt className="text-[17px] text-primary" />
+              <div className="flex items-start gap-3">
+                <FaPhoneAlt className="text-primary text-xl mt-1" />
                 <div>
                   <p className="font-semibold">Phone</p>
-                  <p>+880 1234 567 890</p>
+                  <p className="text-sm">+880 1234 567 890</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Message Form */}
           <div>
             <h2 className="text-2xl font-semibold mb-4">Send us a message</h2>
             <form className="space-y-4">
@@ -105,18 +82,40 @@ const HelpSupport = () => {
                 rows={4}
                 required
               ></textarea>
-
-              <button className="btn btn-primary">Submit</button>
+              <button type="submit" className="btn btn-primary w-full md:w-auto">
+                Submit
+              </button>
             </form>
           </div>
         </div>
-        {/* FeedBack Image */}
+
+        {/* Feedback Illustration */}
         <div className="hidden md:block">
-          <img className="h-full" src={feedbackImage} alt="" />
+          <img
+            src={feedbackImage}
+            alt="Contact Support Illustration"
+            className="w-full max-h-[500px] object-contain"
+          />
         </div>
-      </div>
+      </section>
     </div>
   );
 };
+
+// FAQ data array
+const faqData = [
+  {
+    question: "How do I buy a product on Buynex?",
+    answer: "First, create an account, browse listings, and directly contact the seller to negotiate and buy.",
+  },
+  {
+    question: "Can I sell my own products?",
+    answer: "Yes! After creating an account, go to the “Sell” section and post your product with full details.",
+  },
+  {
+    question: "How do I contact support if I face an issue?",
+    answer: "You can email us or call our hotline below. We're here 24/7 to assist you.",
+  },
+];
 
 export default HelpSupport;
