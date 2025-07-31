@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router"; // Ensure react-router-dom is installed and used for Link
 import useAxios from "../../Hooks/useAxios";
@@ -13,12 +13,14 @@ import {
   FaMobile,
   FaShoppingCart,
 } from "react-icons/fa";
+import { FaRepeat } from "react-icons/fa6";
+import Loading from "../../components/Loading";
 
 // Static icon mapping for categories (since icons are React components)
 const categoryIcons = {
   Electronics: <FaLaptop />,
   Fashion: <FaTshirt />,
-  "Home & Kitchen": <FaCouch />,
+  "Home & Living": <FaCouch />,
   "Sports & Outdoors": <FaBasketballBall />,
   Books: <FaBook />,
   Mobile: <FaMobile />,
@@ -48,10 +50,10 @@ const AllProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedRating, setSelectedRating] = useState(0);
-  const [priceRange, setPriceRange] = useState([0, 2000]); // Default max price
+  const [priceRange, setPriceRange] = useState([0, 200]);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("Newest");
-  const [limit, setLimit] = useState(8); // Products per page
+  const limit = 8;
 
   // Fetch all data in a single query
   const {
@@ -59,7 +61,6 @@ const AllProducts = () => {
     isLoading,
     isError,
     error,
-    refetch, // Use refetch to trigger a new query
   } = useQuery({
     queryKey: [
       "allProductData",
@@ -94,31 +95,46 @@ const AllProducts = () => {
   const totalProducts = allProductData?.totalProducts || 0;
   const currentPage = allProductData?.currentPage || 1;
   const totalPages = allProductData?.totalPages || 1;
-  const categoriesWithCounts = allProductData?.categoryCounts?.map((cat) => ({
-    ...cat,
-    icon: categoryIcons[cat.name] || null, // Attach icon from static mapping
-  })) || [];
+  const categoriesWithCounts =
+    allProductData?.categoryCounts?.map((cat) => ({
+      ...cat,
+      icon: categoryIcons[cat.name] || null, // Attach icon from static mapping
+    })) || [];
   const brandsWithCounts = allProductData?.brandCounts || [];
-
   // Recalculate max price for price range filter if needed, or get from server metadata
   // useEffect(() => {
   //   // You might fetch maxPrice from a separate API or from the initial allProductData if available
   //   // For now, assuming a fixed max range for the input field.
   // }, [allProductData]);
 
-  if (isLoading) {
-    return <p className="text-center py-10">Loading products and filters...</p>;
-  }
-
   if (isError) {
-    return <p className="text-center py-10 text-red-500">Error loading data: {error.message}</p>;
+    return (
+      <p className="text-center py-10 text-red-500">
+        Error loading data: {error.message}
+      </p>
+    );
   }
-
+  const handleResetFilters = () => {
+    setSelectedCategory("");
+    setSelectedBrand("");
+    setSelectedRating(0);
+    setPriceRange([0, 200]);
+    setPage(1);
+    setSortBy("Newest");
+  };
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 max-w-[1600px] mx-auto lg:pt-32">
       {/* Sidebar Filters */}
       <aside className="w-full lg:w-64 bg-white rounded-lg p-6 shadow-sm mb-4 lg:mb-0">
-        <h2 className="font-bold mb-4">Filters</h2>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-bold">Filters</h2>
+          <button
+            onClick={handleResetFilters}
+            className="cursor-pointer p-1 rounded-full border border-primary"
+          >
+            <FaRepeat />
+          </button>
+        </div>
 
         {/* Price Range */}
         <div className="mb-6">
@@ -128,7 +144,8 @@ const AllProducts = () => {
           <div className="flex gap-2 items-center">
             <input
               type="number"
-              value={priceRange[0]}
+              min={1}
+              defaultValue={priceRange[0]}
               onChange={(e) => {
                 setPriceRange([+e.target.value, priceRange[1]]);
                 setPage(1); // Reset page on filter change
@@ -139,7 +156,7 @@ const AllProducts = () => {
             <span>-</span>
             <input
               type="number"
-              value={priceRange[1]}
+              defaultValue={priceRange[1]}
               onChange={(e) => {
                 setPriceRange([priceRange[0], +e.target.value]);
                 setPage(1); // Reset page on filter change
@@ -326,71 +343,77 @@ const AllProducts = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.length > 0 ? (
-            products.map((product) => (
-              <Link
-                to={`/product-details/${product._id}`} 
-                key={product._id} 
-                className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
-              >
-                {product.tags && product.tags.length > 0 && (
-                  <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">
-                    {product.tags[0]}{" "}
-                  </span>
-                )}
-                <div className="h-24 sm:h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-3xl text-gray-300">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="object-contain max-h-full max-w-full"
-                    />
-                  ) : (
-                    <img
-                      src="https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"
-                      alt="No image available"
-                      className="object-contain max-h-full max-w-full"
-                    />
-                  )}
-                </div>
-                <div className="flex items-center gap-1 mb-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={
-                        i < Math.round(product.rating)
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }
-                    >
-                      ★
-                    </span>
-                  ))}
-                  <span className="ml-1 text-xs text-gray-500">
-                    ({product.reviews})
-                  </span>
-                </div>
-                <div className="font-semibold text-sm">{product.name}</div>
-                <div className="text-xs text-gray-500 mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {product.description}
-                </div>
-                <div className="flex items-center gap-2 mb-3 mt-auto">
-                  <span className="text-base font-bold">
-                    ${product.price?.toFixed(2) || "N/A"}
-                  </span>
-                  {product.oldPrice && (
-                    <span className="text-sm line-through text-gray-400">
-                      ${product.oldPrice?.toFixed(2) || "N/A"}
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <div className="grid grid-cols-2  md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.length > 0 ? (
+              products.map((product) => (
+                <Link
+                  to={`/product-details/${product._id}`}
+                  key={product._id}
+                  className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
+                >
+                  {product.tags && product.tags.length > 0 && (
+                    <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">
+                      {product.tags[0]}{" "}
                     </span>
                   )}
-                </div>
-              </Link>
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-600">No products found matching your criteria.</p>
-          )}
-        </div>
+                  <div className="h-24 sm:h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-3xl text-gray-300">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="object-contain max-h-full max-w-full"
+                      />
+                    ) : (
+                      <img
+                        src="https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"
+                        alt="No image available"
+                        className="object-contain max-h-full max-w-full"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mb-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          i < Math.round(product.rating)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }
+                      >
+                        ★
+                      </span>
+                    ))}
+                    <span className="ml-1 text-xs text-gray-500">
+                      ({product.reviews})
+                    </span>
+                  </div>
+                  <div className="font-semibold text-sm">{product.name}</div>
+                  <div className="text-xs text-gray-500 mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                    {product.description}
+                  </div>
+                  <div className="flex items-center gap-2 mb-3 mt-auto">
+                    <span className="text-base font-bold">
+                      ${product.price?.toFixed(2) || "N/A"}
+                    </span>
+                    {product.oldPrice && (
+                      <span className="text-sm line-through text-gray-400">
+                        ${product.oldPrice?.toFixed(2) || "N/A"}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-600">
+                No products found matching your criteria.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalProducts > 0 && (
