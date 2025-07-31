@@ -3,8 +3,26 @@ import { FaPhoneAlt, FaEnvelope, FaQuestionCircle } from "react-icons/fa";
 import feedbackImage from "../../assets/contact-us.svg";
 
 const HelpSupport = () => {
+  // FAQ data array
+  const faqData = [
+    {
+      question: "How do I buy a product on Buynex?",
+      answer:
+        "First, create an account, browse listings, and directly contact the seller to negotiate and buy.",
+    },
+    {
+      question: "Can I sell my own products?",
+      answer:
+        "Yes! After creating an account, go to the “Sell” section and post your product with full details.",
+    },
+    {
+      question: "How do I contact support if I face an issue?",
+      answer:
+        "You can email us or call our hotline below. We're here 24/7 to assist you.",
+    },
+  ];
   return (
-    <div className="px-4 py-20 max-w-7xl mx-auto space-y-16">
+    <div className="px-4 py-20 container mx-auto space-y-16">
       {/* Hero Section */}
       <section className="text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-primary">
@@ -41,7 +59,7 @@ const HelpSupport = () => {
       </section>
 
       {/* Contact + Form Section */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch justify-between">
         {/* Contact Info + Form */}
         <div className="space-y-6">
           {/* Contact Info */}
@@ -106,24 +124,5 @@ const HelpSupport = () => {
     </div>
   );
 };
-
-// FAQ data array
-const faqData = [
-  {
-    question: "How do I buy a product on Buynex?",
-    answer:
-      "First, create an account, browse listings, and directly contact the seller to negotiate and buy.",
-  },
-  {
-    question: "Can I sell my own products?",
-    answer:
-      "Yes! After creating an account, go to the “Sell” section and post your product with full details.",
-  },
-  {
-    question: "How do I contact support if I face an issue?",
-    answer:
-      "You can email us or call our hotline below. We're here 24/7 to assist you.",
-  },
-];
 
 export default HelpSupport;
