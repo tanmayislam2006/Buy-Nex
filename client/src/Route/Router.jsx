@@ -62,8 +62,7 @@ const router = createBrowserRouter([
         Component: BecomeSeller,
       },
       {
-        // path: "/product-details/:id",
-        path: "/product-details",
+        path: "/product-details/:id",
         Component: ProductDetails,
       },
       {
