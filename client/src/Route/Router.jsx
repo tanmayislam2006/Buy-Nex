@@ -9,7 +9,6 @@ import DashboardLayout from "../Layouts/DashboardLayout/DashboardLayout";
 import ProductTracking from "../Pages/dashboard/User/ProductTracking";
 import OrderHistory from "../Pages/dashboard/User/OrderHistory";
 import PaymentHistory from "../Pages/dashboard/User/PaymentHistory";
-import UserOverview from "../Pages/dashboard/User/UserOverview";
 import SellerOverview from "../Pages/dashboard/Seller/SellerOverview";
 import AddProduct from "../Pages/dashboard/Seller/AddProduct";
 import ManageProducts from "../Pages/dashboard/Seller/ManageProducts";
@@ -25,9 +24,10 @@ import Blogs from "../Pages/public/Blogs";
 import Error404 from "../Pages/ErrorPage/Error404";
 import ProductDetails from "../Pages/public/ProductDetails";
 import Upcoming from "../Pages/public/Upcoming";
-import UserProfile from "../Pages/dashboard/User/UserProfile";
 import Profile from "../Pages/dashboard/Profile/Profile";
 import Overview from "../Pages/dashboard/Overview/Overview";
+import BlogLayout from "../components/Blog/BlogLayout";
+import BlogDetails from "../Pages/public/BlogDetails";
 
 
 const router = createBrowserRouter([
@@ -46,8 +46,17 @@ const router = createBrowserRouter([
         Component: AllProducts,
       },
       {
-        path: "/blogs",
-        Component: Blogs,
+        path: "/",
+        Component: BlogLayout,
+        children: [
+          {
+            path: '/blogs',
+            Component: Blogs, 
+          }, {
+            path: '/blog/:id',
+            Component: BlogDetails,
+          }
+        ]
       },
       {
         path: "/help-support",

@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
 import { FaStar, FaBoxOpen, FaComments, FaShoppingCart, FaHeart } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import Loading from "../../components/Loading";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -20,7 +21,7 @@ const ProductDetails = () => {
     enabled: !!id,
   });
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (isLoading) return <Loading/>;
   if (isError) return <div className="min-h-screen flex items-center justify-center">Error loading product!</div>;
 
   // Helper functions
