@@ -24,6 +24,11 @@ import Register from "../Pages/Auth/Register";
 import Blogs from "../Pages/public/Blogs";
 import Error404 from "../Pages/ErrorPage/Error404";
 import ProductDetails from "../Pages/public/ProductDetails";
+import Upcoming from "../Pages/public/Upcoming";
+import UserProfile from "../Pages/dashboard/User/UserProfile";
+import Profile from "../Pages/dashboard/Profile/Profile";
+import Overview from "../Pages/dashboard/Overview/Overview";
+
 
 const router = createBrowserRouter([
   // Public routes
@@ -57,9 +62,12 @@ const router = createBrowserRouter([
         Component: BecomeSeller,
       },
       {
-        // path: "/product-details/:id",
-        path: "/product-details",
+        path: "/product-details/:id",
         Component: ProductDetails,
+      },
+      {
+        path: "/upcoming",
+        Component: Upcoming,
       },
     ],
   },
@@ -88,8 +96,12 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       {
-        path: "dashboard/user",
-        Component: UserOverview,
+        path: "dashboard",
+        Component: Overview,
+      },
+      {
+        path: "profile",
+        Component: Profile,
       },
       {
         path: "product-tracking",

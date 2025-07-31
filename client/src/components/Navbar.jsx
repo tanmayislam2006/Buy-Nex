@@ -15,13 +15,12 @@ import UserDropdown from "../shared/UserDropdown";
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, setUser } = useAuth();
+  const { user, logoutUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const menu = [
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
     { label: "All Products", to: "/all-products" },
-    { label: "Become Seller", to: "/become-seller" },
     { label: "Product Details", to: "/product-details" },
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
@@ -66,7 +65,7 @@ const Navbar = () => {
               </button>
             </form>
             {/* Cart & User */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-6">
               <Link to="/cart" className="relative">
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
@@ -74,7 +73,7 @@ const Navbar = () => {
                 </span>
               </Link>
               {user ? (
-                <UserDropdown menu={menu} />
+                <UserDropdown />
               ) : (
                 <Link to="auth/login">
                   <FiUser className="text-2xl" />
@@ -82,7 +81,7 @@ const Navbar = () => {
               )}
               {/* Mobile menu button */}
               <button
-                className="lg:hidden ml-2"
+                className="lg:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
                 <FiMenu className="text-2xl cursor-pointer" />
@@ -156,7 +155,7 @@ const Navbar = () => {
                 </span>
               </Link>
               {user ? (
-                <UserDropdown menu={menu} />
+                <UserDropdown />
               ) : (
                 <Link to="auth/login">
                   <FiUser className="text-2xl" />
@@ -164,10 +163,10 @@ const Navbar = () => {
               )}
               {/* Mobile menu button */}
               <button
-                className="lg:hidden ml-2"
+                className="lg:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
-                <FiMenu className="text-2xl" />
+                <FiMenu className="text-2xl cursor-pointer" />
               </button>
             </div>
           </div>
@@ -176,7 +175,7 @@ const Navbar = () => {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 z-50 bg-black/40 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/40 transition-opacity duration-300 lg:hidden ${
           sidebarOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -203,8 +202,8 @@ const Navbar = () => {
               key={item.label}
               to={item.to}
               className={({ isActive }) =>
-                `py-2 px-3 rounded hover:bg-orange-50 text-primary ${
-                  isActive ? "bg-secondary font-semibold" : ""
+                `py-2 px-3 rounded hover:bg-orange-50 ${
+                  isActive ? "bg-secondary text-primary font-medium" : ""
                 }`
               }
               onClick={() => setSidebarOpen(false)}
@@ -221,9 +220,9 @@ const Navbar = () => {
           </Link>
           {user ? (
             <button
-              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-50 text-red-500"
+              className="flex items-center gap-2 py-2 px-3 rounded hover:bg-orange-100 text-red-500 cursor-pointer"
               onClick={() => {
-                setUser(null);
+                logoutUser();
                 setSidebarOpen(false);
               }}
             >

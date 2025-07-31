@@ -2,7 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 app.use(
   cors({
@@ -25,6 +25,7 @@ async function run() {
   try {
     const BuyNexDB = client.db("BuyNex");
     const usersCollection = BuyNexDB.collection("users");
+    const productsCollection = BuyNexDB.collection("products");
     //  create a connection to the MongoDB cluster
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -39,13 +40,30 @@ async function run() {
       const user = req.body;
       const existingUser = await usersCollection.findOne({ email: email });
       if (existingUser) {
-        return res.status(400).send({ message: "User already exists" });
+        return res.status(200).send({ message: "User already exists" });
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
-
     // ---------------------------- user api is here-----------------------
+    // -------------------------- product api is here-----------------------
+    app.get("/products", async (req, res) => {
+      const products = await productsCollection.find().toArray();
+      res.send(products);
+    }); 
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const product = await productsCollection.findOne(query);
+      res.send(product);
+    });
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // -------------------------- product api is here-----------------------
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
