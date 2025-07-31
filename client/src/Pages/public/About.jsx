@@ -3,7 +3,7 @@ import { FaBullseye, FaHandshake, FaUsers, FaShieldAlt, FaBolt, FaCheckCircle } 
 
 const AboutUs = () => {
   return (
-    <div className="bg-base-100 text-base-content px-4 md:px-8 py-16 container mx-auto space-y-16">
+    <div className="bg-base-100 text-base-content px-4 md:px-8 py-16 container mx-auto my-6 space-y-16">
 
       {/* Hero Section */}
       <section className="text-center space-y-4">
