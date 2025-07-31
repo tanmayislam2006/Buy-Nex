@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import Home from "../Pages/public/Home";
 import MainLayout from "../Layouts/MainLayout/MainLayout";
-import AllProducts from "../Pages/public/AllProducts";
 import HelpSupport from "../Pages/public/HelpSupport";
 import About from "../Pages/public/About";
 import BecomeSeller from "../Pages/public/BecomeSeller";
@@ -28,6 +27,7 @@ import Profile from "../Pages/dashboard/Profile/Profile";
 import Overview from "../Pages/dashboard/Overview/Overview";
 import BlogLayout from "../components/Blog/BlogLayout";
 import BlogDetails from "../Pages/public/BlogDetails";
+import AllProducts from "../Pages/public/AllProducts/AllProducts";
 
 
 const router = createBrowserRouter([
