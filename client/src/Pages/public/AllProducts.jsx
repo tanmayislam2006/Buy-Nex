@@ -1,5 +1,9 @@
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import { Link } from "react-router"; // Ensure react-router-dom is installed and used for Link
+import useAxios from "../../Hooks/useAxios";
+
+// Import icons (these are static and not fetched from DB, so they remain here)
 import {
   FaLaptop,
   FaTshirt,
@@ -7,32 +11,21 @@ import {
   FaBasketballBall,
   FaBook,
   FaMobile,
+  FaShoppingCart,
 } from "react-icons/fa";
-import { Link } from "react-router";
-import useAxios from "../../Hooks/useAxios";
-// Category data with icons
-const categories = [
-  { name: "Electronics", count: 7, icon: <FaLaptop /> },
-  { name: "Fashion", count: 5, icon: <FaTshirt /> },
-  { name: "Home & Kitchen", count: 4, icon: <FaCouch /> },
-  { name: "Sports & Outdoors", count: 3, icon: <FaBasketballBall /> },
-  { name: "Books", count: 3, icon: <FaBook /> },
-  { name: "Mobile", count: 2, icon: <FaMobile /> },
-];
 
-const brands = [
-  { name: "Apple", count: 3 },
-  { name: "Samsung", count: 4 },
-  { name: "Nike", count: 2 },
-  { name: "Adidas", count: 1 },
-  { name: "Sony", count: 2 },
-  { name: "Dell", count: 1 },
-  { name: "Xiaomi", count: 1 },
-  { name: "Bose", count: 1 },
-  { name: "LG", count: 1 },
-  { name: "KitchenAid", count: 1 },
-];
+// Static icon mapping for categories (since icons are React components)
+const categoryIcons = {
+  Electronics: <FaLaptop />,
+  Fashion: <FaTshirt />,
+  "Home & Kitchen": <FaCouch />,
+  "Sports & Outdoors": <FaBasketballBall />,
+  Books: <FaBook />,
+  Mobile: <FaMobile />,
+  // Add other categories and their icons as needed
+};
 
+// Tags and Ratings can remain hardcoded or be fetched from a static endpoint if preferred.
 const tags = [
   "New",
   "Sale",
@@ -49,40 +42,77 @@ const tags = [
 const ratings = [4, 3, 2];
 
 const AllProducts = () => {
-  const axiosInstance=useAxios()
+  const axiosInstance = useAxios();
+
+  // State for filters and pagination
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedRating, setSelectedRating] = useState(0);
-  const [priceRange, setPriceRange] = useState([0, 2000]);
+  const [priceRange, setPriceRange] = useState([0, 2000]); // Default max price
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState("Newest"); // Added state for sorting
-  const {data:products=[]}=useQuery({
-    queryKey: ["products"],
+  const [sortBy, setSortBy] = useState("Newest");
+  const [limit, setLimit] = useState(8); // Products per page
+
+  // Fetch all data in a single query
+  const {
+    data: allProductData,
+    isLoading,
+    isError,
+    error,
+    refetch, // Use refetch to trigger a new query
+  } = useQuery({
+    queryKey: [
+      "allProductData",
+      selectedCategory,
+      selectedBrand,
+      selectedRating,
+      priceRange,
+      sortBy,
+      page,
+      limit,
+    ],
     queryFn: async () => {
-      const res = await axiosInstance.get("/products");
-      return res.data ;
-    }
-  })
-  const filteredProducts = products?.filter((p) => {
-    const inCategory = selectedCategory
-      ? p.category === selectedCategory
-      : true;
-    const inBrand = selectedBrand ? p.brand === selectedBrand : true;
-    const inRating = selectedRating
-      ? Math.floor(p.rating) >= selectedRating
-      : true;
-    const inPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
-    return inCategory && inBrand && inRating && inPrice;
-  }).sort((a, b) => { // Added sorting logic
-    if (sortBy === "Newest") {
-      return b.id - a.id; // Assuming higher ID means newer
-    } else if (sortBy === "Price: Low to High") {
-      return a.price - b.price;
-    } else if (sortBy === "Price: High to Low") {
-      return b.price - a.price;
-    }
-    return 0;
+      const params = {
+        page,
+        limit,
+        sortBy,
+      };
+      if (selectedCategory) params.category = selectedCategory;
+      if (selectedBrand) params.brand = selectedBrand;
+      if (selectedRating) params.minRating = selectedRating;
+      // Only include price range params if they are not default
+      if (priceRange[0] !== 0) params.minPrice = priceRange[0];
+      if (priceRange[1] !== 2000) params.maxPrice = priceRange[1];
+
+      const res = await axiosInstance.get("/api/all-product-data", { params });
+      return res.data;
+    },
+    keepPreviousData: true, // Helps in smoother UI transitions during pagination/filtering
   });
+
+  const products = allProductData?.products || [];
+  const totalProducts = allProductData?.totalProducts || 0;
+  const currentPage = allProductData?.currentPage || 1;
+  const totalPages = allProductData?.totalPages || 1;
+  const categoriesWithCounts = allProductData?.categoryCounts?.map((cat) => ({
+    ...cat,
+    icon: categoryIcons[cat.name] || null, // Attach icon from static mapping
+  })) || [];
+  const brandsWithCounts = allProductData?.brandCounts || [];
+
+  // Recalculate max price for price range filter if needed, or get from server metadata
+  // useEffect(() => {
+  //   // You might fetch maxPrice from a separate API or from the initial allProductData if available
+  //   // For now, assuming a fixed max range for the input field.
+  // }, [allProductData]);
+
+  if (isLoading) {
+    return <p className="text-center py-10">Loading products and filters...</p>;
+  }
+
+  if (isError) {
+    return <p className="text-center py-10 text-red-500">Error loading data: {error.message}</p>;
+  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 max-w-[1600px] mx-auto lg:pt-32">
@@ -98,14 +128,22 @@ const AllProducts = () => {
           <div className="flex gap-2 items-center">
             <input
               type="number"
-              onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+              value={priceRange[0]}
+              onChange={(e) => {
+                setPriceRange([+e.target.value, priceRange[1]]);
+                setPage(1); // Reset page on filter change
+              }}
               className="w-16 border rounded px-2 py-1"
               placeholder="Min"
             />
             <span>-</span>
             <input
               type="number"
-              onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+              value={priceRange[1]}
+              onChange={(e) => {
+                setPriceRange([priceRange[0], +e.target.value]);
+                setPage(1); // Reset page on filter change
+              }}
               className="w-16 border rounded px-2 py-1"
               placeholder="Max"
             />
@@ -116,7 +154,7 @@ const AllProducts = () => {
         <div className="mb-6">
           <label className="block text-sm font-semibold mb-2">Categories</label>
           <ul>
-            {categories.map((cat) => (
+            {categoriesWithCounts.map((cat) => (
               <li key={cat.name}>
                 <button
                   className={`flex justify-between w-full text-left px-2 py-1 rounded ${
@@ -130,7 +168,7 @@ const AllProducts = () => {
                   }}
                 >
                   <span>{cat.name}</span>
-                  <span className="text-xs text-gray-400">{cat.count}</span>
+                  <span className="text-xs text-gray-400">({cat.count})</span>
                 </button>
               </li>
             ))}
@@ -152,7 +190,7 @@ const AllProducts = () => {
         <div className="mb-6">
           <label className="block text-sm font-semibold mb-2">Brands</label>
           <ul>
-            {brands.map((brand) => (
+            {brandsWithCounts.map((brand) => (
               <li key={brand.name}>
                 <button
                   className={`flex justify-between w-full text-left px-2 py-1 rounded ${
@@ -166,7 +204,7 @@ const AllProducts = () => {
                   }}
                 >
                   <span>{brand.name}</span>
-                  <span className="text-xs text-gray-400">{brand.count}</span>
+                  <span className="text-xs text-gray-400">({brand.count})</span>
                 </button>
               </li>
             ))}
@@ -222,7 +260,7 @@ const AllProducts = () => {
           </ul>
         </div>
 
-        {/* Tags */}
+        {/* Tags (assuming these are still static for now) */}
         <div className="mb-6">
           <label className="block text-sm font-semibold mb-2">
             Popular Tags
@@ -246,10 +284,10 @@ const AllProducts = () => {
           </p>
         </div>
 
-        {/* Category Swiper */}
+        {/* Category Swiper (now uses dynamically fetched categories) */}
         <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((cat, index) => (
-            <div key={index}>
+          {categoriesWithCounts.map((cat) => (
+            <div key={cat.name}>
               <div
                 onClick={() => {
                   setSelectedCategory(cat.name);
@@ -271,74 +309,119 @@ const AllProducts = () => {
         {/* Products Header */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-gray-500">
-            Showing 100 of 200 products
+            Showing {products.length} of {totalProducts} products
           </span>
           <select
             className="border rounded px-2 py-1 text-sm"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1); // Reset page on sort change
+            }}
           >
-            <option>Newest</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
+            <option value="Newest">Newest</option>
+            <option value="Price: Low to High">Price: Low to High</option>
+            <option value="Price: High to Low">Price: High to Low</option>
           </select>
         </div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredProducts.map((product) => (
-            <Link
-              to={`/product-details/${product._id}`}
-              key={product.id}
-              className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
-            >
-              {product.tags && (
-                <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">
-                  {product.tags[1]}
-                </span>
-              )}
-              <div className="h-24 sm:h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-3xl text-gray-300">
-                <img
-                  src={product.images[0] || "https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"}
-                  alt={product.name}
-                  className="object-contain"
-                />
-              </div>
-              <div className="flex items-center gap-1 mb-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={
-                      i < Math.round(product.rating)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }
-                  >
-                    ★
-                  </span>
-                ))}
-                <span className="ml-1 text-xs text-gray-500">
-                  ({product.reviews})
-                </span>
-              </div>
-              <div className="font-semibold text-sm">{product.name}</div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-base font-bold">
-                  ${product.price.toFixed(2)}
-                </span>
-                {product.oldPrice && (
-                  <span className="text-sm line-through text-gray-400">
-                    ${product.oldPrice.toFixed(2)}
+          {products.length > 0 ? (
+            products.map((product) => (
+              <Link
+                to={`/product-details/${product._id}`} 
+                key={product._id} 
+                className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
+              >
+                {product.tags && product.tags.length > 0 && (
+                  <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded">
+                    {product.tags[0]}{" "}
                   </span>
                 )}
-              </div>
-            </Link>
-          ))}
+                <div className="h-24 sm:h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-3xl text-gray-300">
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="object-contain max-h-full max-w-full"
+                    />
+                  ) : (
+                    <img
+                      src="https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"
+                      alt="No image available"
+                      className="object-contain max-h-full max-w-full"
+                    />
+                  )}
+                </div>
+                <div className="flex items-center gap-1 mb-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={
+                        i < Math.round(product.rating)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }
+                    >
+                      ★
+                    </span>
+                  ))}
+                  <span className="ml-1 text-xs text-gray-500">
+                    ({product.reviews})
+                  </span>
+                </div>
+                <div className="font-semibold text-sm">{product.name}</div>
+                <div className="text-xs text-gray-500 mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                  {product.description}
+                </div>
+                <div className="flex items-center gap-2 mb-3 mt-auto">
+                  <span className="text-base font-bold">
+                    ${product.price?.toFixed(2) || "N/A"}
+                  </span>
+                  {product.oldPrice && (
+                    <span className="text-sm line-through text-gray-400">
+                      ${product.oldPrice?.toFixed(2) || "N/A"}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-600">No products found matching your criteria.</p>
+          )}
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center mt-8 gap-2">
-        </div>
+        {totalProducts > 0 && (
+          <div className="flex justify-center mt-8 gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setPage(currentPage - 1)}
+              className="px-3 py-1 rounded border"
+            >
+              &lt;
+            </button>
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 rounded border ${
+                  currentPage === i + 1 ? "bg-primary text-white" : ""
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setPage(currentPage + 1)}
+              className="px-3 py-1 rounded border"
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
