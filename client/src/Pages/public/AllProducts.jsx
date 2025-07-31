@@ -7,27 +7,60 @@ import {
   FaBasketballBall,
   FaBook,
   FaMobile,
+  FaHeadphones,
+  FaWatch,
+  FaTabletAlt,
+  FaCamera,
+  FaGamepad,
+  FaTv,
+  FaBlender,
+  FaToaster,
+  FaShirt,
+  FaJeans,
+  FaRunning,
+  FaFootballBall,
+  FaDumbbell,
+  FaHeartbeat,
+  FaGraduationCap,
+  FaGlobe,
+  FaPaintBrush,
 } from "react-icons/fa";
 
 // Category data with icons
 const categories = [
-  { name: "Electronics", count: 45, icon: <FaLaptop /> },
-  { name: "Fashion", count: 32, icon: <FaTshirt /> },
-  { name: "Home & Kitchen", count: 28, icon: <FaCouch /> },
-  { name: "Sports & Outdoors", count: 19, icon: <FaBasketballBall /> },
-  { name: "Books", count: 24, icon: <FaBook /> },
-    { name: "Mobile", count: 34, icon: <FaMobile /> },
+  { name: "Electronics", count: 7, icon: <FaLaptop /> },
+  { name: "Fashion", count: 5, icon: <FaTshirt /> },
+  { name: "Home & Kitchen", count: 4, icon: <FaCouch /> },
+  { name: "Sports & Outdoors", count: 3, icon: <FaBasketballBall /> },
+  { name: "Books", count: 3, icon: <FaBook /> },
+  { name: "Mobile", count: 2, icon: <FaMobile /> },
 ];
 
 const brands = [
-  { name: "Apple", count: 15 },
-  { name: "Samsung", count: 23 },
-  { name: "Nike", count: 18 },
-  { name: "Adidas", count: 12 },
-  { name: "Sony", count: 9 },
+  { name: "Apple", count: 3 },
+  { name: "Samsung", count: 4 },
+  { name: "Nike", count: 2 },
+  { name: "Adidas", count: 1 },
+  { name: "Sony", count: 2 },
+  { name: "Dell", count: 1 },
+  { name: "Xiaomi", count: 1 },
+  { name: "Bose", count: 1 },
+  { name: "LG", count: 1 },
+  { name: "KitchenAid", count: 1 },
 ];
 
-const tags = ["New", "Sale", "Trending", "Wireless", "Eco-friendly", "Premium"];
+const tags = [
+  "New",
+  "Sale",
+  "Trending",
+  "Wireless",
+  "Eco-friendly",
+  "Premium",
+  "Bestseller",
+  "Durable",
+  "Smart",
+  "Compact",
+];
 
 const ratings = [4, 3, 2];
 
@@ -43,6 +76,7 @@ const products = [
     reviews: 42,
     tag: "New",
     desc: "Premium Sound Quality",
+    image: <FaHeadphones />,
   },
   {
     id: 2,
@@ -55,23 +89,25 @@ const products = [
     reviews: 28,
     tag: "Sale",
     desc: "Health & Activity Tracker",
+    image: <FaWatch />,
   },
   {
     id: 3,
     name: "Ultra Slim Laptop",
     category: "Electronics",
-    brand: "Sony",
+    brand: "Dell",
     price: 899.99,
     oldPrice: 1099.99,
     rating: 4.7,
     reviews: 56,
     tag: "",
     desc: "15.6” Full HD Display",
+    image: <FaLaptop />,
   },
   {
     id: 4,
     name: "Premium Smartphone",
-    category: "Electronics",
+    category: "Mobile",
     brand: "Apple",
     price: 749.99,
     oldPrice: 849.99,
@@ -79,6 +115,241 @@ const products = [
     reviews: 112,
     tag: "Bestseller",
     desc: "128GB, Unlocked",
+    image: <FaMobile />,
+  },
+  {
+    id: 5,
+    name: "4K Smart TV",
+    category: "Electronics",
+    brand: "LG",
+    price: 499.99,
+    oldPrice: 699.99,
+    rating: 4.2,
+    reviews: 78,
+    tag: "Sale",
+    desc: "Vibrant Colors, Smart Features",
+    image: <FaTv />,
+  },
+  {
+    id: 6,
+    name: "Digital Camera DSLR",
+    category: "Electronics",
+    brand: "Sony",
+    price: 599.99,
+    oldPrice: 750.00,
+    rating: 4.3,
+    reviews: 35,
+    tag: "New",
+    desc: "Professional Photography",
+    image: <FaCamera />,
+  },
+  {
+    id: 7,
+    name: "Gaming Console Pro",
+    category: "Electronics",
+    brand: "Sony",
+    price: 399.99,
+    oldPrice: 450.00,
+    rating: 4.6,
+    reviews: 92,
+    tag: "Trending",
+    desc: "Immersive Gaming Experience",
+    image: <FaGamepad />,
+  },
+  {
+    id: 8,
+    name: "Classic Denim Jeans",
+    category: "Fashion",
+    brand: "Nike",
+    price: 49.99,
+    oldPrice: 65.00,
+    rating: 3.8,
+    reviews: 21,
+    tag: "Durable",
+    desc: "Comfortable & Stylish Fit",
+    image: <FaJeans />,
+  },
+  {
+    id: 9,
+    name: "Casual T-Shirt (Men's)",
+    category: "Fashion",
+    brand: "Adidas",
+    price: 24.99,
+    oldPrice: 30.00,
+    rating: 4.1,
+    reviews: 15,
+    tag: "Eco-friendly",
+    desc: "Soft Cotton Fabric",
+    image: <FaShirt />,
+  },
+  {
+    id: 10,
+    name: "Elegant Sofa Set",
+    category: "Home & Kitchen",
+    brand: "Samsung",
+    price: 1200.00,
+    oldPrice: 1500.00,
+    rating: 4.8,
+    reviews: 30,
+    tag: "Premium",
+    desc: "Luxurious Comfort for Your Living Room",
+    image: <FaCouch />,
+  },
+  {
+    id: 11,
+    name: "High-Performance Blender",
+    category: "Home & Kitchen",
+    brand: "KitchenAid",
+    price: 129.99,
+    oldPrice: 150.00,
+    rating: 4.4,
+    reviews: 25,
+    tag: "New",
+    desc: "Smoothies and More",
+    image: <FaBlender />,
+  },
+  {
+    id: 12,
+    name: "Compact Toaster Oven",
+    category: "Home & Kitchen",
+    brand: "Samsung",
+    price: 79.99,
+    oldPrice: 99.99,
+    rating: 3.9,
+    reviews: 18,
+    tag: "Compact",
+    desc: "Perfect for Small Kitchens",
+    image: <FaToaster />,
+  },
+  {
+    id: 13,
+    name: "Yoga Mat Pro",
+    category: "Sports & Outdoors",
+    brand: "Nike",
+    price: 29.99,
+    oldPrice: 35.00,
+    rating: 4.2,
+    reviews: 10,
+    tag: "New",
+    desc: "Non-slip Surface for All Workouts",
+    image: <FaHeartbeat />,
+  },
+  {
+    id: 14,
+    name: "Basketball - Official Size",
+    category: "Sports & Outdoors",
+    brand: "Adidas",
+    price: 34.99,
+    oldPrice: 40.00,
+    rating: 4.0,
+    reviews: 14,
+    tag: "",
+    desc: "Durable for Indoor and Outdoor Play",
+    image: <FaBasketballBall />,
+  },
+  {
+    id: 15,
+    name: "Best-Selling Novel",
+    category: "Books",
+    brand: "N/A",
+    price: 15.99,
+    oldPrice: 19.99,
+    rating: 4.6,
+    reviews: 60,
+    tag: "Bestseller",
+    desc: "A Captivating Story",
+    image: <FaBook />,
+  },
+  {
+    id: 16,
+    name: "Beginner's Guide to React",
+    category: "Books",
+    brand: "N/A",
+    price: 25.00,
+    oldPrice: 30.00,
+    rating: 4.1,
+    reviews: 22,
+    tag: "New",
+    desc: "Learn Modern Web Development",
+    image: <FaGraduationCap />,
+  },
+  {
+    id: 17,
+    name: "Travel Guide - World Edition",
+    category: "Books",
+    brand: "N/A",
+    price: 22.50,
+    oldPrice: 28.00,
+    rating: 4.3,
+    reviews: 17,
+    tag: "Trending",
+    desc: "Explore the Globe",
+    image: <FaGlobe />,
+  },
+  {
+    id: 18,
+    name: "Designer Handbag",
+    category: "Fashion",
+    brand: "Samsung", // Example, not a real fashion brand for Samsung
+    price: 199.99,
+    oldPrice: 250.00,
+    rating: 4.5,
+    reviews: 38,
+    tag: "Premium",
+    desc: "Stylish and Spacious",
+    image: <FaTshirt />, // Using T-shirt as a generic fashion icon
+  },
+  {
+    id: 19,
+    name: "Sport Running Shoes",
+    category: "Sports & Outdoors",
+    brand: "Nike",
+    price: 85.00,
+    oldPrice: 100.00,
+    rating: 4.4,
+    reviews: 45,
+    tag: "Sale",
+    desc: "Lightweight and Responsive",
+    image: <FaRunning />,
+  },
+  {
+    id: 20,
+    name: "Art Painting Kit",
+    category: "Home & Kitchen", // Could also be 'Hobbies' or 'Crafts'
+    brand: "N/A",
+    price: 39.99,
+    oldPrice: 45.00,
+    rating: 3.7,
+    reviews: 9,
+    tag: "New",
+    desc: "Unleash Your Creativity",
+    image: <FaPaintBrush />,
+  },
+  {
+    id: 21,
+    name: "Entry-Level Smartphone",
+    category: "Mobile",
+    brand: "Xiaomi",
+    price: 199.99,
+    oldPrice: 220.00,
+    rating: 3.9,
+    reviews: 55,
+    tag: "Sale",
+    desc: "Affordable and Functional",
+    image: <FaMobile />,
+  },
+  {
+    id: 22,
+    name: "Wireless Earbuds",
+    category: "Electronics",
+    brand: "Bose",
+    price: 149.99,
+    oldPrice: 180.00,
+    rating: 4.7,
+    reviews: 70,
+    tag: "Wireless",
+    desc: "Crisp Audio, All-Day Comfort",
+    image: <FaHeadphones />,
   },
 ];
 
@@ -88,6 +359,7 @@ const AllProducts = () => {
   const [selectedRating, setSelectedRating] = useState(0);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("Newest"); // Added state for sorting
 
   const filteredProducts = products.filter((p) => {
     const inCategory = selectedCategory
@@ -99,6 +371,15 @@ const AllProducts = () => {
       : true;
     const inPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
     return inCategory && inBrand && inRating && inPrice;
+  }).sort((a, b) => { // Added sorting logic
+    if (sortBy === "Newest") {
+      return b.id - a.id; // Assuming higher ID means newer
+    } else if (sortBy === "Price: Low to High") {
+      return a.price - b.price;
+    } else if (sortBy === "Price: High to Low") {
+      return b.price - a.price;
+    }
+    return 0;
   });
 
   const perPage = 8;
@@ -153,7 +434,10 @@ const AllProducts = () => {
                       ? "bg-orange-100 text-primary"
                       : ""
                   }`}
-                  onClick={() => setSelectedCategory(cat.name)}
+                  onClick={() => {
+                    setSelectedCategory(cat.name);
+                    setPage(1); // Reset page on filter change
+                  }}
                 >
                   <span>{cat.name}</span>
                   <span className="text-xs text-gray-400">{cat.count}</span>
@@ -163,7 +447,10 @@ const AllProducts = () => {
             <li>
               <button
                 className="text-xs text-gray-500 mt-1"
-                onClick={() => setSelectedCategory("")}
+                onClick={() => {
+                  setSelectedCategory("");
+                  setPage(1); // Reset page on filter change
+                }}
               >
                 Show all
               </button>
@@ -183,7 +470,10 @@ const AllProducts = () => {
                       ? "bg-orange-100 text-primary"
                       : ""
                   }`}
-                  onClick={() => setSelectedBrand(brand.name)}
+                  onClick={() => {
+                    setSelectedBrand(brand.name);
+                    setPage(1); // Reset page on filter change
+                  }}
                 >
                   <span>{brand.name}</span>
                   <span className="text-xs text-gray-400">{brand.count}</span>
@@ -193,7 +483,10 @@ const AllProducts = () => {
             <li>
               <button
                 className="text-xs text-gray-500 mt-1"
-                onClick={() => setSelectedBrand("")}
+                onClick={() => {
+                  setSelectedBrand("");
+                  setPage(1); // Reset page on filter change
+                }}
               >
                 Show all
               </button>
@@ -213,7 +506,10 @@ const AllProducts = () => {
                   className={`flex items-center gap-1 px-2 py-1 rounded ${
                     selectedRating === r ? "bg-orange-100 text-primary" : ""
                   }`}
-                  onClick={() => setSelectedRating(r)}
+                  onClick={() => {
+                    setSelectedRating(r);
+                    setPage(1); // Reset page on filter change
+                  }}
                 >
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span key={i}>{i < r ? "★" : "☆"}</span>
@@ -225,7 +521,10 @@ const AllProducts = () => {
             <li>
               <button
                 className="text-xs text-gray-500 mt-1"
-                onClick={() => setSelectedRating(0)}
+                onClick={() => {
+                  setSelectedRating(0);
+                  setPage(1); // Reset page on filter change
+                }}
               >
                 Show all
               </button>
@@ -262,7 +561,10 @@ const AllProducts = () => {
           {categories.map((cat, index) => (
             <div key={index}>
               <div
-                onClick={() => setSelectedCategory(cat.name)}
+                onClick={() => {
+                  setSelectedCategory(cat.name);
+                  setPage(1); // Reset page on filter change
+                }}
                 className={`flex flex-col items-center justify-center text-sm p-3 rounded-xl shadow-md w-full h-24 transition hover:scale-105 cursor-pointer ${
                   selectedCategory === cat.name
                     ? "bg-primary text-white"
@@ -282,7 +584,11 @@ const AllProducts = () => {
             Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
             products
           </span>
-          <select className="border rounded px-2 py-1 text-sm">
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
             <option>Newest</option>
             <option>Price: Low to High</option>
             <option>Price: High to Low</option>
@@ -302,7 +608,7 @@ const AllProducts = () => {
                 </span>
               )}
               <div className="h-24 sm:h-32 bg-gray-100 rounded mb-3 flex items-center justify-center text-3xl text-gray-300">
-                🛒
+                {product.image || '🛒'} {/* Use specific image if available, else generic cart */}
               </div>
               <div className="flex items-center gap-1 mb-1">
                 {Array.from({ length: 5 }).map((_, i) => (
