@@ -4,69 +4,36 @@ import { useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
 import { FaStar, FaBoxOpen, FaComments } from "react-icons/fa";
 
-const sampleProduct = {
-  sellerId: "seller123",
-  name: "Wireless Bluetooth Headphones",
-  description:
-    "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
-  oldPrice: 79.99,
-  price: 69.99,
-  inventory: 10,
-  images: [
-    "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-    "https://www.startech.com.bd/image/cache/catalog/headphone/fantech/wh01/wh01-01-500x500.jpg",
-  ],
-  category: "Electronics",
-  brand: "Apple",
-  specifications: {
-    color: "Pink, Black",
-    connectivity: "Bluetooth 5.0",
-    batteryLife: "20 hours",
-    weight: "250g",
-    warranty: "1 year",
-  },
-  averageRating: 4.5,
-  reviews: 245,
-  tags: ["headphones", "wireless", "bluetooth", "audio"],
-  weight: 0.25,
-  dimensions: {
-    length: 20.0,
-    width: 15.0,
-    height: 8.0,
-    unit: "cm",
-  },
-  seoKeywords: ["wireless headphones", "bluetooth headset", "noise cancelling"],
-};
+
 
 const ProductDetails = () => {
   const { id } = useParams();
   const axiosInstance = useAxios();
 
-  // const { data: product, isLoading, isError } = useQuery({
-  //   queryKey: ["product", id],
-  //   queryFn: async () => {
-  //     const res = await axiosInstance.get(`products/${id}`);
-  //     return res.data;
-  //   },
-  //   enabled: !!id,
-  // });
+  const { data: product, isLoading, isError } = useQuery({
+    queryKey: ["product", id],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`products/${id}`);
+      return res.data;
+    },
+    enabled: !!id,  
+  });
+  const [selectedImage, setSelectedImage] = useState(product?.images[0]);
 
-  // if (isLoading) return <p>Loading...</p>;
-  // if (isError) return <p>Error loading product!</p>;
-
-  const product = sampleProduct;
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error loading product!</p>;
+console.log(product);
 
   // colors split from string and trimmed
-  const colors = product.specifications.color.split(",").map((c) => c.trim());
+  const colors = product?.specifications?.color?.split(",").map((c) => c.trim());
 
   // combine colors + images dynamically
   const colorVariants = colors.map((colorName, index) => ({
     colorName,
-    image: product.images[index] || product.images[0], // fallback first image
+    image: product?.images[index] || product?.images[0], // fallback first image
   }));
-
+  
   // selected image state
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
 
   return (
     <div className="py-30 lg:pt-44 max-w-6xl mx-auto px-4">
@@ -75,7 +42,7 @@ const ProductDetails = () => {
         <div className="flex-1 ">
           {/* product image */}
           <img
-            src={selectedImage}
+            src={selectedImage || "https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"}
             alt={product.name}
             className="w-full max-w-sm md:max-w-md mx-auto rounded-lg shadow-lg"
           />
@@ -85,7 +52,7 @@ const ProductDetails = () => {
             {product.images.map((img, i) => (
               <img
                 key={i}
-                src={img}
+                src={img || "https://img.icons8.com/windows/64/shopping-cart-loaded--v1.png"}
                 alt={`Thumbnail ${i}`}
                 onClick={() => setSelectedImage(img)}
                 className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
@@ -161,8 +128,8 @@ const ProductDetails = () => {
             <div className="flex items-center gap-1">
               <FaStar className="text-yellow-500" size={18} />
               <span>
-                {product.averageRating > 0
-                  ? `${product.averageRating} `
+                {product.rating > 0
+                  ? `${product.rating} `
                   : "No Rating"}
               </span>
             </div>
