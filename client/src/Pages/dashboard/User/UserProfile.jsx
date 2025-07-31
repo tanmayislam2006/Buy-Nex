@@ -33,6 +33,7 @@ const user = {
 
 const UserProfile = () => {
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+    console.log("user profile");
     //   const { data: user, isLoading, error } = useQuery({
     //     queryKey: ["userProfile"],
     //     queryFn: fetchUserProfile,

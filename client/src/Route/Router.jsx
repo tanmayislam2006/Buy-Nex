@@ -26,6 +26,8 @@ import Error404 from "../Pages/ErrorPage/Error404";
 import ProductDetails from "../Pages/public/ProductDetails";
 import Upcoming from "../Pages/public/Upcoming";
 import UserProfile from "../Pages/dashboard/User/UserProfile";
+import Profile from "../Pages/dashboard/Profile/Profile";
+import Overview from "../Pages/dashboard/Overview/Overview";
 
 
 const router = createBrowserRouter([
@@ -95,12 +97,12 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       {
-        path: "dashboard/user",
-        Component: UserOverview,
+        path: "dashboard",
+        Component: Overview,
       },
       {
-        path: "dashboard/user-profile",
-        Component: UserProfile,
+        path: "profile",
+        Component: Profile,
       },
       {
         path: "product-tracking",
