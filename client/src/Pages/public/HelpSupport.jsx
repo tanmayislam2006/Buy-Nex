@@ -1,14 +1,17 @@
 import React from "react";
 import { FaPhoneAlt, FaEnvelope, FaQuestionCircle } from "react-icons/fa";
-
+import feedbackImage from "../../assets/contact-us.svg";
 const HelpSupport = () => {
   return (
     <div className="px-4 py-20 container mx-auto space-y-12">
       {/* Hero Section */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary">How can we help you?</h1>
+        <h1 className="text-4xl font-bold text-primary">
+          How can we help you?
+        </h1>
         <p className="mt-4 text-gray-600">
-          Welcome to Buynex Support Center. Find answers to common questions or reach out directly.
+          Welcome to Buynex Support Center. Find answers to common questions or
+          reach out directly.
         </p>
       </div>
 
@@ -25,7 +28,8 @@ const HelpSupport = () => {
             </div>
             <div className="collapse-content">
               <p>
-                First, create an account, browse listings, and directly contact the seller to negotiate and buy.
+                First, create an account, browse listings, and directly contact
+                the seller to negotiate and buy.
               </p>
             </div>
           </div>
@@ -36,7 +40,8 @@ const HelpSupport = () => {
             </div>
             <div className="collapse-content">
               <p>
-                Yes! After creating an account, go to the “Sell” section and post your product with full details.
+                Yes! After creating an account, go to the “Sell” section and
+                post your product with full details.
               </p>
             </div>
           </div>
@@ -47,59 +52,68 @@ const HelpSupport = () => {
             </div>
             <div className="collapse-content">
               <p>
-                You can email us or call our hotline below. We're here 24/7 to assist you.
+                You can email us or call our hotline below. We're here 24/7 to
+                assist you.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contact Section */}
-      <div className="bg-base-200 p-6 rounded-xl">
-        <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="flex items-center gap-4">
-            <FaEnvelope className="text-xl text-primary" />
-            <div>
-              <p className="font-semibold">Email</p>
-              <p>support@buynex.com</p>
+      {/* Feedback or Message Form (optional) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 items-stretch justify-between gap-8">
+        {/* FeedBack Form */}
+        <div>
+          {/* Contact Section */}
+          <div className="bg-base-200 p-6  rounded-xl">
+            <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="flex items-center gap-4">
+                <FaEnvelope className="text-xl text-primary" />
+                <div>
+                  <p className="font-semibold">Email</p>
+                  <p>support@buynex.com</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <FaPhoneAlt className="text-xl text-primary" />
+                <div>
+                  <p className="font-semibold">Phone</p>
+                  <p>+880 1234 567 890</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <FaPhoneAlt className="text-xl text-primary" />
-            <div>
-              <p className="font-semibold">Phone</p>
-              <p>+880 1234 567 890</p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Send us a message</h2>
+            <form className="space-y-4">
+              <input
+                type="text"
+                placeholder="Your Name"
+                className="input input-bordered w-full"
+                required
+              />
+              <input
+                type="email"
+                placeholder="Your Email"
+                className="input input-bordered w-full"
+                required
+              />
+              <textarea
+                className="textarea textarea-bordered w-full"
+                placeholder="Your Message"
+                rows={4}
+                required
+              ></textarea>
+
+              <button className="btn btn-primary">Submit</button>
+            </form>
           </div>
         </div>
-      </div>
-
-      {/* Feedback or Message Form (optional) */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Send us a message</h2>
-        <form className="space-y-4">
-          <input
-            type="text"
-            placeholder="Your Name"
-            className="input input-bordered w-full"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Your Email"
-            className="input input-bordered w-full"
-            required
-          />
-          <textarea
-            className="textarea textarea-bordered w-full"
-            placeholder="Your Message"
-            rows={4}
-            required
-          ></textarea>
-          
-          <button className="btn btn-primary">Submit</button>
-        </form>
+        {/* FeedBack Image */}
+        <div className="hidden md:block">
+          <img className="h-full" src={feedbackImage} alt="" />
+        </div>
       </div>
     </div>
   );
