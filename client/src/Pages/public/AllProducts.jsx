@@ -7,23 +7,6 @@ import {
   FaBasketballBall,
   FaBook,
   FaMobile,
-  FaHeadphones,
-  FaWatch,
-  FaTabletAlt,
-  FaCamera,
-  FaGamepad,
-  FaTv,
-  FaBlender,
-  FaToaster,
-  FaShirt,
-  FaJeans,
-  FaRunning,
-  FaFootballBall,
-  FaDumbbell,
-  FaHeartbeat,
-  FaGraduationCap,
-  FaGlobe,
-  FaPaintBrush,
 } from "react-icons/fa";
 
 // Category data with icons
@@ -76,7 +59,7 @@ const products = [
     reviews: 42,
     tag: "New",
     desc: "Premium Sound Quality",
-    image: <FaHeadphones />,
+    image: "",
   },
   {
     id: 2,
@@ -89,7 +72,7 @@ const products = [
     reviews: 28,
     tag: "Sale",
     desc: "Health & Activity Tracker",
-    image: <FaWatch />,
+    image: "",
   },
   {
     id: 3,
@@ -102,7 +85,7 @@ const products = [
     reviews: 56,
     tag: "",
     desc: "15.6” Full HD Display",
-    image: <FaLaptop />,
+    image: "",
   },
   {
     id: 4,
@@ -115,7 +98,7 @@ const products = [
     reviews: 112,
     tag: "Bestseller",
     desc: "128GB, Unlocked",
-    image: <FaMobile />,
+    image: "",
   },
   {
     id: 5,
@@ -128,7 +111,7 @@ const products = [
     reviews: 78,
     tag: "Sale",
     desc: "Vibrant Colors, Smart Features",
-    image: <FaTv />,
+    image:"",
   },
   {
     id: 6,
@@ -141,7 +124,7 @@ const products = [
     reviews: 35,
     tag: "New",
     desc: "Professional Photography",
-    image: <FaCamera />,
+    image: "",
   },
   {
     id: 7,
@@ -154,7 +137,7 @@ const products = [
     reviews: 92,
     tag: "Trending",
     desc: "Immersive Gaming Experience",
-    image: <FaGamepad />,
+    image: "",
   },
   {
     id: 8,
@@ -167,7 +150,7 @@ const products = [
     reviews: 21,
     tag: "Durable",
     desc: "Comfortable & Stylish Fit",
-    image: <FaJeans />,
+    image: "",
   },
   {
     id: 9,
@@ -180,7 +163,7 @@ const products = [
     reviews: 15,
     tag: "Eco-friendly",
     desc: "Soft Cotton Fabric",
-    image: <FaShirt />,
+    image: "",
   },
   {
     id: 10,
@@ -193,7 +176,7 @@ const products = [
     reviews: 30,
     tag: "Premium",
     desc: "Luxurious Comfort for Your Living Room",
-    image: <FaCouch />,
+    image: "",
   },
   {
     id: 11,
@@ -206,7 +189,7 @@ const products = [
     reviews: 25,
     tag: "New",
     desc: "Smoothies and More",
-    image: <FaBlender />,
+    image: "",
   },
   {
     id: 12,
@@ -219,7 +202,7 @@ const products = [
     reviews: 18,
     tag: "Compact",
     desc: "Perfect for Small Kitchens",
-    image: <FaToaster />,
+    image: "",
   },
   {
     id: 13,
@@ -232,7 +215,7 @@ const products = [
     reviews: 10,
     tag: "New",
     desc: "Non-slip Surface for All Workouts",
-    image: <FaHeartbeat />,
+    image: "",
   },
   {
     id: 14,
@@ -245,7 +228,7 @@ const products = [
     reviews: 14,
     tag: "",
     desc: "Durable for Indoor and Outdoor Play",
-    image: <FaBasketballBall />,
+    image: "",
   },
   {
     id: 15,
@@ -258,7 +241,7 @@ const products = [
     reviews: 60,
     tag: "Bestseller",
     desc: "A Captivating Story",
-    image: <FaBook />,
+    image:"",
   },
   {
     id: 16,
@@ -271,7 +254,7 @@ const products = [
     reviews: 22,
     tag: "New",
     desc: "Learn Modern Web Development",
-    image: <FaGraduationCap />,
+    image: "",
   },
   {
     id: 17,
@@ -284,7 +267,7 @@ const products = [
     reviews: 17,
     tag: "Trending",
     desc: "Explore the Globe",
-    image: <FaGlobe />,
+    image: "",
   },
   {
     id: 18,
@@ -297,7 +280,7 @@ const products = [
     reviews: 38,
     tag: "Premium",
     desc: "Stylish and Spacious",
-    image: <FaTshirt />, // Using T-shirt as a generic fashion icon
+    image: "",
   },
   {
     id: 19,
@@ -310,7 +293,7 @@ const products = [
     reviews: 45,
     tag: "Sale",
     desc: "Lightweight and Responsive",
-    image: <FaRunning />,
+    image: "",
   },
   {
     id: 20,
@@ -323,7 +306,7 @@ const products = [
     reviews: 9,
     tag: "New",
     desc: "Unleash Your Creativity",
-    image: <FaPaintBrush />,
+    image: "",
   },
   {
     id: 21,
@@ -336,7 +319,7 @@ const products = [
     reviews: 55,
     tag: "Sale",
     desc: "Affordable and Functional",
-    image: <FaMobile />,
+    image: "",
   },
   {
     id: 22,
@@ -349,7 +332,7 @@ const products = [
     reviews: 70,
     tag: "Wireless",
     desc: "Crisp Audio, All-Day Comfort",
-    image: <FaHeadphones />,
+    image: "",
   },
 ];
 
@@ -382,13 +365,7 @@ const AllProducts = () => {
     return 0;
   });
 
-  const perPage = 8;
-  const totalPages = Math.ceil(filteredProducts.length / perPage);
-  const paginatedProducts = filteredProducts.slice(
-    (page - 1) * perPage,
-    page * perPage
-  );
-
+ 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 p-4 lg:p-8 max-w-[1600px] mx-auto lg:pt-32">
       {/* Sidebar Filters */}
@@ -403,9 +380,6 @@ const AllProducts = () => {
           <div className="flex gap-2 items-center">
             <input
               type="number"
-              min={0}
-              max={priceRange[1]}
-              value={priceRange[0]}
               onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
               className="w-16 border rounded px-2 py-1"
               placeholder="Min"
@@ -413,8 +387,6 @@ const AllProducts = () => {
             <span>-</span>
             <input
               type="number"
-              min={priceRange[0]}
-              value={priceRange[1]}
               onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
               className="w-16 border rounded px-2 py-1"
               placeholder="Max"
@@ -581,8 +553,7 @@ const AllProducts = () => {
         {/* Products Header */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-gray-500">
-            Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
-            products
+            Showing 100 of 200 products
           </span>
           <select
             className="border rounded px-2 py-1 text-sm"
@@ -597,7 +568,7 @@ const AllProducts = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {paginatedProducts.map((product) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-lg shadow-sm p-4 relative flex flex-col"
@@ -648,31 +619,6 @@ const AllProducts = () => {
 
         {/* Pagination */}
         <div className="flex justify-center mt-8 gap-2">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className="px-3 py-1 rounded border"
-          >
-            &lt;
-          </button>
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded border ${
-                page === i + 1 ? "bg-primary text-white" : ""
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-3 py-1 rounded border"
-          >
-            &gt;
-          </button>
         </div>
       </main>
     </div>

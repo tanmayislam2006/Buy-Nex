@@ -5,21 +5,19 @@ import useAxios from "../../Hooks/useAxios";
 import { FaStar, FaBoxOpen, FaComments } from "react-icons/fa";
 
 const sampleProduct = {
-  id: "b1f4a6c8-3a22-4d7e-9c55-8d73f6d0a123",
-  sellerId: "d4a3f2e1-9b56-4a77-bc81-5f72b4f81234",
+  sellerId: "seller123",
   name: "Wireless Bluetooth Headphones",
   description:
     "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
-  price: 79.99,
-  currency: "USD",
-  // sku: "WBH-2025-BLK",
-  inventory: 120,
+  oldPrice: 79.99,
+  price: 69.99,
+  inventory: 10,
   images: [
     "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
     "https://www.startech.com.bd/image/cache/catalog/headphone/fantech/wh01/wh01-01-500x500.jpg",
   ],
-  // categoryId: "a8b7c6d5-4e3f-2a1b-0c9d-8e7f6d5c4b3a",
-  // brandId: "f1e2d3c4-b5a6-7987-9a8b-7c6d5e4f3a2b",
+  category: "Electronics",
+  brand: "Apple",
   specifications: {
     color: "Pink, Black",
     connectivity: "Bluetooth 5.0",
@@ -27,11 +25,8 @@ const sampleProduct = {
     weight: "250g",
     warranty: "1 year",
   },
-  // status: "Active",
-  // createdAt: "2025-07-29T12:34:56.000Z",
-  // updatedAt: "2025-07-29T12:34:56.000Z",
   averageRating: 4.5,
-  totalReviews: 245,
+  reviews: 245,
   tags: ["headphones", "wireless", "bluetooth", "audio"],
   weight: 0.25,
   dimensions: {
@@ -40,14 +35,7 @@ const sampleProduct = {
     height: 8.0,
     unit: "cm",
   },
-  // isFeatured: true,
-  discountPrice: 69.99,
-  discountPercentage: 12.5,
   seoKeywords: ["wireless headphones", "bluetooth headset", "noise cancelling"],
-  deliveryInfo: {
-    estimatedDeliveryDays: 5,
-    shippingCost: 5.99,
-  },
 };
 
 const ProductDetails = () => {
@@ -121,20 +109,21 @@ const ProductDetails = () => {
           <div className="flex items-center gap-4">
             {/* Discount Price */}
             <p className="text-3xl lg:text-4xl font-bold text-primary">
-              ${product.discountPrice}
+              ${product.price}
             </p>
 
             {/* Original Price (Strike-through) */}
             <p className="text-lg text-gray-500 line-through">
-              ${product.price}
+              ${product.oldPrice}
             </p>
-
             {/* Discount Badge */}
-            {product.discountPercentage > 0 && (
-              <span className="bg-red-600 text-white btn btn-xs rounded-full">
-                -{product.discountPercentage}%
-              </span>
-            )}
+            <span className="bg-red-600 text-white btn btn-xs rounded-full">
+              {(
+                ((product.oldPrice - product.price) / product.oldPrice) *
+                100
+              ).toFixed(2)}{" "}
+              %
+            </span>
           </div>
 
           {/* review, stock & rating */}
@@ -162,8 +151,8 @@ const ProductDetails = () => {
             <div className="flex items-center gap-1">
               <FaComments className="text-blue-500" size={18} />
               <span>
-                {product.totalReviews > 0
-                  ? `${product.totalReviews} Reviews`
+                {product.reviews > 0
+                  ? `${product.reviews} Reviews`
                   : "No Reviews Yet"}
               </span>
             </div>
