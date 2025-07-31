@@ -1,0 +1,732 @@
+[
+  {
+    "sellerId": "sellerA",
+    "id": 1,
+    "name": "Wireless Bluetooth Headphones",
+    "description": "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
+    "oldPrice": 129.99,
+    "price": 89.99,
+    "inventory": 10,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Apple",
+    "specifications": {
+      "color": "Pink, Black",
+      "connectivity": "Bluetooth 5.0",
+      "batteryLife": "20 hours",
+      "weight": "250g",
+      "warranty": "1 year"
+    },
+    "rating": 4.5,
+    "reviews": 245,
+    "tags": ["New", "Wireless", "Audio"],
+    "weight": 0.25,
+    "dimensions": {
+      "length": 20.0,
+      "width": 15.0,
+      "height": 8.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["wireless headphones", "bluetooth headset", "noise cancelling"]
+  },
+  {
+    "sellerId": "sellerB",
+    "id": 2,
+    "name": "Smart Fitness Watch",
+    "description": "Track your health and fitness goals with this stylish smart watch. Features heart rate monitoring, step tracking, and notifications.",
+    "oldPrice": 79.99,
+    "price": 59.99,
+    "inventory": 25,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Samsung",
+    "specifications": {
+      "color": "Black, Silver",
+      "display": "AMOLED",
+      "waterResistance": "5 ATM",
+      "batteryLife": "7 days"
+    },
+    "rating": 4.0,
+    "reviews": 280,
+    "tags": ["Sale", "Smart", "Wearable"],
+    "weight": 0.05,
+    "dimensions": {
+      "length": 4.0,
+      "width": 3.5,
+      "height": 1.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["smart watch", "fitness tracker", "health monitor"]
+  },
+  {
+    "sellerId": "sellerC",
+    "id": 3,
+    "name": "Ultra Slim Laptop",
+    "description": "Powerful and portable, this ultra-slim laptop is perfect for work and entertainment on the go.",
+    "oldPrice": 1099.99,
+    "price": 899.99,
+    "inventory": 15,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Dell",
+    "specifications": {
+      "processor": "Intel i7",
+      "ram": "16GB",
+      "storage": "512GB SSD",
+      "screen": "15.6 inch Full HD"
+    },
+    "rating": 4.7,
+    "reviews": 560,
+    "tags": ["New", "Trending", "Powerful"],
+    "weight": 1.5,
+    "dimensions": {
+      "length": 35.0,
+      "width": 23.0,
+      "height": 1.5,
+      "unit": "cm"
+    },
+    "seoKeywords": ["slim laptop", "portable computer", "dell laptop"]
+  },
+  {
+    "sellerId": "sellerA",
+    "id": 4,
+    "name": "Premium Smartphone",
+    "description": "Experience the best with this premium smartphone. Stunning display, powerful camera, and long-lasting battery.",
+    "oldPrice": 849.99,
+    "price": 749.99,
+    "inventory": 30,
+    "images": [],
+    "category": "Mobile",
+    "brand": "Apple",
+    "specifications": {
+      "storage": "128GB",
+      "camera": "Dual 12MP",
+      "display": "Super Retina XDR",
+      "color": "Space Gray, Silver"
+    },
+    "rating": 4.9,
+    "reviews": 1120,
+    "tags": ["Bestseller", "New", "Premium"],
+    "weight": 0.18,
+    "dimensions": {
+      "length": 15.0,
+      "width": 7.0,
+      "height": 0.8,
+      "unit": "cm"
+    },
+    "seoKeywords": ["iphone", "apple smartphone", "premium phone"]
+  },
+  {
+    "sellerId": "sellerD",
+    "id": 5,
+    "name": "4K Smart TV",
+    "description": "Immerse yourself in stunning 4K resolution and smart features with this state-of-the-art television.",
+    "oldPrice": 699.99,
+    "price": 499.99,
+    "inventory": 8,
+    "images": [],
+    "category": "Electronics",
+    "brand": "LG",
+    "specifications": {
+      "screenSize": "55 inch",
+      "resolution": "3840 x 2160",
+      "smartFeatures": "WebOS",
+      "ports": "3 HDMI, 2 USB"
+    },
+    "rating": 4.2,
+    "reviews": 780,
+    "tags": ["Sale", "Smart", "Trending"],
+    "weight": 15.0,
+    "dimensions": {
+      "length": 124.0,
+      "width": 72.0,
+      "height": 8.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["4k tv", "smart television", "lg tv"]
+  },
+  {
+    "sellerId": "sellerC",
+    "id": 6,
+    "name": "Digital Camera DSLR",
+    "description": "Capture breathtaking photos and videos with this professional-grade DSLR camera.",
+    "oldPrice": 750.00,
+    "price": 599.99,
+    "inventory": 7,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Sony",
+    "specifications": {
+      "megapixels": "24.2 MP",
+      "videoResolution": "4K",
+      "lensMount": "E-mount",
+      "isoRange": "100-32000"
+    },
+    "rating": 4.3,
+    "reviews": 350,
+    "tags": ["New", "Professional", "Photography"],
+    "weight": 0.6,
+    "dimensions": {
+      "length": 12.0,
+      "width": 9.0,
+      "height": 6.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["dslr camera", "sony camera", "digital photography"]
+  },
+  {
+    "sellerId": "sellerE",
+    "id": 7,
+    "name": "Gaming Console Pro",
+    "description": "Dive into immersive gaming worlds with this powerful next-gen gaming console.",
+    "oldPrice": 450.00,
+    "price": 399.99,
+    "inventory": 12,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Sony",
+    "specifications": {
+      "storage": "1TB SSD",
+      "graphics": "AMD Radeon RDNA 2",
+      "resolution": "4K",
+      "controllers": "1 included"
+    },
+    "rating": 4.6,
+    "reviews": 920,
+    "tags": ["Trending", "Gaming", "Bestseller"],
+    "weight": 4.5,
+    "dimensions": {
+      "length": 39.0,
+      "width": 26.0,
+      "height": 10.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["gaming console", "playstation", "xbox"]
+  },
+  {
+    "sellerId": "sellerF",
+    "id": 8,
+    "name": "Classic Denim Jeans",
+    "description": "Timeless style and comfortable fit, these denim jeans are a wardrobe essential.",
+    "oldPrice": 65.00,
+    "price": 49.99,
+    "inventory": 50,
+    "images": [],
+    "category": "Fashion",
+    "brand": "Nike",
+    "specifications": {
+      "material": "100% Cotton",
+      "fit": "Regular",
+      "wash": "Medium Blue",
+      "sizes": "28-38"
+    },
+    "rating": 3.8,
+    "reviews": 210,
+    "tags": ["Durable", "Classic", "Everyday"],
+    "weight": 0.7,
+    "dimensions": {
+      "length": 100.0,
+      "width": 30.0,
+      "height": 2.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["denim jeans", "men's jeans", "casual pants"]
+  },
+  {
+    "sellerId": "sellerG",
+    "id": 9,
+    "name": "Casual T-Shirt (Men's)",
+    "description": "Soft, breathable, and perfect for everyday wear. Made from organic cotton.",
+    "oldPrice": 30.00,
+    "price": 24.99,
+    "inventory": 70,
+    "images": [],
+    "category": "Fashion",
+    "brand": "Adidas",
+    "specifications": {
+      "material": "Organic Cotton",
+      "color": "Grey, White, Black",
+      "neckline": "Crew Neck",
+      "sizes": "S-XXL"
+    },
+    "rating": 4.1,
+    "reviews": 150,
+    "tags": ["Eco-friendly", "Comfort", "Basic"],
+    "weight": 0.2,
+    "dimensions": {
+      "length": 70.0,
+      "width": 50.0,
+      "height": 1.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["men's t-shirt", "cotton tee", "casual wear"]
+  },
+  {
+    "sellerId": "sellerH",
+    "id": 10,
+    "name": "Elegant Sofa Set",
+    "description": "Enhance your living space with this luxurious and comfortable sofa set, designed for modern homes.",
+    "oldPrice": 1500.00,
+    "price": 1200.00,
+    "inventory": 5,
+    "images": [],
+    "category": "Home & Kitchen",
+    "brand": "Samsung",
+    "specifications": {
+      "material": "Velvet",
+      "seatingCapacity": "3+2",
+      "color": "Grey, Blue",
+      "assembly": "Required"
+    },
+    "rating": 4.8,
+    "reviews": 300,
+    "tags": ["Premium", "Furniture", "Luxury"],
+    "weight": 120.0,
+    "dimensions": {
+      "length": 220.0,
+      "width": 90.0,
+      "height": 80.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["sofa set", "living room furniture", "modern couch"]
+  },
+  {
+    "sellerId": "sellerI",
+    "id": 11,
+    "name": "High-Performance Blender",
+    "description": "Whip up smoothies, soups, and sauces with ease. Powerful motor and durable blades.",
+    "oldPrice": 150.00,
+    "price": 129.99,
+    "inventory": 18,
+    "images": [],
+    "category": "Home & Kitchen",
+    "brand": "KitchenAid",
+    "specifications": {
+      "power": "1200W",
+      "capacity": "2L",
+      "speeds": "Variable + Pulse",
+      "material": "Stainless Steel, BPA-Free Plastic"
+    },
+    "rating": 4.4,
+    "reviews": 250,
+    "tags": ["New", "Kitchen", "Appliance"],
+    "weight": 3.5,
+    "dimensions": {
+      "length": 20.0,
+      "width": 20.0,
+      "height": 40.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["blender", "kitchen appliance", "smoothie maker"]
+  },
+  {
+    "sellerId": "sellerJ",
+    "id": 12,
+    "name": "Compact Toaster Oven",
+    "description": "A versatile kitchen essential for toasting, baking, and broiling, perfect for small spaces.",
+    "oldPrice": 99.99,
+    "price": 79.99,
+    "inventory": 22,
+    "images": [],
+    "category": "Home & Kitchen",
+    "brand": "Samsung",
+    "specifications": {
+      "capacity": "4 slice",
+      "functions": "Toast, Bake, Broil",
+      "features": "Timer, Auto Shut-off",
+      "color": "Black"
+    },
+    "rating": 3.9,
+    "reviews": 180,
+    "tags": ["Compact", "Kitchen", "Sale"],
+    "weight": 2.8,
+    "dimensions": {
+      "length": 35.0,
+      "width": 25.0,
+      "height": 20.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["toaster oven", "mini oven", "kitchen appliance"]
+  },
+  {
+    "sellerId": "sellerK",
+    "id": 13,
+    "name": "Yoga Mat Pro",
+    "description": "Premium non-slip yoga mat for all levels. Provides excellent grip and cushioning.",
+    "oldPrice": 35.00,
+    "price": 29.99,
+    "inventory": 40,
+    "images": [],
+    "category": "Sports & Outdoors",
+    "brand": "Nike",
+    "specifications": {
+      "material": "Eco-friendly TPE",
+      "thickness": "6mm",
+      "dimensions": "183cm x 61cm",
+      "color": "Blue, Purple"
+    },
+    "rating": 4.2,
+    "reviews": 100,
+    "tags": ["New", "Eco-friendly", "Fitness"],
+    "weight": 1.2,
+    "dimensions": {
+      "length": 61.0,
+      "width": 10.0,
+      "height": 10.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["yoga mat", "exercise mat", "fitness accessories"]
+  },
+  {
+    "sellerId": "sellerL",
+    "id": 14,
+    "name": "Official Size Basketball",
+    "description": "Durable basketball for indoor and outdoor play. Excellent grip and bounce.",
+    "oldPrice": 40.00,
+    "price": 34.99,
+    "inventory": 30,
+    "images": [],
+    "category": "Sports & Outdoors",
+    "brand": "Adidas",
+    "specifications": {
+      "size": "7 (Official)",
+      "material": "Composite Leather",
+      "use": "Indoor/Outdoor",
+      "color": "Orange"
+    },
+    "rating": 4.0,
+    "reviews": 140,
+    "tags": ["Durable", "Sport", "Training"],
+    "weight": 0.62,
+    "dimensions": {
+      "length": 24.0,
+      "width": 24.0,
+      "height": 24.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["basketball", "sports ball", "outdoor sports"]
+  },
+  {
+    "sellerId": "sellerM",
+    "id": 15,
+    "name": "The Midnight Library",
+    "description": "A compelling novel about choices, regrets, and finding happiness.",
+    "oldPrice": 19.99,
+    "price": 15.99,
+    "inventory": 60,
+    "images": [],
+    "category": "Books",
+    "brand": "N/A",
+    "specifications": {
+      "author": "Matt Haig",
+      "genre": "Fiction, Fantasy",
+      "pages": "304",
+      "format": "Paperback"
+    },
+    "rating": 4.6,
+    "reviews": 600,
+    "tags": ["Bestseller", "Fiction", "Read"],
+    "weight": 0.3,
+    "dimensions": {
+      "length": 20.0,
+      "width": 13.0,
+      "height": 2.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["novel", "fiction book", "bestselling book"]
+  },
+  {
+    "sellerId": "sellerN",
+    "id": 16,
+    "name": "Beginner's Guide to React",
+    "description": "Master ReactJS with this comprehensive guide, perfect for aspiring web developers.",
+    "oldPrice": 30.00,
+    "price": 25.00,
+    "inventory": 35,
+    "images": [],
+    "category": "Books",
+    "brand": "N/A",
+    "specifications": {
+      "author": "John Doe",
+      "genre": "Programming, Web Development",
+      "pages": "400",
+      "format": "Paperback, eBook"
+    },
+    "rating": 4.1,
+    "reviews": 220,
+    "tags": ["New", "Study", "Programming"],
+    "weight": 0.45,
+    "dimensions": {
+      "length": 24.0,
+      "width": 18.0,
+      "height": 2.5,
+      "unit": "cm"
+    },
+    "seoKeywords": ["react tutorial", "web development book", "javascript react"]
+  },
+  {
+    "sellerId": "sellerO",
+    "id": 17,
+    "name": "World Atlas 2024",
+    "description": "Explore the world with this updated atlas featuring detailed maps and geographical information.",
+    "oldPrice": 28.00,
+    "price": 22.50,
+    "inventory": 20,
+    "images": [],
+    "category": "Books",
+    "brand": "N/A",
+    "specifications": {
+      "publisher": "National Geographic",
+      "pages": "256",
+      "format": "Hardcover",
+      "features": "Satellite imagery"
+    },
+    "rating": 4.3,
+    "reviews": 170,
+    "tags": ["Trending", "Education", "Travel"],
+    "weight": 1.0,
+    "dimensions": {
+      "length": 30.0,
+      "width": 25.0,
+      "height": 3.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["world map", "atlas book", "geography"]
+  },
+  {
+    "sellerId": "sellerP",
+    "id": 18,
+    "name": "Women's Designer Handbag",
+    "description": "A stylish and spacious handbag, perfect for any occasion. Crafted with premium materials.",
+    "oldPrice": 250.00,
+    "price": 199.99,
+    "inventory": 10,
+    "images": [],
+    "category": "Fashion",
+    "brand": "Apple",
+    "specifications": {
+      "material": "Vegan Leather",
+      "color": "Black, Brown",
+      "closure": "Zipper",
+      "dimensions": "30x25x12 cm"
+    },
+    "rating": 4.5,
+    "reviews": 380,
+    "tags": ["Premium", "Fashion", "Luxury"],
+    "weight": 0.8,
+    "dimensions": {
+      "length": 30.0,
+      "width": 12.0,
+      "height": 25.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["designer handbag", "women's bag", "leather purse"]
+  },
+  {
+    "sellerId": "sellerQ",
+    "id": 19,
+    "name": "Sport Running Shoes",
+    "description": "Lightweight and comfortable running shoes with excellent cushioning for long runs.",
+    "oldPrice": 100.00,
+    "price": 85.00,
+    "inventory": 28,
+    "images": [],
+    "category": "Sports & Outdoors",
+    "brand": "Nike",
+    "specifications": {
+      "material": "Mesh, Rubber",
+      "color": "Black, White",
+      "closure": "Lace-up",
+      "sizes": "US 6-12"
+    },
+    "rating": 4.4,
+    "reviews": 450,
+    "tags": ["Sale", "Running", "Comfort"],
+    "weight": 0.5,
+    "dimensions": {
+      "length": 30.0,
+      "width": 11.0,
+      "height": 15.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["running shoes", "nike shoes", "athletic footwear"]
+  },
+  {
+    "sellerId": "sellerR",
+    "id": 20,
+    "name": "Complete Art Painting Kit",
+    "description": "Everything you need to start painting, including brushes, paints, and canvases.",
+    "oldPrice": 45.00,
+    "price": 39.99,
+    "inventory": 15,
+    "images": [],
+    "category": "Home & Kitchen",
+    "brand": "N/A",
+    "specifications": {
+      "paintType": "Acrylic",
+      "brushes": "12 assorted",
+      "canvases": "3 (8x10 inch)",
+      "palette": "Included"
+    },
+    "rating": 3.7,
+    "reviews": 90,
+    "tags": ["New", "Creative", "Hobby"],
+    "weight": 1.5,
+    "dimensions": {
+      "length": 30.0,
+      "width": 25.0,
+      "height": 5.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["painting kit", "art supplies", "acrylic paints"]
+  },
+  {
+    "sellerId": "sellerS",
+    "id": 21,
+    "name": "Affordable Android Smartphone",
+    "description": "A budget-friendly smartphone with essential features for everyday use.",
+    "oldPrice": 220.00,
+    "price": 199.99,
+    "inventory": 40,
+    "images": [],
+    "category": "Mobile",
+    "brand": "Xiaomi",
+    "specifications": {
+      "storage": "64GB",
+      "camera": "13MP",
+      "battery": "4000mAh",
+      "os": "Android 12"
+    },
+    "rating": 3.9,
+    "reviews": 550,
+    "tags": ["Sale", "Affordable", "Android"],
+    "weight": 0.19,
+    "dimensions": {
+      "length": 16.0,
+      "width": 7.5,
+      "height": 0.9,
+      "unit": "cm"
+    },
+    "seoKeywords": ["android phone", "xiaomi phone", "budget smartphone"]
+  },
+  {
+    "sellerId": "sellerA",
+    "id": 22,
+    "name": "Premium Wireless Earbuds",
+    "description": "Immerse yourself in high-fidelity audio with these comfortable and feature-rich wireless earbuds.",
+    "oldPrice": 180.00,
+    "price": 149.99,
+    "inventory": 20,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Bose",
+    "specifications": {
+      "noiseCancellation": "Active",
+      "batteryLife": "6 hours (earbuds), 18 hours (case)",
+      "connectivity": "Bluetooth 5.2",
+      "color": "Black"
+    },
+    "rating": 4.7,
+    "reviews": 700,
+    "tags": ["Wireless", "Premium", "Audio"],
+    "weight": 0.01,
+    "dimensions": {
+      "length": 6.0,
+      "width": 4.0,
+      "height": 3.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["wireless earbuds", "bose earbuds", "noise cancelling headphones"]
+  },
+  {
+    "sellerId": "sellerT",
+    "id": 23,
+    "name": "Ergonomic Office Chair",
+    "description": "Designed for maximum comfort and support during long working hours. Adjustable features for personalized comfort.",
+    "oldPrice": 250.00,
+    "price": 199.99,
+    "inventory": 10,
+    "images": [],
+    "category": "Home & Kitchen",
+    "brand": "N/A",
+    "specifications": {
+      "material": "Mesh, PU Leather",
+      "adjustments": "Height, Lumbar Support, Armrests",
+      "weightCapacity": "120kg",
+      "color": "Black"
+    },
+    "rating": 4.6,
+    "reviews": 150,
+    "tags": ["New", "Comfort", "Office"],
+    "weight": 18.0,
+    "dimensions": {
+      "length": 60.0,
+      "width": 60.0,
+      "height": 120.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["office chair", "ergonomic chair", "desk chair"]
+  },
+  {
+    "sellerId": "sellerU",
+    "id": 24,
+    "name": "Gaming Mouse Pro",
+    "description": "Achieve precision and speed with this high-performance gaming mouse, featuring customizable buttons and RGB lighting.",
+    "oldPrice": 70.00,
+    "price": 55.00,
+    "inventory": 30,
+    "images": [],
+    "category": "Electronics",
+    "brand": "Logitech",
+    "specifications": {
+      "dpi": "25600",
+      "buttons": "11 programmable",
+      "connectivity": "Wired/Wireless",
+      "lighting": "LIGHTSYNC RGB"
+    },
+    "rating": 4.8,
+    "reviews": 400,
+    "tags": ["Gaming", "Wireless", "New"],
+    "weight": 0.12,
+    "dimensions": {
+      "length": 12.0,
+      "width": 7.0,
+      "height": 4.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["gaming mouse", "wireless mouse", "logitech mouse"]
+  },
+  {
+    "id": 25,
+    "sellerId": "seller123",
+    "name": "Wireless Bluetooth Headphones",
+    "description": "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
+    "oldPrice": 79.99,
+    "price": 69.99,
+    "inventory": 10,
+    "images": [
+      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
+      "https://www.startech.com.bd/image/cache/catalog/headphone/fantech/wh01/wh01-01-500x500.jpg"
+    ],
+    "category": "Electronics",
+    "brand": "Apple",
+    "specifications": {
+      "color": "Pink, Black",
+      "connectivity": "Bluetooth 5.0",
+      "batteryLife": "20 hours",
+      "weight": "250g",
+      "warranty": "1 year"
+    },
+    "rating": 4.5,
+    "reviews": 245,
+    "tags": ["headphones", "wireless", "bluetooth", "audio"],
+    "weight": 0.25,
+    "dimensions": {
+      "length": 20.0,
+      "width": 15.0,
+      "height": 8.0,
+      "unit": "cm"
+    },
+    "seoKeywords": ["New", "wireless headphones", "bluetooth headset", "noise cancelling"]
+  }
+]
