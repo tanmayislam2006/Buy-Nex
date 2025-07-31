@@ -21,7 +21,7 @@ const uri = process.env.DB_URI; // Make sure DB_URI is correctly set in your .en
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
-    strict: true,
+    strict: false,
     deprecationErrors: true,
   },
 });
@@ -35,6 +35,7 @@ async function run() {
     const BuyNexDB = client.db("BuyNex");
     const usersCollection = BuyNexDB.collection("users");
     const productsCollection = BuyNexDB.collection("products");
+    const blogsCollection = BuyNexDB.collection("blogs");
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -60,7 +61,16 @@ async function run() {
 
     // Endpoint for all products data (including filters, counts, pagination)
     app.get("/api/all-product-data", async (req, res) => {
-      const { category, brand, minPrice, maxPrice, minRating, sortBy, page, limit } = req.query;
+      const {
+        category,
+        brand,
+        minPrice,
+        maxPrice,
+        minRating,
+        sortBy,
+        page,
+        limit,
+      } = req.query;
 
       let matchQuery = {}; // This will be the $match stage for all facets
 
@@ -90,44 +100,47 @@ async function run() {
       const skip = (pageNumber - 1) * productsPerPage;
 
       try {
-        const result = await productsCollection.aggregate([
-          // Initial match stage to filter products before any other operations
-          // This ensures that category/brand counts reflect the currently filtered set
-          { $match: matchQuery },
-          {
-            $facet: {
-              // Pipeline 1: Get paginated, sorted products
-              products: [
-                { $sort: sortOptions },
-                { $skip: skip },
-                { $limit: productsPerPage },
-              ],
-              // Pipeline 2: Get total count of filtered products
-              totalCount: [
-                { $count: "count" }
-              ],
-              // Pipeline 3: Get category counts based on the filtered products
-              categoryCounts: [
-                { $group: { _id: "$category", count: { $sum: 1 } } },
-                { $project: { name: "$_id", count: 1, _id: 0 } },
-                { $sort: { name: 1 } }
-              ],
-              // Pipeline 4: Get brand counts based on the filtered products
-              brandCounts: [
-                { $group: { _id: "$brand", count: { $sum: 1 } } },
-                { $project: { name: "$_id", count: 1, _id: 0 } },
-                { $sort: { name: 1 } }
-              ]
-            }
-          }
-        ]).toArray();
+        const result = await productsCollection
+          .aggregate([
+            // Initial match stage to filter products before any other operations
+            // This ensures that category/brand counts reflect the currently filtered set
+            { $match: matchQuery },
+            {
+              $facet: {
+                // Pipeline 1: Get paginated, sorted products
+                products: [
+                  { $sort: sortOptions },
+                  { $skip: skip },
+                  { $limit: productsPerPage },
+                ],
+                // Pipeline 2: Get total count of filtered products
+                totalCount: [{ $count: "count" }],
+                // Pipeline 3: Get category counts based on the filtered products
+                categoryCounts: [
+                  { $group: { _id: "$category", count: { $sum: 1 } } },
+                  { $project: { name: "$_id", count: 1, _id: 0 } },
+                  { $sort: { name: 1 } },
+                ],
+                // Pipeline 4: Get brand counts based on the filtered products
+                brandCounts: [
+                  { $group: { _id: "$brand", count: { $sum: 1 } } },
+                  { $project: { name: "$_id", count: 1, _id: 0 } },
+                  { $sort: { name: 1 } },
+                ],
+              },
+            },
+          ])
+          .toArray();
 
         // The result of $facet is an array containing a single document
         const aggregatedData = result[0];
 
         // Extract data, handling cases where counts might be empty if no products match
         const products = aggregatedData.products || [];
-        const totalProducts = aggregatedData.totalCount.length > 0 ? aggregatedData.totalCount[0].count : 0;
+        const totalProducts =
+          aggregatedData.totalCount.length > 0
+            ? aggregatedData.totalCount[0].count
+            : 0;
         const categoryCounts = aggregatedData.categoryCounts || [];
         const brandCounts = aggregatedData.brandCounts || [];
 
@@ -139,7 +152,6 @@ async function run() {
           categoryCounts,
           brandCounts,
         });
-
       } catch (error) {
         console.error("Error fetching all product data:", error);
         res.status(500).send({ message: "Failed to fetch product data" });
@@ -175,6 +187,86 @@ async function run() {
     });
 
     // -------------------------- PRODUCT API END -----------------------
+
+
+    // -------------------------- BLOGS API START -----------------------
+
+    app.get("/blogs", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        const skip = (page - 1) * limit;
+
+        const total = await blogsCollection.countDocuments();
+        const blogs = await blogsCollection
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.json({
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+          blogs,
+        });
+      } catch (err) {
+        console.error("Error fetching paginated registrations:", err);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    app.get("/blog/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const query = { _id: new ObjectId(id) };
+        const blog = await blogsCollection.findOne(query);
+        if (!blog) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        res.send(blog);
+      } catch (error) {
+        console.error("Error fetching single product:", error);
+        res.status(500).send({ message: "Failed to fetch product" });
+      }
+
+    })
+
+    app.post("/blogs", async (req, res) => {
+      const blogs = req.body;
+      blogs.createdAt = new Date().toISOString();
+      try {
+        const result =await blogsCollection.insertOne(blogs)
+        res.send(result)
+      } catch (error) {
+       res.status(500).send({ message: "Failed to add blog" });
+      }
+    });
+
+
+    // Recent articles and category 
+app.get("/articles-category", async (req, res) => {
+  try {
+    const recentArticles = await blogsCollection
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .toArray();
+
+    const categories = await blogsCollection.distinct("category");
+
+    res.send({ recentArticles, categories });
+  } catch (error) {
+    console.error("🔥 Error fetching data:", error.message);
+    res
+      .status(500)
+      .send({ message: "Failed to fetch recent articles or categories" });
+  }
+});
+    
+    // -------------------------- BLOGS API END -----------------------
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(

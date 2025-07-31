@@ -9,6 +9,8 @@ const Pagination = ({
 }) => {
   const visiblePages = 5;
 
+  console.log(currentPage,totalItems, totalPages, itemsPerPage);
+
   const getPageNumbers = () => {
     const pages = [];
     const half = Math.floor(visiblePages / 2);
@@ -26,7 +28,7 @@ const Pagination = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-6 px-2 text-xs sm:text-sm text-[#2D91EF]">
+    <div className="flex justify-between items-center mt-6 px-2 text-xs sm:text-sm text-primary">
       <div>
         Showing {(currentPage - 1) * itemsPerPage + 1} -{" "}
         {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}
@@ -35,17 +37,17 @@ const Pagination = ({
         <button
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="px-2 py-1 border border-[#2D91EF] rounded hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-2.5 py-1 border border-primary rounded hover:bg-primary transition hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          &lt;
+          &lt; Prev
         </button>
 
         {getPageNumbers().map((page) => (
           <button
             key={page}
-            className={`px-2 py-1 border border-[#2D91EF] rounded ${
+            className={`px-2 py-1 border hover:bg-primary transition hover:text-white rounded ${
               page === currentPage
-                ? "bg-blue-200 text-blue-800 font-semibold"
+                ? "bg-primary transition text-white font-semibold"
                 : ""
             }`}
             onClick={() => onPageChange(page)}
@@ -57,9 +59,9 @@ const Pagination = ({
         <button
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="px-2 py-1 border border-[#2D91EF] rounded hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-2 py-1 border border-primary rounded hover:bg-primary transition hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          &gt;
+          Next &gt;
         </button>
       </div>
     </div>
