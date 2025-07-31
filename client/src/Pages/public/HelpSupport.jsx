@@ -68,15 +68,15 @@ const HelpSupport = () => {
           <div className="bg-base-200 p-6  rounded-xl">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="flex items-center gap-4">
-                <FaEnvelope className="text-xl text-primary" />
+              <div className="flex items-center gap-2">
+                <FaEnvelope className="text-[17px] text-primary" />
                 <div>
                   <p className="font-semibold">Email</p>
                   <p>support@buynex.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <FaPhoneAlt className="text-xl text-primary" />
+                <FaPhoneAlt className="text-[17px] text-primary" />
                 <div>
                   <p className="font-semibold">Phone</p>
                   <p>+880 1234 567 890</p>
