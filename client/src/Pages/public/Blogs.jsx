@@ -1,35 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import BlogCard from "../../components/Blog/BlogCard";
 import Loading from "../../components/Loading";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import Pagination from "../../shared/Pagination";
+import useBlogs from "../../Hooks/useBlogs";
 
 const Blogs = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const itemsPerPage = 4;
+  const {
+    isLoading,
+    itemsPerPage,
+    isError,
+    currentPage,
+    setCurrentPage,
+    total,
+    blogs,
+  } = useBlogs();
 
-  setTimeout(() => {
-    setLoading(false);
-  }, 200);
+  if (isLoading) return <Loading />;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["blogs", currentPage],
-    queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/blogs`, {
-        params: {
-          page: currentPage,
-          limit: itemsPerPage,
-        },
-      });
-      return res.data;
-    },
-  });
-
-  if (isLoading || loading) return <Loading />;
-
-  const { blogs, total } = data || {};
   const totalPages = Math.ceil(total / itemsPerPage);
 
   if (isError) {
@@ -45,11 +32,17 @@ const Blogs = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-4 md:gap-6 max-w-6xl mx-auto">
-        {blogs.map((blog) => (
-          <BlogCard key={blog._id} blog={blog} />
-        ))}
-      </div>
+      {blogs.length === 0 ? (
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <p className="text-xl md:text-2xl text-gray-600">No blogs found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-4 md:gap-6 max-w-6xl mx-auto">
+          {blogs.map((blog) => (
+            <BlogCard key={blog._id} blog={blog} />
+          ))}
+        </div>
+      )}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
