@@ -1,175 +1,152 @@
 import React, { useState } from "react";
 import ProfileUpdateModal from "../../../components/User/ProfileUpdateModal";
-
-
-// Example static user data
-const user = {
-    name: "Teegan Emerson",
-    profileImage: "https://cdn-icons-png.flaticon.com/512/219/219983.png",
-    email: "1234@56.com",
-    createdAt: "2025-07-30T03:10:00Z",
-    lastLogin: "2025-07-30T03:10:00Z",
-    isVerified: true,
-    role: "Standard User",
-    address: {
-        street: "123 Main St",
-        city: "Dhaka",
-        state: "BD",
-        zipCode: "1207",
-        country: "Bangladesh",
-    },
-    phone: "+8801XXXXXXXXX",
-};
-
-
-// import React from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import axios from "axios";
-
-// const fetchUserProfile = async () => {
-//   const res = await axios.get("/api/user/profile"); // Your real API
-//   return res.data;
-// };
+import { MdVerifiedUser } from "react-icons/md";
+import useAuth from "../../../Hooks/useAuth";
+import useUserProfile from "../../../Hooks/useUserProfile";
+import Loading from "../../../components/Loading";
 
 const UserProfile = () => {
+    const { user: authUser } = useAuth();
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-    console.log("user profile");
-    //   const { data: user, isLoading, error } = useQuery({
-    //     queryKey: ["userProfile"],
-    //     queryFn: fetchUserProfile,
-    //   });
 
-    //   if (isLoading) return <div className="text-center p-10">Loading...</div>;
-    //   if (error) return <div className="text-center p-10 text-red-500">Error loading profile.</div>;
+    const {
+        data: user,
+        isLoading,
+        isError,
+        refetch,
+    } = useUserProfile(authUser?.email);
 
-    const memberSince = new Date(user.createdAt).toLocaleDateString();
-    const lastLogin = new Date(user.lastLogin).toLocaleString();
+    if (isLoading) {
+        return <Loading />;
+    }
+
+    if (isError || !user) {
+        return <p className="text-center py-20 text-red-500">Failed to load profile.</p>;
+    }
+
+    const defaultAvtar = `https://ui-avatars.com/api/?name=${user?.name || "Buy Nex"
+        }&background=random&color=fff&bold=true`;
+
+    const memberSince = user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+        : "N/A";
+
+    const lastLogin = user?.lastLogin
+        ? new Date(user.lastLogin).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+        : "N/A";
+
 
     return (
-        <div className="flex flex-col items-center justify-center  px-4 py-16 md:py-0">
+        <section className="flex flex-col items-center justify-center py-16 md:py-0">
             <h1 className="text-4xl font-bold pb-2 text-primary">My Profile</h1>
-            <p className="text-gray-500 text-md pb-4">Manage account information and preferences</p>
-            <div className="max-w-3xl w-full bg-white rounded-2xl shadow-lg overflow-hidden">
-
-                {/* Top Banner */}
-                <div className="bg-gradient-to-r from-orange-400 bg-primary p-6 flex items-center gap-4">
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white">
+            <p className="text-gray-500 text-md pb-4 text-center">
+                Manage account information and preferences
+            </p>
+            <div className="max-w-4xl w-full bg-white rounded-2xl overflow-hidden">
+                {/* Banner */}
+                <div className="bg-gradient-to-r from-primary to-orange-400 p-8 flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-white shadow-lg">
                         <img
-                            src={user.profileImage || "https://via.placeholder.com/150"}
-                            alt={user.name}
+                            src={user?.profileImage || defaultAvtar}
+                            alt={user?.name || "Profile"}
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <div className="text-white">
-                        <h2 className="text-2xl font-bold">{user.name}</h2>
-                        <p>{user.role}</p>
-                        <p className="text-sm">Member since {memberSince}</p>
+                    <div className="text-white text-center md:text-left">
+                        <h2 className="text-xl md:text-4xl font-bold flex flex-wrap items-center gap-2 md:mb-4">
+                            <span>{user?.name || "N/A"}</span>
+                            {user?.isVerified && <MdVerifiedUser className="text-green-200" />}
+                        </h2>
+                        <p className="text-sm md:text-base">{user?.role || "N/A"}</p>
+                        <p className="text-sm md:text-base">Member since {memberSince}</p>
                     </div>
                 </div>
 
-                {/* Info Section */}
-                <div className="p-6 gap-6">
-                    {/* Left Column */}
-                    <h3 className="font-bold mb-2">📌 Basic Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Details */}
+                <div className="p-8 space-y-8">
+                    <div>
+                        <h3 className="font-bold text-lg mb-4">📌 Basic Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Full Name</p>
+                                <p className="font-semibold">{user?.name || "N/A"}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Email Address</p>
+                                <p className="font-semibold">{user?.email || "N/A"}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Phone Number</p>
+                                <p className="font-semibold">{user?.phone || "N/A"}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Address</p>
+                                <p className="font-semibold">
+                                    {user?.address
+                                        ? `${user?.address?.street || ""}, ${user?.address?.city || ""}, ${user?.address?.state || ""} ${user?.address?.zipCode || ""}, ${user?.address?.country || ""}`
+                                        : "N/A"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div className="bg-gray-100 p-4 rounded mb-2">
-                            <p className="font-medium">Email Address</p>
-                            <p>{user.email}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded mb-2">
-                            <p className="font-medium">Full Name</p>
-                            <p>{user.name}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded mb-2">
-                            <p className="font-medium">Phone Number</p>
-                            <p>{user.phone}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded mb-">
-                            <p className="font-medium">Address</p>
-                            <p>
-                                {user.address.street}, {user.address.city}, {user.address.state}{" "}
-                                {user.address.zipCode}, {user.address.country}
-                            </p>
+                    <div>
+                        <h3 className="font-bold text-lg mb-4">⏰ Account Activity</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Last Login</p>
+                                <p className="font-semibold">{lastLogin}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Account Created</p>
+                                <p className="font-semibold">{memberSince}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Account Type</p>
+                                <p className="font-semibold">{user?.role || "N/A"}</p>
+                            </div>
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-sm">
+                                <p className="text-gray-500 text-sm mb-1">Member For</p>
+                                <p className="font-semibold">
+                                    {user?.createdAt
+                                        ? `${Math.floor(
+                                            (new Date() - new Date(user.createdAt)) /
+                                            (1000 * 60 * 60 * 24)
+                                        )} days`
+                                        : "N/A"}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Right Column */}
-                    <h3 className="font-bold my-2 mt-2">⏰ Account Activity</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                        <div className="bg-gray-100 p-4 rounded mb-2">
-                            <p className="font-medium">Last Login</p>
-                            <p>{lastLogin}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded">
-                            <p className="font-medium">Account Created</p>
-                            <p>{new Date(user.createdAt).toLocaleString()}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded-xl shadow ">
-                            <p className="font-semibold">Account Type</p>
-                            <p>{user.role}</p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded-xl shadow ">
-                            <p className="font-semibold">Member For</p>
-                            <p>
-                                {Math.floor(
-                                    (new Date() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24)
-                                )}{" "}
-                                days
-                            </p>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded-xl shadow ">
-                            <p className="font-semibold">Status</p>
-                            <p>{user.isVerified ? "Verified" : "Not Verified"}</p>
-                        </div>
+                    <div>
+                        <button
+                            onClick={() => setIsUpdateOpen(true)}
+                            className="btn btn-primary w-full py-3 text-lg shadow-md"
+                        >
+                            ✏️ Edit Profile
+                        </button>
                     </div>
                 </div>
-
-                <div className="px-6 pb-6">
-                    <button
-                        className="btn btn-primary w-full"
-                        onClick={() => setIsUpdateOpen(true)}
-                    >
-                        ✏️ Edit Profile
-                    </button>
-                </div>
-
-                {isUpdateOpen && (
-                    <ProfileUpdateModal
-                        user={user}
-                        onClose={() => setIsUpdateOpen(false)}
-                        onSave={(updatedData) => {
-                            console.log("Save to backend:", updatedData);
-                            // TODO: Call API mutation here!
-                        }}
-                    />
-                )}
             </div>
 
-            {/* Bottom Info Cards */}
-            {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full">
-                <div className="bg-white p-4 rounded-xl shadow text-center">
-                    <p className="font-semibold">Account Type</p>
-                    <p>{user.role}</p>
-                </div>
-                <div className="bg-white p-4 rounded-xl shadow text-center">
-                    <p className="font-semibold">Member For</p>
-                    <p>
-                        {Math.floor(
-                            (new Date() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24)
-                        )}{" "}
-                        days
-                    </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl shadow text-center">
-                    <p className="font-semibold">Status</p>
-                    <p>{user.isVerified ? "Verified" : "Not Verified"}</p>
-                </div>
-            </div> */}
-        </div>
+            {isUpdateOpen && (
+                <ProfileUpdateModal
+                    user={user}
+                    onClose={() => setIsUpdateOpen(false)}
+                    refetchProfile={refetch}
+                />
+            )}
+        </section>
     );
 };
 
 export default UserProfile;
-
