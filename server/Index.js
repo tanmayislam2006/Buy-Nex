@@ -61,7 +61,7 @@ async function run() {
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
 
     // Endpoint for all products data (including filters, counts, pagination)
-    app.get("/api/all-product-data", async (req, res) => {
+    app.get("/all-product-data", async (req, res) => {
       const {
         category,
         brand,

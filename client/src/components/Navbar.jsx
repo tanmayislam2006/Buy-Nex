@@ -12,11 +12,43 @@ import {
 import MainLogo from "../shared/MainLogo";
 import useAuth from "../Hooks/useAuth";
 import UserDropdown from "../shared/UserDropdown";
+import CartDropdown from "./Cart/CartDropdown";
 
+const mockCartItems = [
+  {
+    _id: "1",
+    name: "Product 1",
+    price: 29.99,
+    image:
+      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
+  },
+  {
+    _id: "2",
+    name: "Product 2",
+    price: 39.99,
+    image:
+      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
+  },
+  {
+    _id: "3",
+    name: "Product 3",
+    price: 49.99,
+    image:
+      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
+  },
+  {
+    _id: "4",
+    name: "Product 4",
+    price: 59.99,
+    image:
+      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
+  },
+];
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logoutUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [showCartDropdown, setShowCartDropdown] = useState(false);
   const menu = [
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
@@ -65,12 +97,16 @@ const Navbar = () => {
             </form>
             {/* Cart & User */}
             <div className="flex items-center gap-6">
-              <Link to="/cart" className="relative">
+              <button
+                onClick={() => setShowCartDropdown((prev) => !prev)}
+                className="relative cursor-pointer"
+              >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  0
+                  {mockCartItems.length}
                 </span>
-              </Link>
+              </button>
+              {showCartDropdown && <CartDropdown cartItems={mockCartItems} />}
               {user ? (
                 <UserDropdown />
               ) : (
@@ -147,12 +183,16 @@ const Navbar = () => {
             </nav>
             {/* Cart, User, Support */}
             <div className="flex items-center gap-6">
-              <Link to="/cart" className="relative">
+              <button
+                onClick={() => setShowCartDropdown((prev) => !prev)}
+                className="relative cursor-pointer "
+              >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  0
+                  {mockCartItems.length}
                 </span>
-              </Link>
+              </button>
+              {showCartDropdown && <CartDropdown cartItems={mockCartItems} />}
               {user ? (
                 <UserDropdown />
               ) : (
