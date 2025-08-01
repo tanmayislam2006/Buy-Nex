@@ -55,6 +55,19 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+
+
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const updatedData = req.body;
+
+      const filter = { email };
+      const updateDoc = { $set: updatedData };
+      const options = { upsert: true };
+
+      const result = await usersCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
     // ---------------------------- user api is here-----------------------
 
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
@@ -237,34 +250,34 @@ async function run() {
       const blogs = req.body;
       blogs.createdAt = new Date().toISOString();
       try {
-        const result =await blogsCollection.insertOne(blogs)
+        const result = await blogsCollection.insertOne(blogs)
         res.send(result)
       } catch (error) {
-       res.status(500).send({ message: "Failed to add blog" });
+        res.status(500).send({ message: "Failed to add blog" });
       }
     });
 
 
     // Recent articles and category 
-app.get("/articles-category", async (req, res) => {
-  try {
-    const recentArticles = await blogsCollection
-      .find()
-      .sort({ createdAt: -1 })
-      .limit(3)
-      .toArray();
+    app.get("/articles-category", async (req, res) => {
+      try {
+        const recentArticles = await blogsCollection
+          .find()
+          .sort({ createdAt: -1 })
+          .limit(3)
+          .toArray();
 
-    const categories = await blogsCollection.distinct("category");
+        const categories = await blogsCollection.distinct("category");
 
-    res.send({ recentArticles, categories });
-  } catch (error) {
-    console.error("🔥 Error fetching data:", error.message);
-    res
-      .status(500)
-      .send({ message: "Failed to fetch recent articles or categories" });
-  }
-});
-    
+        res.send({ recentArticles, categories });
+      } catch (error) {
+        console.error("🔥 Error fetching data:", error.message);
+        res
+          .status(500)
+          .send({ message: "Failed to fetch recent articles or categories" });
+      }
+    });
+
     // -------------------------- BLOGS API END -----------------------
 
 

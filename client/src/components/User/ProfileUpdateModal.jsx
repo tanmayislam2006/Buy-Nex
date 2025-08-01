@@ -135,216 +135,218 @@ const ProfileUpdateModal = ({ user, onClose }) => {
     return (
         <dialog open className="modal modal-open">
             <div className="modal-box w-full max-w-2xl">
-                <div className="flex items-center mb-4 gap-4">
-                    <button className="btn p-2" onClick={onClose} disabled={isSaving}>
-                        <IoMdArrowRoundBack className="w-6 h-6" />
-                    </button>
-                    <div>
-                        <h3 className="text-xl font-bold">Update Profile</h3>
-                        <p className="text-sm text-gray-500">
-                            Modify your account information
-                        </p>
-                    </div>
-                </div>
-
-                {/* Image */}
-                <div className="bg-gradient-to-r from-orange-400 to-primary text-white p-4 rounded-lg mb-6 text-center">
-                    <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white mt-4 relative">
-                        <img
-                            src={profileImage || "https://i.ibb.co/hFx3tmn/download.png"}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    <div className="flex justify-center gap-4 items-center">
-                        <label className="btn btn-sm btn-info mt-2 cursor-pointer">
-                            📷 Change Photo
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handlePhotoChange}
-                                className="hidden"
-                                disabled={isSaving}
-                            />
-                        </label>
-                        {newPhotoFile && (
-                            <button
-                                onClick={handlePhotoCancel}
-                                className="btn btn-sm btn-outline mt-2"
-                                disabled={isSaving}
-                            >
-                                ✖ Cancel
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Form Fields */}
-                <div className="space-y-4">
-                    <div>
-                        <label className="block mb-1 text-sm font-semibold">
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => {
-                                setName(e.target.value);
-                                setHasChanges(true);
-                            }}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-                            disabled={isSaving}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 text-sm font-semibold">
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            value={user.email}
-                            readOnly
-                            className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
-                            disabled
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 text-sm font-semibold">
-                            Phone Number
-                        </label>
-                        <input
-                            type="text"
-                            value={phone}
-                            onChange={(e) => {
-                                setPhone(e.target.value);
-                                setHasChanges(true);
-                            }}
-                            placeholder="+8801XXXXXXXXX"
-                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-                            disabled={isSaving}
-                        />
-                        {phoneError && (
-                            <p className="text-red-500 text-xs mt-1">{phoneError}</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 text-sm font-semibold">Street</label>
-                        <input
-                            type="text"
-                            value={address.street}
-                            onChange={(e) => {
-                                setAddress({ ...address, street: e.target.value });
-                                setHasChanges(true);
-                            }}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-                            disabled={isSaving}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="py-2 text-sm max-h-[90vh] overflow-y-auto space-y-3">
+                    <div className="flex items-center mb-4 gap-4">
+                        <button className="btn p-2" onClick={onClose} disabled={isSaving}>
+                            <IoMdArrowRoundBack className="w-6 h-6" />
+                        </button>
                         <div>
-                            <label className="block mb-1 text-sm font-semibold">City</label>
-                            <input
-                                type="text"
-                                value={address.city}
-                                onChange={(e) => {
-                                    setAddress({ ...address, city: e.target.value });
-                                    setHasChanges(true);
-                                }}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-                                disabled={isSaving}
-                            />
-                        </div>
-                        <div>
-                            <label className="block mb-1 text-sm font-semibold">State</label>
-                            <input
-                                type="text"
-                                value={address.state}
-                                onChange={(e) => {
-                                    setAddress({ ...address, state: e.target.value });
-                                    setHasChanges(true);
-                                }}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
-                                disabled={isSaving}
-                            />
+                            <h3 className="text-xl font-bold">Update Profile</h3>
+                            <p className="text-sm text-gray-500">
+                                Modify your account information
+                            </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Image */}
+                    <div className="bg-gradient-to-r from-orange-400 to-primary text-white p-4 rounded-lg mb-6 text-center">
+                        <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white mt-4 relative">
+                            <img
+                                src={profileImage || "https://i.ibb.co/hFx3tmn/download.png"}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className="flex justify-center gap-4 items-center">
+                            <label className="btn btn-sm btn-info mt-2 cursor-pointer">
+                                📷 Change Photo
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handlePhotoChange}
+                                    className="hidden"
+                                    disabled={isSaving}
+                                />
+                            </label>
+                            {newPhotoFile && (
+                                <button
+                                    onClick={handlePhotoCancel}
+                                    className="btn btn-sm btn-outline mt-2"
+                                    disabled={isSaving}
+                                >
+                                    ✖ Cancel
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Form Fields */}
+                    <div className="space-y-4">
                         <div>
                             <label className="block mb-1 text-sm font-semibold">
-                                Zip Code
+                                Full Name
                             </label>
                             <input
                                 type="text"
-                                value={address.zipCode}
+                                value={name}
                                 onChange={(e) => {
-                                    setAddress({ ...address, zipCode: e.target.value });
+                                    setName(e.target.value);
                                     setHasChanges(true);
                                 }}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
                                 disabled={isSaving}
                             />
                         </div>
+
                         <div>
                             <label className="block mb-1 text-sm font-semibold">
-                                Country
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                value={user.email}
+                                readOnly
+                                className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
+                                disabled
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-1 text-sm font-semibold">
+                                Phone Number
                             </label>
                             <input
                                 type="text"
-                                value={address.country}
+                                value={phone}
                                 onChange={(e) => {
-                                    setAddress({ ...address, country: e.target.value });
+                                    setPhone(e.target.value);
+                                    setHasChanges(true);
+                                }}
+                                placeholder="+8801XXXXXXXXX"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+                                disabled={isSaving}
+                            />
+                            {phoneError && (
+                                <p className="text-red-500 text-xs mt-1">{phoneError}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block mb-1 text-sm font-semibold">Street</label>
+                            <input
+                                type="text"
+                                value={address.street}
+                                onChange={(e) => {
+                                    setAddress({ ...address, street: e.target.value });
                                     setHasChanges(true);
                                 }}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
                                 disabled={isSaving}
                             />
                         </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-1 text-sm font-semibold">City</label>
+                                <input
+                                    type="text"
+                                    value={address.city}
+                                    onChange={(e) => {
+                                        setAddress({ ...address, city: e.target.value });
+                                        setHasChanges(true);
+                                    }}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+                                    disabled={isSaving}
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-1 text-sm font-semibold">State</label>
+                                <input
+                                    type="text"
+                                    value={address.state}
+                                    onChange={(e) => {
+                                        setAddress({ ...address, state: e.target.value });
+                                        setHasChanges(true);
+                                    }}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+                                    disabled={isSaving}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-1 text-sm font-semibold">
+                                    Zip Code
+                                </label>
+                                <input
+                                    type="text"
+                                    value={address.zipCode}
+                                    onChange={(e) => {
+                                        setAddress({ ...address, zipCode: e.target.value });
+                                        setHasChanges(true);
+                                    }}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+                                    disabled={isSaving}
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-1 text-sm font-semibold">
+                                    Country
+                                </label>
+                                <input
+                                    type="text"
+                                    value={address.country}
+                                    onChange={(e) => {
+                                        setAddress({ ...address, country: e.target.value });
+                                        setHasChanges(true);
+                                    }}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#F85606]"
+                                    disabled={isSaving}
+                                />
+                            </div>
+                        </div>
+
+                        {hasChanges && (
+                            <div className="alert alert-info shadow-sm text-xs">
+                                You have unsaved changes
+                            </div>
+                        )}
                     </div>
 
-                    {hasChanges && (
-                        <div className="alert alert-info shadow-sm text-xs">
-                            You have unsaved changes
-                        </div>
-                    )}
-                </div>
+                    <div className="mt-6 flex gap-4">
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className={`btn btn-primary flex-1 ${isSaving ? "Saving..." : ""}`}
+                        >
+                            ✔ Save Changes
+                        </button>
+                        <button
+                            onClick={handleReset}
+                            className="btn flex-1"
+                            disabled={isSaving}
+                        >
+                            ✖ Reset
+                        </button>
+                    </div>
 
-                <div className="mt-6 flex gap-4">
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className={`btn btn-primary flex-1 ${isSaving ? "loading" : ""}`}
+                    <p
+                        className="text-center text-xs mt-4 underline cursor-pointer"
+                        onClick={onClose}
                     >
-                        ✔ Save Changes
-                    </button>
-                    <button
-                        onClick={handleReset}
-                        className="btn flex-1"
-                        disabled={isSaving}
-                    >
-                        ✖ Reset
-                    </button>
-                </div>
+                        Cancel and go back to profile
+                    </p>
 
-                <p
-                    className="text-center text-xs mt-4 underline cursor-pointer"
-                    onClick={onClose}
-                >
-                    Cancel and go back to profile
-                </p>
-
-                <div className="bg-white p-4 rounded-lg shadow mt-4 text-sm">
-                    <h4 className="font-semibold mb-2">Profile Image Guidelines</h4>
-                    <ul className="list-disc list-inside space-y-1">
-                        <li>Supported formats: JPG, PNG, GIF, WebP</li>
-                        <li>Maximum file size: 5MB</li>
-                        <li>Recommended dimensions: 400x400 pixels</li>
-                        <li>Square images work best for profile pictures</li>
-                    </ul>
+                    <div className="bg-white p-4 rounded-lg shadow mt-4 text-sm">
+                        <h4 className="font-semibold mb-2">Profile Image Guidelines</h4>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Supported formats: JPG, PNG, GIF, WebP</li>
+                            <li>Maximum file size: 5MB</li>
+                            <li>Recommended dimensions: 400x400 pixels</li>
+                            <li>Square images work best for profile pictures</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </dialog>
