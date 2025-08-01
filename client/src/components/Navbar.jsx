@@ -13,40 +13,13 @@ import MainLogo from "../shared/MainLogo";
 import useAuth from "../Hooks/useAuth";
 import UserDropdown from "../shared/UserDropdown";
 import CartDropdown from "./Cart/CartDropdown";
+import useAxios from "../Hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
 
-const mockCartItems = [
-  {
-    _id: "1",
-    name: "Product 1",
-    price: 29.99,
-    image:
-      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-  },
-  {
-    _id: "2",
-    name: "Product 2",
-    price: 39.99,
-    image:
-      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-  },
-  {
-    _id: "3",
-    name: "Product 3",
-    price: 49.99,
-    image:
-      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-  },
-  {
-    _id: "4",
-    name: "Product 4",
-    price: 59.99,
-    image:
-      "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-  },
-];
 const Navbar = () => {
+  const axiosInstance = useAxios();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logoutUser } = useAuth();
+  const { user, logoutUser,firebaseUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const menu = [
@@ -56,6 +29,16 @@ const Navbar = () => {
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
   ];
+  const { data: cartItem } = useQuery({
+    queryKey: ["cartItems"],
+    queryFn: async () => {
+      if (!user) return [];
+      const response = await axiosInstance.get(
+        `/cart/${firebaseUser?.email}`
+      );
+      return response.data;
+    },
+  });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -103,10 +86,10 @@ const Navbar = () => {
               >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  {mockCartItems.length}
+                  {cartItem?.length}
                 </span>
               </button>
-              {showCartDropdown && <CartDropdown cartItems={mockCartItems} />}
+              {showCartDropdown && <CartDropdown cartItems={cartItem} />}
               {user ? (
                 <UserDropdown />
               ) : (
@@ -189,10 +172,10 @@ const Navbar = () => {
               >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  {mockCartItems.length}
+                  {cartItem?.length}
                 </span>
               </button>
-              {showCartDropdown && <CartDropdown cartItems={mockCartItems} />}
+              {showCartDropdown && <CartDropdown cartItems={cartItem} />}
               {user ? (
                 <UserDropdown />
               ) : (
