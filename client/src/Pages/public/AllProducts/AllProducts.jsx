@@ -60,7 +60,7 @@ const AllProducts = () => {
       if (priceRange[0] !== 0) params.minPrice = priceRange[0];
       if (priceRange[1] !== 2000) params.maxPrice = priceRange[1];
 
-      const res = await axiosInstance.get("/api/all-product-data", { params });
+      const res = await axiosInstance.get("/all-product-data", { params });
       return res.data;
     },
     keepPreviousData: true,

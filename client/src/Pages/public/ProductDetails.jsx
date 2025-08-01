@@ -2,17 +2,29 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
-import { FaStar, FaBoxOpen, FaComments, FaShoppingCart, FaHeart } from "react-icons/fa";
+import {
+  FaStar,
+  FaBoxOpen,
+  FaComments,
+  FaShoppingCart,
+  FaHeart,
+} from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Loading from "../../components/Loading";
+import useAuth from "../../Hooks/useAuth";
+import toast from "react-hot-toast";
 
 const ProductDetails = () => {
+  const { user } = useAuth();
   const { id } = useParams();
   const axiosInstance = useAxios();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-
-  const { data: product, isLoading, isError } = useQuery({
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const res = await axiosInstance.get(`products/${id}`);
@@ -21,16 +33,48 @@ const ProductDetails = () => {
     enabled: !!id,
   });
 
-  if (isLoading) return <Loading/>;
-  if (isError) return <div className="min-h-screen flex items-center justify-center">Error loading product!</div>;
+  if (isLoading) return <Loading />;
+  if (isError)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Error loading product!
+      </div>
+    );
+  const { _id } = product;
+  const cartInfo = {
+    productId: _id,
+    name: product.name,
+    image:
+      selectedImage % product.images.length
+        ? product.images[selectedImage % product.images.length]
+        : product.images[0] ||
+          "https://img.icons8.com/windows/96/shopping-cart.png",
+    price: product.price,
+    quantity,
+    userEmail: user?.email,
+  };
+const handleAddToCart = async() => {
+  if(!user) {
+    toast.error("Please log in to add items to your cart.");
+    return;
+  }
+  try {
+    const response = await axiosInstance.post("/cart", cartInfo);
+    toast.success("Item added to cart: " + response.data.name);
+  } catch (error) {
+    toast.error("Error adding item to cart: " + error.message);
+  }
+};
 
   // Helper functions
   const renderSpecifications = () => {
     if (!product.specifications) return null;
-    
+
     return Object.entries(product.specifications).map(([key, value]) => (
       <tr key={key} className="border-b border-gray-200">
-        <td className="px-4 py-2 w-1/3 capitalize">{key.replace(/([A-Z])/g, ' $1')}</td>
+        <td className="px-4 py-2 w-1/3 capitalize">
+          {key.replace(/([A-Z])/g, " $1")}
+        </td>
         <td className="px-4 py-2">{value}</td>
       </tr>
     ));
@@ -38,8 +82,8 @@ const ProductDetails = () => {
 
   const renderColorOptions = () => {
     if (!product.specifications?.color) return null;
-    
-    const colors = product.specifications.color.split(",").map(c => c.trim());
+
+    const colors = product.specifications.color.split(",").map((c) => c.trim());
     return (
       <div className="flex gap-2 items-center">
         <strong>Color:</strong>
@@ -47,9 +91,16 @@ const ProductDetails = () => {
           {colors.map((color, i) => (
             <button
               key={i}
-              onClick={() => setSelectedImage(i % (product.images?.length || 1))}
+              onClick={() =>
+                setSelectedImage(i % (product.images?.length || 1))
+              }
               className="btn btn-sm border-neutral text-accent hover:bg-neutral"
-              style={{ backgroundColor: color.toLowerCase() === 'black' ? '#000' : color.toLowerCase() }}
+              style={{
+                backgroundColor:
+                  color.toLowerCase() === "black"
+                    ? "#000"
+                    : color.toLowerCase(),
+              }}
               aria-label={color}
             >
               {color}
@@ -93,7 +144,7 @@ const ProductDetails = () => {
             </button>
           ))}
         </div>
-        
+
         {/* Main image */}
         <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden">
           <img
@@ -102,7 +153,7 @@ const ProductDetails = () => {
             className="w-full h-96 object-contain"
           />
         </div>
-        
+
         {/* Thumbnails - horizontal on mobile */}
         <div className="flex md:hidden gap-2 overflow-x-auto py-2">
           {product.images.map((img, i) => (
@@ -127,7 +178,9 @@ const ProductDetails = () => {
 
   const renderPriceSection = () => {
     const discountPercentage = product.oldPrice
-      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+      ? Math.round(
+          ((product.oldPrice - product.price) / product.oldPrice) * 100
+        )
       : 0;
 
     return (
@@ -160,8 +213,12 @@ const ProductDetails = () => {
           className={product.inventory > 0 ? "text-green-600" : "text-red-500"}
           size={18}
         />
-        <span className={product.inventory > 0 ? "text-green-600" : "text-red-500"}>
-          {product.inventory > 0 ? `${product.inventory} In Stock` : "Out of Stock"}
+        <span
+          className={product.inventory > 0 ? "text-green-600" : "text-red-500"}
+        >
+          {product.inventory > 0
+            ? `${product.inventory} In Stock`
+            : "Out of Stock"}
         </span>
       </div>
 
@@ -179,9 +236,7 @@ const ProductDetails = () => {
       <div className="flex items-center gap-1">
         <FaStar className="text-yellow-500" size={18} />
         <span>
-          {product.rating > 0
-            ? `${product.rating.toFixed(1)}/5`
-            : "No Rating"}
+          {product.rating > 0 ? `${product.rating.toFixed(1)}/5` : "No Rating"}
         </span>
       </div>
     </div>
@@ -189,7 +244,7 @@ const ProductDetails = () => {
 
   const renderTags = () => {
     if (!product.tags || product.tags.length === 0) return null;
-    
+
     return (
       <div className="flex gap-2 flex-wrap mt-4">
         {product.tags.map((tag, index) => (
@@ -205,22 +260,29 @@ const ProductDetails = () => {
     <div className="flex items-center gap-4 mt-6">
       <div className="flex items-center border rounded-lg overflow-hidden">
         <button
-          onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+          onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
           className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
           disabled={quantity <= 1}
         >
           -
         </button>
-        <span className="px-4 py-1">{quantity}</span>
+        <input
+          type="number"
+          min={1}
+          max={product.inventory}
+          value={quantity}
+          onChange={(e) => setQuantity(Math.max(1, e.target.value))}
+          className="w-12 text-center focus:outline-0"
+        />
         <button
-          onClick={() => setQuantity(prev => prev + 1)}
+          onClick={() => setQuantity((prev) => prev + 1)}
           className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
           disabled={quantity >= product.inventory}
         >
           +
         </button>
       </div>
-      <button className="btn btn-primary flex items-center gap-2">
+      <button onClick={handleAddToCart} className="btn btn-primary flex items-center gap-2">
         <FaShoppingCart /> Add to Cart
       </button>
       <button className="btn btn-outline">
@@ -241,9 +303,7 @@ const ProductDetails = () => {
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Image Section */}
-        <div className="flex-1">
-          {renderImageGallery()}
-        </div>
+        <div className="flex-1">{renderImageGallery()}</div>
 
         {/* Product Info */}
         <div className="flex-1 space-y-4">
@@ -268,7 +328,9 @@ const ProductDetails = () => {
 
       {/* Specification Section */}
       <div className="mt-12">
-        <h3 className="font-bold text-2xl mb-6 border-b pb-2">Product Details</h3>
+        <h3 className="font-bold text-2xl mb-6 border-b pb-2">
+          Product Details
+        </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Specification Table */}
@@ -317,7 +379,9 @@ const ProductDetails = () => {
 
           {/* Additional Info */}
           <div>
-            <h4 className="font-semibold text-xl mb-4">Additional Information</h4>
+            <h4 className="font-semibold text-xl mb-4">
+              Additional Information
+            </h4>
             <div className="space-y-4">
               {product.category && (
                 <div>
