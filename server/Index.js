@@ -163,6 +163,29 @@ async function run() {
       }
     });
 
+    app.get("/products", async (req, res) => {
+      const category = req.query.category;
+      const excludeId = req.query.excludeId;
+
+      const query = {};
+
+      if (category) {
+        query.category = category;
+      }
+
+      if (excludeId) {
+        query._id = { $ne: new ObjectId(excludeId) };
+      }
+
+      let cursor = productsCollection.find(query);
+      if (category) {
+        cursor = cursor.limit(5);
+      }
+
+      const products = await cursor.toArray();
+      res.send(products);
+    });
+
     // Endpoint for single product details (remains separate and uses _id)
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
