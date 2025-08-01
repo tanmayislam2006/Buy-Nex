@@ -36,6 +36,8 @@ async function run() {
     const usersCollection = BuyNexDB.collection("users");
     const productsCollection = BuyNexDB.collection("products");
     const blogsCollection = BuyNexDB.collection("blogs");
+    const commentsCollection = BuyNexDB.collection("comments");
+    const cartCollection = BuyNexDB.collection("cart");
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -60,7 +62,7 @@ async function run() {
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
 
     // Endpoint for all products data (including filters, counts, pagination)
-    app.get("/api/all-product-data", async (req, res) => {
+    app.get("/all-product-data", async (req, res) => {
       const {
         category,
         brand,
@@ -185,9 +187,45 @@ async function run() {
         res.status(500).send({ message: "Failed to add product" });
       }
     });
+    //  ------cart API START -----------------------
+    // Get cart items for a user
+    app.get("/cart/:email", async (req, res) => {
+      const email = req.params.email;
+      try {
+        const cartItems = await cartCollection
+          .find({ userEmail: email })
+          .toArray();
+        res.send(cartItems);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+        res.status(500).send({ message: "Failed to fetch cart items" });
+      }
+    });
 
+    // added item in cart collection
+    app.post("/cart", async (req, res) => {
+      const cartItem = req.body;
+      const existingItem = await cartCollection.findOne({
+        userEmail: cartItem.userEmail,
+        productId: cartItem.productId,
+      });
+      try {
+        if (existingItem) {
+          // If the item already exists, update the quantity
+          const result = await cartCollection.updateOne(
+            { _id: existingItem._id },
+            { $inc: { quantity: cartItem.quantity } }
+          );
+          return res.send(result);
+        }
+        const result = await cartCollection.insertOne(cartItem);
+        res.send(result);
+      } catch (error) {
+        console.error("Error adding item to cart:", error);
+        res.status(500).send({ message: "Failed to add item to cart" });
+      }
+    });
     // -------------------------- PRODUCT API END -----------------------
-
 
     // -------------------------- BLOGS API START -----------------------
 
@@ -196,10 +234,25 @@ async function run() {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
         const skip = (page - 1) * limit;
+        const search = req.query.search || "";
+        const category = req.query.category || "";
 
-        const total = await blogsCollection.countDocuments();
+        // Build filter object
+        let filter = {};
+        if (search) {
+          filter.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { author: { $regex: search, $options: "i" } },
+          ];
+        }
+        if (category) {
+          filter.category = category;
+        }
+
+        const total = await blogsCollection.countDocuments(filter);
         const blogs = await blogsCollection
-          .find()
+          .find(filter)
           .skip(skip)
           .limit(limit)
           .toArray();
@@ -212,7 +265,7 @@ async function run() {
           blogs,
         });
       } catch (err) {
-        console.error("Error fetching paginated registrations:", err);
+        console.error("Error fetching paginated blogs:", err);
         res.status(500).json({ error: "Internal server error" });
       }
     });
@@ -230,43 +283,244 @@ async function run() {
         console.error("Error fetching single product:", error);
         res.status(500).send({ message: "Failed to fetch product" });
       }
-
-    })
+    });
 
     app.post("/blogs", async (req, res) => {
       const blogs = req.body;
       blogs.createdAt = new Date().toISOString();
       try {
-        const result =await blogsCollection.insertOne(blogs)
-        res.send(result)
+        const result = await blogsCollection.insertOne(blogs);
+        res.send(result);
       } catch (error) {
-       res.status(500).send({ message: "Failed to add blog" });
+        res.status(500).send({ message: "Failed to add blog" });
       }
     });
 
+    // Recent articles and category
+    app.get("/articles-category", async (req, res) => {
+      try {
+        const recentArticles = await blogsCollection
+          .find()
+          .sort({ createdAt: -1 })
+          .limit(3)
+          .toArray();
 
-    // Recent articles and category 
-app.get("/articles-category", async (req, res) => {
-  try {
-    const recentArticles = await blogsCollection
-      .find()
-      .sort({ createdAt: -1 })
-      .limit(3)
-      .toArray();
+        const categories = await blogsCollection.distinct("category");
 
-    const categories = await blogsCollection.distinct("category");
+        res.send({ recentArticles, categories });
+      } catch (error) {
+        console.error("🔥 Error fetching data:", error.message);
+        res
+          .status(500)
+          .send({ message: "Failed to fetch recent articles or categories" });
+      }
+    });
 
-    res.send({ recentArticles, categories });
-  } catch (error) {
-    console.error("🔥 Error fetching data:", error.message);
-    res
-      .status(500)
-      .send({ message: "Failed to fetch recent articles or categories" });
-  }
-});
-    
-    // -------------------------- BLOGS API END -----------------------
+    // Get comments for a blog
+    app.get("/blog/:id/comments", async (req, res) => {
+      const blogId = req.params.id;
+      try {
+        const comments = await commentsCollection
+          .find({ blogId })
+          .sort({ createdAt: -1 })
+          .toArray();
+        res.json(comments);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch comments" });
+      }
+    });
 
+    // Add a comment to a blog
+    app.post("/blog/:id/comments", async (req, res) => {
+      const blogId = req.params.id;
+      const { author, email, text } = req.body;
+      const comment = {
+        blogId,
+        author,
+        email,
+        text,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        replies: [],
+      };
+      try {
+        const result = await commentsCollection.insertOne(comment);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to add comment" });
+      }
+    });
+
+    // Delete a comment
+    app.delete("/blog/:id/comments/:commentId", async (req, res) => {
+      const { commentId } = req.params;
+      try {
+        await commentsCollection.deleteOne({
+          _id: new ObjectId(commentId),
+        });
+        res.json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to delete comment" });
+      }
+    });
+
+    // Edit a comment
+    app.put("/blog/:id/comments/:commentId", async (req, res) => {
+      const { commentId } = req.params;
+      const { text } = req.body;
+      try {
+        await commentsCollection.updateOne(
+          { _id: new ObjectId(commentId) },
+          { $set: { text } }
+        );
+        res.json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update comment" });
+      }
+    });
+
+    // Reply to a comment
+    app.post("/blog/:id/comments/:commentId/reply", async (req, res) => {
+      const { commentId } = req.params;
+      const { author, email, text } = req.body;
+      const replyObj = {
+        _id: new ObjectId(),
+        author,
+        email,
+        text,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        replies: [],
+      };
+      try {
+        await commentsCollection.updateOne(
+          { _id: new ObjectId(commentId) },
+          { $push: { replies: replyObj } }
+        );
+        res.json({ success: true, reply: replyObj });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to add reply" });
+      }
+    });
+
+    // Nested reply to a reply (threaded)
+    app.post(
+      "/blog/:id/comments/:commentId/replies/:replyId/reply",
+      async (req, res) => {
+        const { commentId, replyId } = req.params;
+        const { author, email, text } = req.body;
+        const nestedReply = {
+          _id: new ObjectId(),
+          author,
+          email,
+          text,
+          createdAt: new Date().toISOString(),
+          likes: [],
+          replies: [],
+        };
+        try {
+          await commentsCollection.updateOne(
+            { _id: new ObjectId(commentId) },
+            { $push: { "replies.$[reply].replies": nestedReply } },
+            { arrayFilters: [{ "reply._id": new ObjectId(replyId) }] }
+          );
+          res.json({ success: true, reply: nestedReply });
+        } catch (error) {
+          res.status(500).json({ error: "Failed to add nested reply" });
+        }
+      }
+    );
+
+    // Like/unlike a comment
+    app.post("/blog/:id/comments/:commentId/like", async (req, res) => {
+      const { commentId } = req.params;
+      const { userId } = req.body;
+      try {
+        const comment = await commentsCollection.findOne({
+          _id: new ObjectId(commentId),
+        });
+        let update;
+        if (comment.likes && comment.likes.includes(userId)) {
+          update = { $pull: { likes: userId } };
+        } else {
+          update = { $addToSet: { likes: userId } };
+        }
+        await commentsCollection.updateOne(
+          { _id: new ObjectId(commentId) },
+          update
+        );
+        res.json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to like/unlike comment" });
+      }
+    });
+
+    // Like/unlike a reply
+    app.post(
+      "/blog/:id/comments/:commentId/replies/:replyId/like",
+      async (req, res) => {
+        const { commentId, replyId } = req.params;
+        const { userId } = req.body;
+        try {
+          const comment = await commentsCollection.findOne({
+            _id: new ObjectId(commentId),
+          });
+          const reply = comment.replies.find(
+            (r) => r._id.toString() === replyId
+          );
+          let update;
+          if (reply.likes && reply.likes.includes(userId)) {
+            update = { $pull: { "replies.$[reply].likes": userId } };
+          } else {
+            update = { $addToSet: { "replies.$[reply].likes": userId } };
+          }
+          await commentsCollection.updateOne(
+            { _id: new ObjectId(commentId) },
+            update,
+            { arrayFilters: [{ "reply._id": new ObjectId(replyId) }] }
+          );
+          res.json({ success: true });
+        } catch (error) {
+          res.status(500).json({ error: "Failed to like/unlike reply" });
+        }
+      }
+    );
+
+    // Edit a reply
+    app.put(
+      "/blog/:id/comments/:commentId/replies/:replyId",
+      async (req, res) => {
+        const { commentId, replyId } = req.params;
+        const { text } = req.body;
+        try {
+          await commentsCollection.updateOne(
+            { _id: new ObjectId(commentId) },
+            { $set: { "replies.$[reply].text": text } },
+            { arrayFilters: [{ "reply._id": new ObjectId(replyId) }] }
+          );
+          res.json({ success: true });
+        } catch (error) {
+          res.status(500).json({ error: "Failed to update reply" });
+        }
+      }
+    );
+
+    // Delete a reply
+    app.delete(
+      "/blog/:id/comments/:commentId/replies/:replyId",
+      async (req, res) => {
+        const { commentId, replyId } = req.params;
+        try {
+          await commentsCollection.updateOne(
+            { _id: new ObjectId(commentId) },
+            { $pull: { replies: { _id: new ObjectId(replyId) } } }
+          );
+          res.json({ success: true });
+        } catch (error) {
+          res.status(500).json({ error: "Failed to delete reply" });
+        }
+      }
+    );
 
     await client.db("admin").command({ ping: 1 });
     console.log(

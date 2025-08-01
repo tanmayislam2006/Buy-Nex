@@ -28,6 +28,8 @@ import Overview from "../Pages/dashboard/Overview/Overview";
 import BlogLayout from "../components/Blog/BlogLayout";
 import BlogDetails from "../Pages/public/BlogDetails";
 import AllProducts from "../Pages/public/AllProducts/AllProducts";
+import CartItems from "../Pages/dashboard/User/CartItems";
+import OrderPage from "../Pages/dashboard/User/Oder/OrderPage";
 import ProductStatus from "../Pages/dashboard/User/ProductStatus";
 
 const router = createBrowserRouter([
@@ -78,6 +80,14 @@ const router = createBrowserRouter([
       {
         path: "/upcoming",
         Component: Upcoming,
+      },
+      {
+        path: "/cart",
+        Component: CartItems,
+      },
+      {
+        path: "/orderPage",
+        Component: OrderPage,
       },
     ],
   },
