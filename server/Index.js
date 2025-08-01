@@ -47,10 +47,31 @@ async function run() {
     });
     // ---------------------------- user api is here-----------------------
     // -------------------------- product api is here-----------------------
-    app.get("/products", async (req, res) => {
-      const products = await productsCollection.find().toArray();
-      res.send(products);
-    }); 
+  app.get("/products", async (req, res) => {
+  const category = req.query.category;
+  const excludeId = req.query.excludeId;
+
+  const query = {};
+  
+  if (category) {
+    query.category = category;
+  }
+
+  if (excludeId) {
+    query._id = { $ne: new ObjectId(excludeId) };
+  }
+
+  let cursor = productsCollection.find(query);
+
+  // শুধু category থাকলে limit হবে
+  if (category) {
+    cursor = cursor.limit(5);
+  }
+
+  const products = await cursor.toArray();
+  res.send(products);
+});
+
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
