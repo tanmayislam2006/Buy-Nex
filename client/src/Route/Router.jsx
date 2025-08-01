@@ -30,7 +30,7 @@ import BlogDetails from "../Pages/public/BlogDetails";
 import AllProducts from "../Pages/public/AllProducts/AllProducts";
 import CartItems from "../Pages/dashboard/User/CartItems";
 import OrderPage from "../Pages/dashboard/User/Oder/OrderPage";
-
+import ProductStatus from "../Pages/dashboard/User/ProductStatus";
 
 const router = createBrowserRouter([
   // Public routes
@@ -52,13 +52,14 @@ const router = createBrowserRouter([
         Component: BlogLayout,
         children: [
           {
-            path: '/blogs',
-            Component: Blogs, 
-          }, {
-            path: '/blog/:id',
+            path: "/blogs",
+            Component: Blogs,
+          },
+          {
+            path: "/blog/:id",
             Component: BlogDetails,
-          }
-        ]
+          },
+        ],
       },
       {
         path: "/help-support",
@@ -125,6 +126,10 @@ const router = createBrowserRouter([
       {
         path: "product-tracking",
         Component: ProductTracking,
+      },
+      {
+        path: "Product-status/:id",
+        Component: ProductStatus,
       },
       {
         path: "order-history",
