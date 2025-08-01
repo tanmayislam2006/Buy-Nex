@@ -12,11 +12,16 @@ import {
 import MainLogo from "../shared/MainLogo";
 import useAuth from "../Hooks/useAuth";
 import UserDropdown from "../shared/UserDropdown";
+import CartDropdown from "./Cart/CartDropdown";
+import useAxios from "../Hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
 
 const Navbar = () => {
+  const axiosInstance = useAxios();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logoutUser } = useAuth();
+  const { user, logoutUser,firebaseUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [showCartDropdown, setShowCartDropdown] = useState(false);
   const menu = [
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
@@ -24,6 +29,16 @@ const Navbar = () => {
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
   ];
+  const { data: cartItem } = useQuery({
+    queryKey: ["cartItems"],
+    queryFn: async () => {
+      if (!user) return [];
+      const response = await axiosInstance.get(
+        `/cart/${firebaseUser?.email}`
+      );
+      return response.data;
+    },
+  });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -65,12 +80,16 @@ const Navbar = () => {
             </form>
             {/* Cart & User */}
             <div className="flex items-center gap-6">
-              <Link to="/cart" className="relative">
+              <button
+                onClick={() => setShowCartDropdown((prev) => !prev)}
+                className="relative cursor-pointer"
+              >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  0
+                  {cartItem?.length}
                 </span>
-              </Link>
+              </button>
+              {showCartDropdown && <CartDropdown cartItems={cartItem} />}
               {user ? (
                 <UserDropdown />
               ) : (
@@ -147,12 +166,16 @@ const Navbar = () => {
             </nav>
             {/* Cart, User, Support */}
             <div className="flex items-center gap-6">
-              <Link to="/cart" className="relative">
+              <button
+                onClick={() => setShowCartDropdown((prev) => !prev)}
+                className="relative cursor-pointer "
+              >
                 <FiShoppingBag className="text-2xl" />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full px-1">
-                  0
+                  {cartItem?.length}
                 </span>
-              </Link>
+              </button>
+              {showCartDropdown && <CartDropdown cartItems={cartItem} />}
               {user ? (
                 <UserDropdown />
               ) : (
