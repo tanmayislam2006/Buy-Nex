@@ -1,9 +1,4 @@
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, FreeMode } from "swiper/modules";
-
-import "swiper/css";
-import "swiper/css/free-mode";
+import React, { useEffect, useState } from "react";
 import ProductCard from "./Component/ProductCard";
 
 const products = [
@@ -150,41 +145,108 @@ const products = [
   },
 ];
 
-const NewArrival = () => {
-  return (
-    <div className="w-full py-10">
-      <div className="container mx-auto px-4">
-        <h4 className="font-semibold text-3xl text-center">
-          New <span className="text-primary">Arrival</span>
-        </h4>
-        <div className="divider my-4"></div>
+const LimitedOffer = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const totalPages = Math.ceil(products.length / itemsPerPage);
 
-        <Swiper
-          spaceBetween={30}
-          //   freeMode={true}
-          autoplay={{ delay: 1000, disableOnInteraction: false }}
-          modules={[Autoplay]}
-          loop={true}
-          speed={2000}
-          breakpoints={{
-            320: { slidesPerView: 1.2 },
-            480: { slidesPerView: 2 },
-            640: { slidesPerView: 2.5 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
-            1280: { slidesPerView: 4 },
-            1536: { slidesPerView: 6 },
-          }}
-          className="mySwiper"
+  const currentProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const goToPage = (pageNum) => {
+    if (pageNum < 1 || pageNum > totalPages) return;
+    setCurrentPage(pageNum);
+  };
+
+  //   countdown timer
+
+  const startSeconds = 183600;
+  const [timeLeft, setTimeLeft] = useState(startSeconds);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (totalSeconds) => {
+    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, "0") + "h";
+    const mins =
+      String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0") + "m";
+    const secs = String(totalSeconds % 60).padStart(2, "0");
+    return `${hrs}:${mins}:${secs}` + "s ";
+  };
+
+  return (
+    <div className="px-4 py-10  mx-auto">
+      <div className="flex items-center justify-center gap-6 mb-6">
+        <h2 className="text-center text-2xl whitespace-nowrap md:text-3xl font-semibold">
+          Limited Time Offer
+        </h2>
+        <div>
+          <span className="text-lg p-2 bg-gray-700 text-white rounded-2xl">
+            {formatTime(timeLeft)}
+          </span>
+        </div>
+      </div>
+
+      <div className="divider"></div>
+
+      <div className="mt-8 grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6  gap-3">
+        {currentProducts.map((product) => (
+          <ProductCard key={product.id} product={product} offers={50} />
+        ))}
+      </div>
+
+      <div className="flex justify-center mt-8 space-x-3">
+        <button
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 rounded ${
+            currentPage === 1
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-gray-700 text-white"
+          }`}
         >
-          {products.map((product, index) => (
-            <SwiperSlide key={index} className="flex justify-center">
-              <ProductCard product={product} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          Prev
+        </button>
+
+        {[...Array(totalPages)].map((_, index) => {
+          const pageNum = index + 1;
+          return (
+            <button
+              key={pageNum}
+              onClick={() => goToPage(pageNum)}
+              className={`px-3 py-1 rounded ${
+                currentPage === pageNum
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200"
+              }`}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
+
+        <button
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 rounded ${
+            currentPage === totalPages
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-gray-700 text-white"
+          }`}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
 };
-export default NewArrival;
+
+export default LimitedOffer;
