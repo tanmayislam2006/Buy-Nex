@@ -88,7 +88,7 @@ const DashboardLayout = () => {
             >
               <img
                 className="w-8 h-8 rounded-full"
-                src={user.photoURL || defaultAvtar}
+                src={user.profileImage || defaultAvtar}
                 alt=""
               />
               {user.name || "Buy Nex"}
@@ -166,7 +166,7 @@ const DashboardLayout = () => {
             >
               <img
                 className="w-8 h-8 rounded-full"
-                src={user.photoURL || defaultAvtar}
+                src={user.profileImage || defaultAvtar}
                 alt=""
               />
               {user.name || "Buy Nex"}
