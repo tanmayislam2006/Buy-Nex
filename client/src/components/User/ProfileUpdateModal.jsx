@@ -3,15 +3,15 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { toast } from "react-hot-toast";
 import useAxios from "../../Hooks/useAxios";
 
-const ProfileUpdateModal = ({ user, onClose }) => {
+const ProfileUpdateModal = ({ user, onClose, refetchProfile }) => {
     const axiosInstance = useAxios();
 
-    const [name, setName] = useState(user.name || "");
-    const [profileImage, setProfileImage] = useState(user.profileImage || "");
+    const [name, setName] = useState(user?.name || "");
+    const [profileImage, setProfileImage] = useState(user?.profileImage || "");
     const [newPhotoFile, setNewPhotoFile] = useState(null);
-    const [phone, setPhone] = useState(user.phone || "");
+    const [phone, setPhone] = useState(user?.phone || "");
     const [address, setAddress] = useState(
-        user.address || {
+        user?.address || {
             street: "",
             city: "",
             state: "",
@@ -24,7 +24,6 @@ const ProfileUpdateModal = ({ user, onClose }) => {
     const [phoneError, setPhoneError] = useState("");
     const [isSaving, setIsSaving] = useState(false);
 
-    // Clean up preview URL to prevent memory leaks
     useEffect(() => {
         return () => {
             if (newPhotoFile && profileImage) {
@@ -32,6 +31,13 @@ const ProfileUpdateModal = ({ user, onClose }) => {
             }
         };
     }, [newPhotoFile, profileImage]);
+
+    const handleBackdropClick = (e) => {
+        // Close modal only if clicked directly on the <dialog>, not inside the modal-box
+        if (e.target.nodeName === "DIALOG") {
+            onClose();
+        }
+    };
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
@@ -56,7 +62,6 @@ const ProfileUpdateModal = ({ user, onClose }) => {
     };
 
     const handleSave = async () => {
-        // ✅ Validate BD phone number
         const bdPhoneRegex = /^(?:\+8801|01)[0-9]{9}$/;
         if (!bdPhoneRegex.test(phone.trim())) {
             setPhoneError(
@@ -69,7 +74,6 @@ const ProfileUpdateModal = ({ user, onClose }) => {
 
         let finalProfileImage = profileImage;
 
-        // ✅ Upload image if changed
         if (newPhotoFile) {
             const formData = new FormData();
             formData.append("image", newPhotoFile);
@@ -87,7 +91,6 @@ const ProfileUpdateModal = ({ user, onClose }) => {
             }
         }
 
-        // ✅ Send PUT request to update user
         try {
             const res = await axiosInstance.put(`/user/${user.email}`, {
                 name: name.trim(),
@@ -99,6 +102,9 @@ const ProfileUpdateModal = ({ user, onClose }) => {
             if (res.data.modifiedCount > 0 || res.data.upsertedCount > 0) {
                 toast.success("Profile updated!");
                 setHasChanges(false);
+                if (refetchProfile) {
+                    refetchProfile();
+                }
                 onClose();
             } else {
                 toast.error("Nothing was updated. Try changing some info first.");
@@ -132,27 +138,48 @@ const ProfileUpdateModal = ({ user, onClose }) => {
         setPhoneError("");
     };
 
-    return (
-        <dialog open className="modal modal-open">
-            <div className="modal-box w-full max-w-2xl">
-                <div className="py-2 text-sm max-h-[90vh] overflow-y-auto space-y-3">
-                    <div className="flex items-center mb-4 gap-4">
-                        <button className="btn p-2" onClick={onClose} disabled={isSaving}>
-                            <IoMdArrowRoundBack className="w-6 h-6" />
-                        </button>
-                        <div>
-                            <h3 className="text-xl font-bold">Update Profile</h3>
-                            <p className="text-sm text-gray-500">
-                                Modify your account information
-                            </p>
-                        </div>
-                    </div>
+    const defaultAvtar = `https://ui-avatars.com/api/?name=${user?.name || "Buy Nex"
+        }&background=random&color=fff&bold=true`;
 
-                    {/* Image */}
-                    <div className="bg-gradient-to-r from-orange-400 to-primary text-white p-4 rounded-lg mb-6 text-center">
-                        <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-white mt-4 relative">
+    return (
+        // <dialog open className="modal modal-open" onClick={handleBackdropClick}>
+        //     <div className="modal-box w-full max-w-2xl">
+        //         <div className="py-2 px-2 text-sm max-h-[80vh] overflow-y-auto space-y-3">
+        //             <div className="flex items-center mb-4 gap-4">
+        //                 <button className="btn p-2" onClick={onClose} disabled={isSaving}>
+        //                     <IoMdArrowRoundBack className="w-6 h-6" />
+        //                 </button>
+        //                 <div>
+        //                     <h3 className="text-xl font-bold">Update Profile</h3>
+        //                     <p className="text-sm text-gray-500">
+        //                         Modify your account information
+        //                     </p>
+        //                 </div>
+        //             </div>
+
+        //             <div className="bg-gradient-to-r from-primary to-orange-400 text-white p-4 rounded-lg mb-6 text-center">
+        <dialog open className="modal modal-open" onClick={handleBackdropClick}>
+            <div className="modal-box w-full max-w-2xl bg-white shadow-2xl rounded-xl p-0 overflow-hidden">
+                <div className="bg-gradient-to-r from-primary to-orange-400 p-4 flex items-center gap-4 text-white">
+                    <button
+                        className="btn bg-opacity-20 p-2 rounded-full hover:bg-opacity-40 transition"
+                        onClick={onClose}
+                        disabled={isSaving}
+                    >
+                        <IoMdArrowRoundBack className="w-6 h-6" />
+                    </button>
+                    <div>
+                        <h3 className="text-xl font-bold">Update Profile</h3>
+                        <p className="text-sm opacity-90">Modify your account information</p>
+                    </div>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[80vh]">
+                    {/* Profile Image */}
+                    <div className="flex flex-col items-center bg-gradient-to-r from-primary to-orange-400 text-white p-4 rounded-lg mb-6 text-center">
+                        <div className="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-full overflow-hidden border-4 border-white mt-2 relative">
                             <img
-                                src={profileImage || "https://i.ibb.co/hFx3tmn/download.png"}
+                                src={profileImage || defaultAvtar}
                                 alt="Profile"
                                 className="w-full h-full object-cover"
                             />
@@ -180,7 +207,6 @@ const ProfileUpdateModal = ({ user, onClose }) => {
                         </div>
                     </div>
 
-                    {/* Form Fields */}
                     <div className="space-y-4">
                         <div>
                             <label className="block mb-1 text-sm font-semibold">
