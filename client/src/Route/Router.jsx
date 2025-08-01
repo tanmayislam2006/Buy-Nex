@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import Home from "../Pages/public/Home";
 import MainLayout from "../Layouts/MainLayout/MainLayout";
-import AllProducts from "../Pages/public/AllProducts";
 import HelpSupport from "../Pages/public/HelpSupport";
 import About from "../Pages/public/About";
 import BecomeSeller from "../Pages/public/BecomeSeller";
@@ -9,7 +8,6 @@ import DashboardLayout from "../Layouts/DashboardLayout/DashboardLayout";
 import ProductTracking from "../Pages/dashboard/User/ProductTracking";
 import OrderHistory from "../Pages/dashboard/User/OrderHistory";
 import PaymentHistory from "../Pages/dashboard/User/PaymentHistory";
-import UserOverview from "../Pages/dashboard/User/UserOverview";
 import SellerOverview from "../Pages/dashboard/Seller/SellerOverview";
 import AddProduct from "../Pages/dashboard/Seller/AddProduct";
 import ManageProducts from "../Pages/dashboard/Seller/ManageProducts";
@@ -25,10 +23,14 @@ import Blogs from "../Pages/public/Blogs";
 import Error404 from "../Pages/ErrorPage/Error404";
 import ProductDetails from "../Pages/public/ProductDetails";
 import Upcoming from "../Pages/public/Upcoming";
-import UserProfile from "../Pages/dashboard/User/UserProfile";
 import Profile from "../Pages/dashboard/Profile/Profile";
 import Overview from "../Pages/dashboard/Overview/Overview";
-
+import BlogLayout from "../components/Blog/BlogLayout";
+import BlogDetails from "../Pages/public/BlogDetails";
+import AllProducts from "../Pages/public/AllProducts/AllProducts";
+import CartItems from "../Pages/dashboard/User/CartItems";
+import OrderPage from "../Pages/dashboard/User/Oder/OrderPage";
+import ProductStatus from "../Pages/dashboard/User/ProductStatus";
 
 const router = createBrowserRouter([
   // Public routes
@@ -46,8 +48,18 @@ const router = createBrowserRouter([
         Component: AllProducts,
       },
       {
-        path: "/blogs",
-        Component: Blogs,
+        path: "/",
+        Component: BlogLayout,
+        children: [
+          {
+            path: "/blogs",
+            Component: Blogs,
+          },
+          {
+            path: "/blog/:id",
+            Component: BlogDetails,
+          },
+        ],
       },
       {
         path: "/help-support",
@@ -68,6 +80,14 @@ const router = createBrowserRouter([
       {
         path: "/upcoming",
         Component: Upcoming,
+      },
+      {
+        path: "/cart",
+        Component: CartItems,
+      },
+      {
+        path: "/orderPage",
+        Component: OrderPage,
       },
     ],
   },
@@ -106,6 +126,10 @@ const router = createBrowserRouter([
       {
         path: "product-tracking",
         Component: ProductTracking,
+      },
+      {
+        path: "Product-status/:id",
+        Component: ProductStatus,
       },
       {
         path: "order-history",
