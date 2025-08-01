@@ -56,6 +56,7 @@ const BlogDetails = () => {
     },
   });
 
+  console.log(comments);
   // Add comment mutation
   const [form, setForm] = useState({ text: "" });
   const [editId, setEditId] = useState(null);
@@ -83,6 +84,18 @@ const BlogDetails = () => {
   // Delete comment mutation
   const deleteMutation = useMutation({
     mutationFn: async (commentId) => {
+      // Find the comment by id
+      const comment = comments.find((c) => c._id === commentId);
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      // Check if current user is the author
+      if (
+        !user ||
+        (comment.email !== user.email)
+      ) {
+        throw new Error("You are not allowed to delete this comment");
+      }
       await axios.delete(
         `http://localhost:5000/blog/${id}/comments/${commentId}`
       );
@@ -90,6 +103,9 @@ const BlogDetails = () => {
     onSuccess: () => {
       toast.success("Comment deleted");
       queryClient.invalidateQueries(["blog-comments", id]);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Delete not allowed");
     },
   });
 
