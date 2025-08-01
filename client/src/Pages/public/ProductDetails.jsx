@@ -60,7 +60,7 @@ const handleAddToCart = async() => {
   }
   try {
     const response = await axiosInstance.post("/cart", cartInfo);
-    toast.success("Item added to cart: " + response.data.name);
+    toast.success("Item added to cart: " + product.name);
   } catch (error) {
     toast.error("Error adding item to cart: " + error.message);
   }
