@@ -2,32 +2,22 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
-import {
-  FaStar,
-  FaBoxOpen,
-  FaComments,
-  FaShoppingCart,
-  FaHeart,
-} from "react-icons/fa";
+import { FaStar, FaBoxOpen, FaComments, FaShoppingCart } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Loading from "../../components/Loading";
-// <<<<<<< HEAD
 import { FiShoppingBag } from "react-icons/fi";
-// =======
-// import useAuth from "../../Hooks/useAuth";
-// import toast from "react-hot-toast";
-// >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7
+import useAuth from "../../Hooks/useAuth";
+import toast from "react-hot-toast";
 
 const ProductDetails = () => {
-  // const { user } = useAuth();
+  const { user } = useAuth();
   const { id } = useParams();
   const axiosInstance = useAxios();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedColor, setSelectedColor] = useState(0);
   const navigate = useNavigate();
-
 
   const {
     data: product,
@@ -41,6 +31,7 @@ const ProductDetails = () => {
     },
     enabled: !!id,
   });
+  
   const { data: similarProducts = [], isLoading: isSimilarLoading } = useQuery({
     queryKey: ["similar-products", product?.category],
     queryFn: async () => {
@@ -52,8 +43,6 @@ const ProductDetails = () => {
     enabled: !!product?.category && !!product?._id,
   });
 
-  // console.log(product);
-
   if (isLoading || isSimilarLoading) return <Loading />;
 
   if (isError)
@@ -62,34 +51,45 @@ const ProductDetails = () => {
         Error loading product!
       </div>
     );
-// <<<<<<< HEAD
-// =======
+
   const { _id } = product;
-  // const cartInfo = {
-  //   productId: _id,
-  //   name: product.name,
-  //   image:
-  //     selectedImage % product.images.length
-  //       ? product.images[selectedImage % product.images.length]
-  //       : product.images[0] ||
-  //         "https://img.icons8.com/windows/96/shopping-cart.png",
-  //   price: product.price,
-  //   quantity,
-  //   userEmail: user?.email,
-  // };
-// const handleAddToCart = async() => {
-//   if(!user) {
-//     toast.error("Please log in to add items to your cart.");
-//     return;
-//   }
-//   try {
-//     const response = await axiosInstance.post("/cart", cartInfo);
-//     toast.success("Item added to cart: " + product.name);
-//   } catch (error) {
-//     toast.error("Error adding item to cart: " + error.message);
-//   }
-// };
-// >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7
+  const cartInfo = {
+    productId: _id,
+    name: product.name,
+    image:
+      selectedImage % product.images.length
+        ? product.images[selectedImage % product.images.length]
+        : product.images[0] ||
+          "https://img.icons8.com/windows/96/shopping-cart.png",
+    price: product.price,
+    quantity,
+    userEmail: user?.email,
+  };
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+    try {
+      const response = await axiosInstance.post("/cart", cartInfo);
+      toast.success("Item added to cart: " + product.name);
+    } catch (error) {
+      toast.error("Error adding item to cart: " + error.message);
+    }
+  };
+  const handleBuyNow = async () => {
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      return;
+    }
+    try {
+      const response = await axiosInstance.post("/cart", cartInfo);
+      toast.success("Item added to cart: " + product.name);
+      navigate("/orderPage", { state: cartInfo });
+    } catch (error) {
+      toast.error("Error adding item to cart: " + error.message);
+    }
+  };
 
   // Helper functions
   const renderSpecifications = () => {
@@ -109,10 +109,7 @@ const ProductDetails = () => {
     if (!product.specifications?.color) return null;
 
     const colors = product.specifications.color.split(",").map((c) => c.trim());
-// <<<<<<< HEAD
 
-// =======
-// >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7
     return (
       <div className="flex gap-2 items-center mt-3">
         <strong className="mr-2">Color:</strong>
@@ -120,7 +117,6 @@ const ProductDetails = () => {
           {colors.map((color, i) => (
             <button
               key={i}
-// <<<<<<< HEAD
               onClick={() => {
                 setSelectedColor(color);
                 setSelectedImage(i % (product.images?.length || 1));
@@ -132,19 +128,6 @@ const ProductDetails = () => {
                   : "text-accent"
               }
             `}
-// =======
-//               onClick={() =>
-//                 setSelectedImage(i % (product.images?.length || 1))
-//               }
-//               className="btn btn-sm border-neutral text-accent hover:bg-neutral"
-//               style={{
-//                 backgroundColor:
-//                   color.toLowerCase() === "black"
-//                     ? "#000"
-//                     : color.toLowerCase(),
-//               }}
-//               aria-label={color}
-// >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7
             >
               {color}
             </button>
@@ -198,26 +181,6 @@ const ProductDetails = () => {
             className="w-full h-96 object-contain"
           />
         </div>
-
-        {/* Thumbnails - horizontal on mobile */}
-        <div className="flex md:hidden gap-2 overflow-x-auto py-2">
-          {product.images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedImage(i)}
-              className={`w-16 h-16 rounded border-2 overflow-hidden flex-shrink-0 ${
-                selectedImage === i ? "border-primary" : "border-transparent"
-              }`}
-            >
-              <img
-                src={img}
-                alt={`Thumbnail ${i + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-
       </div>
     );
   };
@@ -315,18 +278,7 @@ const ProductDetails = () => {
         >
           -
         </button>
-{/* <<<<<<< HEAD */}
         <span className="px-4 py-1 m-1 border border-neutral">{quantity}</span>
-{/* ======= */}
-        <input
-          type="number"
-          min={1}
-          max={product.inventory}
-          value={quantity}
-          onChange={(e) => setQuantity(Math.max(1, e.target.value))}
-          className="w-12 text-center focus:outline-0"
-        />
-{/* >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7 */}
         <button
           onClick={() => setQuantity((prev) => prev + 1)}
           className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
@@ -335,25 +287,23 @@ const ProductDetails = () => {
           +
         </button>
       </div>
-{/* <<<<<<< HEAD */}
-      <button className="btn btn-primary btn-soft flex items-center gap-2 duration-500  transition ">
-{/* ======= */}
-      {/* <button onClick={handleAddToCart} className="btn btn-primary flex items-center gap-2"> */}
-{/* >>>>>>> e723dcf8f24dddba93eaf4ca2d643639878a43d7 */}
+      <button
+        onClick={handleAddToCart}
+        className="btn btn-primary flex items-center gap-2"
+      >
         <FaShoppingCart /> Add to Cart
       </button>
-      <button className="btn bg-green-700 hover:bg-green-800 text-white btn-soft flex items-center gap-2 duration-500 transition">
+      <button
+        onClick={handleBuyNow}
+        className="btn bg-green-700 hover:bg-green-800 text-white btn-soft flex items-center gap-2 duration-500 transition"
+      >
         <FiShoppingBag /> Buy now
-      </button>
-
-      <button className="btn btn-soft  bg-transparent border-red-100 text-red-600">
-        <FaHeart />
       </button>
     </div>
   );
 
   return (
-    <div className="py-20 lg:pt-36 max-w-7xl mx-auto px-5 text-sm">
+    <div className="py-8 lg:py-20  max-w-7xl mx-auto px-5 text-sm">
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
@@ -408,7 +358,6 @@ const ProductDetails = () => {
             Product Details
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></span>
           </h3>
-
 
           <div className="grid gap-8">
             {/* Specification Table */}
@@ -550,7 +499,6 @@ const ProductDetails = () => {
                     <span className="text-gray-600 text-xs">
                       ({item.rating || 0})
                     </span>
-
                   </div>
                 </div>
               </div>

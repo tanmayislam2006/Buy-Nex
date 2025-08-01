@@ -62,44 +62,6 @@ async function run() {
     });
     // ---------------------------- user api is here-----------------------
 
-    // -------------------------- product api is here-----------------------
-  app.get("/products", async (req, res) => {
-  const category = req.query.category;
-  const excludeId = req.query.excludeId;
-
-  const query = {};
-  
-  if (category) {
-    query.category = category;
-  }
-
-  if (excludeId) {
-    query._id = { $ne: new ObjectId(excludeId) };
-  }
-
-  let cursor = productsCollection.find(query);
-
-  // শুধু category থাকলে limit হবে
-  if (category) {
-    cursor = cursor.limit(5);
-  }
-
-  const products = await cursor.toArray();
-  res.send(products);
-});
-
-    app.get("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const product = await productsCollection.findOne(query);
-      res.send(product);
-    });
-    app.post("/products", async (req, res) => {
-      const product = req.body;
-      const result = await productsCollection.insertOne(product);
-      res.send(result);
-
-
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
 
     // Endpoint for all products data (including filters, counts, pagination)
@@ -199,7 +161,29 @@ async function run() {
         console.error("Error fetching all product data:", error);
         res.status(500).send({ message: "Failed to fetch product data" });
       }
+    });
 
+    app.get("/products", async (req, res) => {
+      const category = req.query.category;
+      const excludeId = req.query.excludeId;
+
+      const query = {};
+
+      if (category) {
+        query.category = category;
+      }
+
+      if (excludeId) {
+        query._id = { $ne: new ObjectId(excludeId) };
+      }
+
+      let cursor = productsCollection.find(query);
+      if (category) {
+        cursor = cursor.limit(5);
+      }
+
+      const products = await cursor.toArray();
+      res.send(products);
     });
 
     // Endpoint for single product details (remains separate and uses _id)
