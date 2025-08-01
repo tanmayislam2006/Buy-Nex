@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTrashAlt } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAuth from "../../../Hooks/useAuth";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import Loading from "../../../components/Loading";
 const CartItems = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
-
+  const navigate = useNavigate();
   const {
     data: cart = [],
     refetch,
@@ -40,7 +40,9 @@ const CartItems = () => {
       console.error("Clear cart error:", error);
     }
   };
-
+  const handleBuyNow = (item) => {
+  navigate('/orderPage', { state: item });
+};
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
@@ -91,12 +93,12 @@ const CartItems = () => {
                     </p>
                   </div>
                   <div className="flex gap-5 items-center">
-                    <Link
-                      to={`/orderPage`}
-                      className="bg-primary text-white px-4 py-1.5 rounded hover:bg-opacity-90 text-sm w-full sm:w-auto text-center"
+                    <button
+                     onClick={()=>handleBuyNow(item)}
+                      className="cursor-pointer bg-primary text-white px-4 py-1.5 rounded hover:bg-opacity-90 text-sm w-full sm:w-auto text-center"
                     >
                       Buy Now
-                    </Link>
+                    </button>
                     <button
                       onClick={() => handleDelete(item._id)}
                       className="text-red-500 hover:text-red-700"
@@ -123,12 +125,12 @@ const CartItems = () => {
               >
                 Clear Cart
               </button>
-              <Link
-                to="/orderPage"
+              <button
+                onClick={()=>handleBuyNow(cart)}
                 className="bg-primary text-white px-6 py-2 rounded hover:bg-opacity-90 transition text-center"
               >
                 Proceed to Checkout
-              </Link>
+              </button>
             </div>
           </div>
         </>
