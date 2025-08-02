@@ -4,7 +4,14 @@ import { useEffect } from "react"
 
 import useAxiosSecure from "../../../../Hooks/useAxiosSecure";
 import useAuth from "../../../../Hooks/useAuth";
-
+const generateOrderId = (prefix = 'BN') => {
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `ORD-${prefix}-${randomNum}`;
+};
+const generateTrackingId = (prefix = 'BN') => {
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `TRC-${prefix}-${randomNum}`;
+};
 const OrderPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,13 +27,13 @@ const OrderPage = () => {
 
   const products = Array.isArray(productData) ? productData : [productData];
   const subtotal = products.reduce(
-    (sum, p) => sum + p.price * p.quantity,
+    (sum, p) => Math.ceil(sum + p.price * p.quantity),
     0
   );
   const shippingCost = 10;
   const taxAmount = 5;
   const discountAmount = 15;
-  const totalAmount = subtotal + shippingCost + taxAmount - discountAmount;
+  const totalAmount = Math.ceil(subtotal + shippingCost + taxAmount) ;
 
   const {
     register,
@@ -37,7 +44,8 @@ const OrderPage = () => {
   const onSubmit = async (data) => {
     const orderData = {
       userEmail: user.email,
-      orderNumber: `ORD-142`,
+      orderNumber: generateOrderId("BN"),
+      trackingNumber: generateTrackingId("BN"),
       products,
       subtotal,
       shippingCost,
@@ -52,10 +60,12 @@ const OrderPage = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
+console.log(orderData);
     try {
-      await axiosSecure.post("/orders", orderData);
-      navigate("/order-success");
+      await axiosSecure.post("/ssl-payment-init",{orderData}).then(res=>{
+        window.location.replace(res.data);
+      });
+
     } catch (error) {
       console.error("Order placement failed", error);
     }

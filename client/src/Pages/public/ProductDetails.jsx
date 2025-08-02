@@ -31,7 +31,7 @@ const ProductDetails = () => {
     },
     enabled: !!id,
   });
-  
+
   const { data: similarProducts = [], isLoading: isSimilarLoading } = useQuery({
     queryKey: ["similar-products", product?.category],
     queryFn: async () => {
@@ -142,7 +142,7 @@ const ProductDetails = () => {
       return (
         <div className="bg-gray-100 flex items-center justify-center rounded-lg">
           <img
-            src="https://via.placeholder.com/600x400?text=No+Image+Available"
+            src="https://img.icons8.com/sf-regular-filled/96/shopping-cart.png"
             alt="Placeholder"
             className="w-full  h-64 object-contain "
           />
@@ -478,7 +478,10 @@ const ProductDetails = () => {
                 onClick={() => navigate(`/product-details/${item._id}`)}
               >
                 <img
-                  src={item.images?.[0] || "https://via.placeholder.com/80"}
+                  src={
+                    item.images?.[0] ||
+                    "https://img.icons8.com/sf-regular-filled/96/shopping-cart.png"
+                  }
                   alt={item.name}
                   className="w-18 h-18 object-cover rounded"
                 />
