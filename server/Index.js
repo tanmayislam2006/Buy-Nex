@@ -60,6 +60,19 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+
+
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const updatedData = req.body;
+
+      const filter = { email };
+      const updateDoc = { $set: updatedData };
+      const options = { upsert: true };
+
+      const result = await usersCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
     // ---------------------------- user api is here-----------------------
 
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
@@ -315,14 +328,13 @@ async function run() {
       const blogs = req.body;
       blogs.createdAt = new Date().toISOString();
       try {
-        const result = await blogsCollection.insertOne(blogs);
-        res.send(result);
+        const result = await blogsCollection.insertOne(blogs)
+        res.send(result)
       } catch (error) {
         res.status(500).send({ message: "Failed to add blog" });
       }
     });
-
-    // Recent articles and category
+    // Recent articles and category 
     app.get("/articles-category", async (req, res) => {
       try {
         const recentArticles = await blogsCollection
@@ -342,6 +354,7 @@ async function run() {
       }
     });
 
+
     // Get comments for a blog
     app.get("/blog/:id/comments", async (req, res) => {
       const blogId = req.params.id;
@@ -355,6 +368,8 @@ async function run() {
         res.status(500).json({ error: "Failed to fetch comments" });
       }
     });
+
+    // -------------------------- BLOGS API END -----------------------
 
     // Add a comment to a blog
     app.post("/blog/:id/comments", async (req, res) => {
