@@ -29,8 +29,10 @@ import BlogLayout from "../components/Blog/BlogLayout";
 import BlogDetails from "../Pages/public/BlogDetails";
 import AllProducts from "../Pages/public/AllProducts/AllProducts";
 import CartItems from "../Pages/dashboard/User/CartItems";
-import OrderPage from "../Pages/dashboard/User/Oder/OrderPage";
+import OrderPage from "../Pages/dashboard/User/Order/OrderPage";
 import ProductStatus from "../Pages/dashboard/User/ProductStatus";
+import PaymentSuccess from "../Pages/dashboard/User/Order/PaymentSuccess";
+import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
 
 const router = createBrowserRouter([
   // Public routes
@@ -88,6 +90,14 @@ const router = createBrowserRouter([
       {
         path: "/orderPage",
         Component: OrderPage,
+      },
+      {
+        path: "/payment-success/:orderNumber",
+        Component: PaymentSuccess,
+      },
+      {
+        path: "/payment-fail/:orderNumber",
+        Component: PaymentFail,
       },
     ],
   },
