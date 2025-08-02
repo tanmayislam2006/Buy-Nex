@@ -41,6 +41,7 @@ async function run() {
     const blogsCollection = BuyNexDB.collection("blogs");
     const commentsCollection = BuyNexDB.collection("comments");
     const cartCollection = BuyNexDB.collection("cart");
+    const orderCollection = BuyNexDB.collection("orders");
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -49,7 +50,11 @@ async function run() {
       const user = await usersCollection.findOne(query);
       res.send(user);
     });
-
+    app.get("/order-history/:userEmail",async (req,res)=>{
+      const {userEmail}=req.params
+      const orderHistory=await orderCollection.find({userEmail}).toArray()
+      res.send(orderHistory)
+    });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
       const user = req.body;
@@ -61,7 +66,6 @@ async function run() {
       res.send(result);
     });
 
-
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const updatedData = req.body;
@@ -70,7 +74,11 @@ async function run() {
       const updateDoc = { $set: updatedData };
       const options = { upsert: true };
 
-      const result = await usersCollection.updateOne(filter, updateDoc, options);
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
     // ---------------------------- user api is here-----------------------
@@ -265,6 +273,91 @@ async function run() {
       }
     });
     // -------------------------- PRODUCT API END -----------------------
+    // -------------------------- PAYMENT  API END -----------------------
+    //sslcommerz init
+    app.post("/ssl-payment-init", async (req, res) => {
+      const { orderData } = req.body;
+      const data = {
+        total_amount: orderData.totalAmount,
+        currency: "USD",
+        tran_id: orderData.orderNumber,
+        success_url: `http://localhost:5000/payment/success/${orderData.orderNumber}`,
+        fail_url: `http://localhost:5000/payment/fail/${orderData.orderNumber}`,
+        cancel_url: "http://localhost:3030/cancel",
+        ipn_url: "http://localhost:3030/ipn",
+        shipping_method: "Courier",
+        product_name: "Computer.",
+        product_category: "Electronic",
+        product_profile: "general",
+        cus_name: orderData.userEmail,
+        cus_email: orderData.userEmail,
+        cus_add1: orderData?.shippingAddress?.street,
+        cus_add2: "",
+        cus_city: orderData?.shippingAddress?.city,
+        cus_state: orderData?.shippingAddress?.state,
+        cus_postcode: orderData?.shippingAddress?.zipCode,
+        cus_country: "Bangladesh",
+        cus_phone: orderData?.shippingAddress?.phone,
+        cus_fax: "",
+        ship_name: "Customer Name",
+        ship_add1: orderData?.shippingAddress?.street,
+        ship_add2: "",
+        ship_city: orderData?.shippingAddress?.city,
+        ship_state: orderData?.shippingAddress?.state,
+        ship_postcode: orderData?.shippingAddress?.zipCode,
+        ship_country: orderData?.shippingAddress?.country,
+      };
+
+      const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+
+      try {
+        const apiResponse = await sslcz.init(data);
+        let GatewayPageURL = apiResponse.GatewayPageURL;
+        res.send(GatewayPageURL);
+        // Save order to DB
+        await orderCollection.insertOne(orderData);
+      } catch (error) {
+        console.error("Init Payment Error:", error);
+        res.status(500).send({ error: "Failed to initialize payment" });
+      }
+    });
+    app.post("/payment/success/:orderNumber", async (req, res) => {
+      const { orderNumber } = req.params;
+      try {
+        const result = await orderCollection.updateOne(
+          { orderNumber },
+          {
+            $set: {
+              paymentStatus: "Paid",
+              status: "Order Placed",
+            },
+          }
+        );
+
+        if (result.modifiedCount > 0) {
+          res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+        } else {
+          res.status(404).send("Order not found");
+        }
+      } catch (err) {
+        console.error("Payment Success Error:", err);
+        res.status(500).send("Error updating order after payment success");
+      }
+    });
+
+    app.post("/payment/fail/:orderNumber", async (req, res) => {
+      const { orderNumber } = req.params;
+
+      try {
+        await orderCollection.deleteOne({ orderNumber });
+        res.redirect(`http://localhost:5173/payment-fail/${orderNumber}`);
+      } catch (err) {
+        console.error("Payment Fail Error:", err);
+        res.status(500).send("Error handling failed payment");
+      }
+    });
+
+    // -------------------------- PAYMENT  API END -----------------------
 
     // -------------------------- BLOGS API START -----------------------
 
@@ -328,13 +421,13 @@ async function run() {
       const blogs = req.body;
       blogs.createdAt = new Date().toISOString();
       try {
-        const result = await blogsCollection.insertOne(blogs)
-        res.send(result)
+        const result = await blogsCollection.insertOne(blogs);
+        res.send(result);
       } catch (error) {
         res.status(500).send({ message: "Failed to add blog" });
       }
     });
-    // Recent articles and category 
+    // Recent articles and category
     app.get("/articles-category", async (req, res) => {
       try {
         const recentArticles = await blogsCollection
@@ -353,7 +446,6 @@ async function run() {
           .send({ message: "Failed to fetch recent articles or categories" });
       }
     });
-
 
     // Get comments for a blog
     app.get("/blog/:id/comments", async (req, res) => {

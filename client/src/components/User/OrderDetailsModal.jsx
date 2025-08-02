@@ -69,7 +69,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                         <strong>Discount:</strong>{" "}
                         {order.discountCode
                             ? `${order.discountCode} ($${order.discountAmount})`
-                            : "None"}
+                            : order.discountAmount}
                     </div>
                     <div>
                         <strong>Shipping Cost:</strong> ${order.shippingCost}
