@@ -50,7 +50,11 @@ async function run() {
       const user = await usersCollection.findOne(query);
       res.send(user);
     });
-
+    app.get("/order-history/:userEmail",async (req,res)=>{
+      const {userEmail}=req.params
+      const orderHistory=await orderCollection.find({userEmail}).toArray()
+      res.send(orderHistory)
+    });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
       const user = req.body;
