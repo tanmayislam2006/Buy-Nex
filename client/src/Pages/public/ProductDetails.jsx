@@ -273,7 +273,7 @@ const ProductDetails = () => {
       <div className="flex items-center rounded-lg overflow-hidden">
         <button
           onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-          className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
+          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
           disabled={quantity <= 1}
         >
           -
@@ -281,7 +281,7 @@ const ProductDetails = () => {
         <span className="px-4 py-1 m-1 border border-neutral">{quantity}</span>
         <button
           onClick={() => setQuantity((prev) => prev + 1)}
-          className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
+          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
           disabled={quantity >= product.inventory}
         >
           +
@@ -289,7 +289,7 @@ const ProductDetails = () => {
       </div>
       <button
         onClick={handleAddToCart}
-        className="btn btn-primary flex items-center gap-2"
+        className="btn btn-soft btn-primary flex items-center gap-2 duration-500"
       >
         <FaShoppingCart /> Add to Cart
       </button>
@@ -303,11 +303,11 @@ const ProductDetails = () => {
   );
 
   return (
-    <div className="py-8 lg:py-20  max-w-7xl mx-auto px-5 text-sm">
+    <div className="py-5 pb-15 lg:py-20  max-w-7xl mx-auto px-5 text-sm">
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
-        className="flex items-center gap-2 text-primary mb-6"
+        className="flex items-center gap-2 text-primary mb-6 cursor-pointer"
       >
         <IoMdArrowRoundBack /> Back to Products
       </button>
@@ -323,7 +323,7 @@ const ProductDetails = () => {
               {product.name}
             </h1>
             {product.brand && product.brand !== "N/A" && (
-              <div className=" flex items-center gap-2 text-base">
+              <div className=" flex items-center gap-2 text-sm md:text-base">
                 <span className="font-semibold text-gray-600 ">Brand :</span>
                 <span className="text-green-600 font-medium">
                   {product.brand}

@@ -24,17 +24,17 @@ const BecomeSeller = () => {
     console.log("Form Submitted:", formData);
   };
   return (
-    <div className="py-30 md:py-18 lg:py-30">
+    <div className="py-10 md:py-0 md:pb-20 lg:pb-25 lg:py-10 pb-16 ">
       <img src={banner} alt="" className="mx-auto md:pb-18 lg:pb-30  hidden md:block" />
       <div className=" flex flex-col lg:flex-row justify-center items-center px-4 sm:px-6 md:px-8 lg:px-10 max-w-6xl mx-auto gap-10 ">
         <div className="border border-secondary/50 rounded-lg p-5 md:px-6 shadow-md shadow-secondary flex gap-6 justify-center items-center">
         {/* content */}
         <div className="text-primary text-center ">
           {/* Title */}
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
+          <h2 className="text-xl md:text-2xl lg:text-4xl font-bold mb-2">
            Let’s Create Account
           </h2>
-          <p className="text-accent text-sm mb-6 ">
+          <p className="text-accent text-xs sm:text-sm mb-6 ">
             Fill out the form below to start selling on Buy-Nex.
           </p>
 
