@@ -19,7 +19,44 @@ const io = new Server(server, {
   },
 });
 
+// Handle socket connection
+// Map of active users: { email: socketId }
+const users = {};
 
+io.on("connection", (socket) => {
+  console.log("⚡ New user connected:", socket.id);
+
+  socket.on("register", (email) => {
+    users[email] = socket.id;
+    console.log(`📌 Registered ${email} with socket ${socket.id}`);
+  });
+
+  socket.on("send_message", (data) => {
+    const { sellerEmail, customerEmail } = data;
+    console.log("💬 New message", data);
+
+    // Forward to the other user (based on sender)
+    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientSocketId = users[recipientEmail];
+
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("receive_message", data);
+      console.log(`📨 Message sent to ${recipientEmail}`);
+    } else {
+      console.log(`🚫 ${recipientEmail} is not online`);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const email in users) {
+      if (users[email] === socket.id) {
+        delete users[email];
+        console.log(`🗑 Removed ${email} from active users`);
+        break;
+      }
+    }
+  });
+});
 
 
 app.use(
@@ -354,6 +391,49 @@ async function run() {
         res.status(500).send({ message: "Failed to add item to cart" });
       }
     });
+
+    // single cart item delete
+    app.delete("/cart/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await cartCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting cart item:", error);
+        res.status(500).send({ message: "Failed to delete cart item" });
+      }
+    });
+
+    // product quentity update API
+    app.patch("/cart/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const { quantity } = req.body;
+      try {
+        const result = await cartCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { quantity } }
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        res.status(500).send({ message: "Failed to update quantity" });
+      }
+    });
+
+    // all cart item delete API 
+    app.delete("/cart/clear/:email", async (req, res) => {
+      const email = req.params.email;
+      try {
+        const result = await cartCollection.deleteMany({ userEmail: email });
+        res.send(result);
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        res.status(500).send({ message: "Failed to clear cart" });
+      }
+    });
+
     // -------------------------- PRODUCT API END -----------------------
     // -------------------------- PAYMENT  API END -----------------------
     //sslcommerz init
@@ -368,26 +448,30 @@ async function run() {
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
-        product_name: "Computer.",
+        product_name: "Multiple Products",
         product_category: "Electronic",
         product_profile: "general",
-        cus_name: orderData.userEmail,
-        cus_email: orderData.userEmail,
-        cus_add1: orderData?.shippingAddress?.street,
-        cus_add2: "",
-        cus_city: orderData?.shippingAddress?.city,
-        cus_state: orderData?.shippingAddress?.state,
-        cus_postcode: orderData?.shippingAddress?.zipCode,
+
+        // ✅ Customer Info
+        cus_name: orderData.shippingAddress?.name || orderData.userEmail,
+        cus_email: orderData.shippingAddress?.email || orderData.userEmail,
+        cus_add1: orderData.shippingAddress?.street || "N/A",
+        cus_add2: orderData.shippingAddress?.area || "",
+        cus_city: orderData.shippingAddress?.city || "City",
+        cus_state: orderData.shippingAddress?.region || "",
+        cus_postcode: "0000", // <-- placeholder since zipCode nai
         cus_country: "Bangladesh",
-        cus_phone: orderData?.shippingAddress?.phone,
+        cus_phone: orderData.shippingAddress?.phone || "N/A",
         cus_fax: "",
-        ship_name: "Customer Name",
-        ship_add1: orderData?.shippingAddress?.street,
-        ship_add2: "",
-        ship_city: orderData?.shippingAddress?.city,
-        ship_state: orderData?.shippingAddress?.state,
-        ship_postcode: orderData?.shippingAddress?.zipCode,
-        ship_country: orderData?.shippingAddress?.country,
+
+        // ✅ Shipping Info (can use same)
+        ship_name: orderData.shippingAddress?.name || orderData.userEmail,
+        ship_add1: orderData.shippingAddress?.street || "N/A",
+        ship_add2: orderData.shippingAddress?.area || "",
+        ship_city: orderData.shippingAddress?.city || "City",
+        ship_state: orderData.shippingAddress?.region || "",
+        ship_postcode: "0000",
+        ship_country: "Bangladesh",
       };
 
       const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
@@ -396,36 +480,45 @@ async function run() {
         const apiResponse = await sslcz.init(data);
         let GatewayPageURL = apiResponse.GatewayPageURL;
         res.send(GatewayPageURL);
-        // Save order to DB
+
+        // Save order in DB
         await orderCollection.insertOne(orderData);
       } catch (error) {
         console.error("Init Payment Error:", error);
         res.status(500).send({ error: "Failed to initialize payment" });
       }
     });
-    app.post("/payment/success/:orderNumber", async (req, res) => {
-      const { orderNumber } = req.params;
-      try {
-        const result = await orderCollection.updateOne(
-          { orderNumber },
-          {
-            $set: {
-              paymentStatus: "Paid",
-              status: "Order Placed",
-            },
-          }
-        );
 
-        if (result.modifiedCount > 0) {
-          res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
-        } else {
-          res.status(404).send("Order not found");
-        }
-      } catch (err) {
-        console.error("Payment Success Error:", err);
-        res.status(500).send("Error updating order after payment success");
+app.post("/payment/success/:orderNumber", async (req, res) => {
+  const { orderNumber } = req.params;
+  try {
+    // 1. Update the order status
+    const result = await orderCollection.updateOne(
+      { orderNumber },
+      {
+        $set: {
+          paymentStatus: "Paid",
+          status: "Order Placed",
+        },
       }
+    );
+
+    // 2. Find the updated order
+    const findOrder = await orderCollection.findOne({ orderNumber });
+
+    // 3. Delete each product from the cart collection
+    const productIds = findOrder.products.map((product) => product._id);
+    const deleteResult = await cartCollection.deleteMany({
+      _id: { $in: productIds.map((id) => new ObjectId(id)) },
     });
+
+    // 4. Redirect if successful
+      res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+  } catch (err) {
+    console.error("Payment Success Error:", err);
+    res.status(500).send("Error updating order after payment success");
+  }
+});
 
     app.post("/payment/fail/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;

@@ -75,7 +75,7 @@ const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
   }
 
   return (
-    <div className="flex flex-col border border-gray-300 rounded-lg p-5 w-full max-w-md mx-auto h-[500px] shadow bg-white">
+    <div className="flex flex-col border border-gray-300 rounded-lg p-5 w-full max-w-sm mx-auto h-[500px] shadow bg-white">
       {/* Header with product info */}
       <div className="mb-4 border-b pb-3">
         <h2 className="text-lg font-semibold text-gray-800">
