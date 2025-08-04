@@ -1,3 +1,5 @@
+const http = require("http");
+const { Server } = require("socket.io");
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
@@ -8,6 +10,55 @@ const app = express();
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false; //true for live, false for sandbox
+const server = http.createServer(app);
+
+// Initialize Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins (change for production)
+  },
+});
+
+// Handle socket connection
+// Map of active users: { email: socketId }
+const users = {};
+
+io.on("connection", (socket) => {
+  console.log("⚡ New user connected:", socket.id);
+
+  socket.on("register", (email) => {
+    users[email] = socket.id;
+    console.log(`📌 Registered ${email} with socket ${socket.id}`);
+  });
+
+  socket.on("send_message", (data) => {
+    const { sellerEmail, customerEmail } = data;
+    console.log("💬 New message", data);
+
+    // Forward to the other user (based on sender)
+    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientSocketId = users[recipientEmail];
+
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("receive_message", data);
+      console.log(`📨 Message sent to ${recipientEmail}`);
+    } else {
+      console.log(`🚫 ${recipientEmail} is not online`);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const email in users) {
+      if (users[email] === socket.id) {
+        delete users[email];
+        console.log(`🗑 Removed ${email} from active users`);
+        break;
+      }
+    }
+  });
+});
+
+
 app.use(
   cors({
     origin: [
@@ -50,10 +101,10 @@ async function run() {
       const user = await usersCollection.findOne(query);
       res.send(user);
     });
-    app.get("/order-history/:userEmail",async (req,res)=>{
-      const {userEmail}=req.params
-      const orderHistory=await orderCollection.find({userEmail}).toArray()
-      res.send(orderHistory)
+    app.get("/order-history/:userEmail", async (req, res) => {
+      const { userEmail } = req.params;
+      const orderHistory = await orderCollection.find({ userEmail }).toArray();
+      res.send(orderHistory);
     });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
@@ -664,7 +715,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
+server.listen(port, () => {
   const time = new Date().toLocaleTimeString();
-  console.log(`Server is running on ${time} port http://localhost:${port}`);
+  console.log(`🚀 Server is running on http://localhost:${port} at ${time}`);
 });

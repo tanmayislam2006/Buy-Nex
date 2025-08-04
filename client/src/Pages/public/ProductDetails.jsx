@@ -8,6 +8,7 @@ import Loading from "../../components/Loading";
 import { FiShoppingBag } from "react-icons/fi";
 import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
+import Chat from "../../components/Chat/Chat";
 
 const ProductDetails = () => {
   const { user } = useAuth();
@@ -450,11 +451,11 @@ const ProductDetails = () => {
                       </tr>
                     )}
 
-                    {product.sellerId && (
+                    {product.sellerEmail && (
                       <tr className="border-b border-gray-200">
                         <td className="px-4 py-2 w-1/3">Sold By</td>
                         <td className="px-4 py-2">
-                          {product.sellerId.replace("seller", "Seller ")}
+                          {product.sellerEmail}
                         </td>
                       </tr>
                     )}
@@ -509,6 +510,12 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      <Chat
+       productId={product?._id}
+       sellerEmail={product?.sellerEmail}
+       customerEmail={user?.email}
+       productName={product?.name}
+      />
     </div>
   );
 };
