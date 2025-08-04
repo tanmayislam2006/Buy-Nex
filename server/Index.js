@@ -19,44 +19,7 @@ const io = new Server(server, {
   },
 });
 
-// Handle socket connection
-// Map of active users: { email: socketId }
-const users = {};
 
-io.on("connection", (socket) => {
-  console.log("⚡ New user connected:", socket.id);
-
-  socket.on("register", (email) => {
-    users[email] = socket.id;
-    console.log(`📌 Registered ${email} with socket ${socket.id}`);
-  });
-
-  socket.on("send_message", (data) => {
-    const { sellerEmail, customerEmail } = data;
-    console.log("💬 New message", data);
-
-    // Forward to the other user (based on sender)
-    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
-    const recipientSocketId = users[recipientEmail];
-
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit("receive_message", data);
-      console.log(`📨 Message sent to ${recipientEmail}`);
-    } else {
-      console.log(`🚫 ${recipientEmail} is not online`);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    for (const email in users) {
-      if (users[email] === socket.id) {
-        delete users[email];
-        console.log(`🗑 Removed ${email} from active users`);
-        break;
-      }
-    }
-  });
-});
 
 
 app.use(
@@ -93,6 +56,54 @@ async function run() {
     const commentsCollection = BuyNexDB.collection("comments");
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
+    const messagesCollection = BuyNexDB.collection("messages");
+
+    // Handle socket connection
+    // Map of active users: { email: socketId }
+    const users = {};
+
+    io.on("connection", (socket) => {
+      console.log("⚡ New user connected:", socket.id);
+
+      socket.on("register", (email) => {
+        users[email] = socket.id;
+        console.log(`📌 Registered ${email} with socket ${socket.id}`);
+      });
+
+      socket.on("send_message", async (data) => {
+        const { sellerEmail, customerEmail } = data;
+        console.log("💬 New message", data);
+
+        // Save message to the database
+        try {
+          await messagesCollection.insertOne(data);
+        } catch (error) {
+          console.error("Error saving message to database:", error);
+        }
+
+        // Forward to the other user (based on sender)
+        const recipientEmail =
+          data.sender === "customer" ? sellerEmail : customerEmail;
+        const recipientSocketId = users[recipientEmail];
+
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit("receive_message", data);
+          console.log(`📨 Message sent to ${recipientEmail}`);
+        } else {
+          console.log(`🚫 ${recipientEmail} is not online`);
+        }
+      });
+
+      socket.on("disconnect", () => {
+        for (const email in users) {
+          if (users[email] === socket.id) {
+            delete users[email];
+            console.log(`🗑 Removed ${email} from active users`);
+            break;
+          }
+        }
+      });
+    });
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -115,6 +126,26 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    // Get messages between a seller and a customer
+    app.get("/messages/:sellerEmail/:customerEmail", async (req, res) => {
+      const { sellerEmail, customerEmail } = req.params;
+      try {
+        const messages = await messagesCollection
+          .find({
+            $or: [
+              { sellerEmail, customerEmail },
+              { sellerEmail: customerEmail, customerEmail: sellerEmail },
+            ],
+          })
+          .sort({ timestamp: 1 })
+          .toArray();
+        res.send(messages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).send({ message: "Failed to fetch messages" });
+      }
     });
 
     app.put("/user/:email", async (req, res) => {

@@ -1,13 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Link } from "react-router";
+import useAxios from "./../../Hooks/useAxios";
 
 const socket = io("http://localhost:5000"); // Change this for production
 
 const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
+  const axiosInstance = useAxios();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
+
+  // Fetch message history
+  useEffect(() => {
+    if (sellerEmail && customerEmail) {
+      axiosInstance
+        .get(`/messages/${sellerEmail}/${customerEmail}`)
+        .then((res) => {
+          setMessages(res.data);
+        });
+    }
+  }, [sellerEmail, customerEmail, axiosInstance]);
 
   // Register socket connection for customer
   useEffect(() => {
