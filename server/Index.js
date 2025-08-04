@@ -1,3 +1,5 @@
+const http = require("http");
+const { Server } = require("socket.io");
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
@@ -8,6 +10,64 @@ const app = express();
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false; //true for live, false for sandbox
+const server = http.createServer(app);
+
+// Initialize Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins (change for production)
+  },
+});
+
+// Keep track of connected users { userId: socketId }
+const users = {};
+
+// Handle socket connection
+io.on("connection", (socket) => {
+  console.log("⚡ New user connected:", socket.id);
+
+  // Register the user with their userId
+  socket.on("register", (userId) => {
+    users[userId] = socket.id;
+    console.log(`📌 Registered user ${userId} with socket ${socket.id}`);
+  });
+
+  // Handle message sending from customer to seller
+  socket.on("send_message", async (data) => {
+    const { productId, sellerId, customerId, text } = data;
+
+    console.log("💬 New message from customer:", data);
+
+    // 🔒 Later you can save this message to MongoDB for chat history:
+    /*
+
+    // Save to MongoDB logic will go here
+    */
+
+    // Check if seller is online
+    const sellerSocketId = users[sellerId];
+    if (sellerSocketId) {
+      // Send the message to the seller in real-time
+      io.to(sellerSocketId).emit("receive_message", data);
+      console.log(`📨 Sent message to seller ${sellerId}`);
+    } else {
+      console.log(`🚫 Seller ${sellerId} is not online`);
+    }
+  });
+
+  // Handle user disconnect
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
+    for (const userId in users) {
+      if (users[userId] === socket.id) {
+        delete users[userId];
+        console.log(`🗑 Removed user ${userId} from active list`);
+        break;
+      }
+    }
+  });
+});
+
 app.use(
   cors({
     origin: [
@@ -50,10 +110,10 @@ async function run() {
       const user = await usersCollection.findOne(query);
       res.send(user);
     });
-    app.get("/order-history/:userEmail",async (req,res)=>{
-      const {userEmail}=req.params
-      const orderHistory=await orderCollection.find({userEmail}).toArray()
-      res.send(orderHistory)
+    app.get("/order-history/:userEmail", async (req, res) => {
+      const { userEmail } = req.params;
+      const orderHistory = await orderCollection.find({ userEmail }).toArray();
+      res.send(orderHistory);
     });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
@@ -664,7 +724,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
+server.listen(port, () => {
   const time = new Date().toLocaleTimeString();
-  console.log(`Server is running on ${time} port http://localhost:${port}`);
+  console.log(`🚀 Server is running on http://localhost:${port} at ${time}`);
 });

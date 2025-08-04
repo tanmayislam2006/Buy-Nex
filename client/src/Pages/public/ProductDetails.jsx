@@ -8,6 +8,7 @@ import Loading from "../../components/Loading";
 import { FiShoppingBag } from "react-icons/fi";
 import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
+import Chat from "../../components/Chat/Chat";
 
 const ProductDetails = () => {
   const { user } = useAuth();
@@ -509,6 +510,11 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      <Chat
+       productId={product?._id}
+       sellerId={product?.sellerId}
+       customerId={user?._id}
+      />
     </div>
   );
 };
