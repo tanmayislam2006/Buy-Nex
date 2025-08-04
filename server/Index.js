@@ -34,25 +34,22 @@ io.on("connection", (socket) => {
 
   // Handle message sending from customer to seller
   socket.on("send_message", async (data) => {
-    const { productId, sellerId, customerId, text } = data;
+    const { productId, sellerId, customerId, text, sender } = data;
 
-    console.log("💬 New message from customer:", data);
+    console.log("💬 New message received:", data);
 
-    // 🔒 Later you can save this message to MongoDB for chat history:
-    /*
+    // Determine who the receiver is
+    const receiverId = sender === "customer" ? sellerId : customerId;
+    const receiverSocketId = users[receiverId];
 
-    // Save to MongoDB logic will go here
-    */
-
-    // Check if seller is online
-    const sellerSocketId = users[sellerId];
-    if (sellerSocketId) {
-      // Send the message to the seller in real-time
-      io.to(sellerSocketId).emit("receive_message", data);
-      console.log(`📨 Sent message to seller ${sellerId}`);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("receive_message", data);
+      console.log(`📨 Message sent to ${receiverId}`);
     } else {
-      console.log(`🚫 Seller ${sellerId} is not online`);
+      console.log(`🚫 Receiver (${receiverId}) is not online`);
     }
+
+    // Optionally: You can save the message to DB here later
   });
 
   // Handle user disconnect

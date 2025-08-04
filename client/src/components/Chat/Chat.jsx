@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // Change to your backend URL
+const socket = io("http://localhost:5000"); // Change for production
 
-const Chat = ({ productId, sellerId, customerId }) => {
+const Chat = ({ productId, sellerId, customerId, productName }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    // Register current user (customer) with the backend socket server
     socket.emit("register", customerId);
-    // Listen for messages from seller
+
     socket.on("receive_message", (message) => {
       setMessages((prev) => [...prev, message]);
     });
-    // Cleanup on unmount
+
     return () => {
       socket.off("receive_message");
     };
   }, [customerId]);
 
-  // Send message handler
   const sendMessage = () => {
     if (input.trim() === "") return;
 
@@ -33,32 +31,43 @@ const Chat = ({ productId, sellerId, customerId }) => {
       timestamp: new Date().toISOString(),
     };
 
-    // Send message to backend
     socket.emit("send_message", message);
-
-    // Show the message instantly in UI
     setMessages((prev) => [...prev, message]);
-
-    // Clear input field
     setInput("");
   };
 
   return (
-    <div className="chat-container" style={{border: "1px solid #ccc", padding: 10, width: 350}}>
-      <h3>Chat with Seller</h3>
-      <div
-        className="messages"
-        style={{ height: 200, overflowY: "scroll", border: "1px solid #ddd", padding: 5, marginBottom: 10 }}
-      >
-        {messages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: 6 }}>
-            <strong>{msg.sender === "customer" ? "You" : "Seller"}:</strong> {msg.text}
-            <br />
-            <small style={{ color: "#888" }}>
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </small>
-          </div>
-        ))}
+    <div className="flex flex-col border border-gray-300 rounded-md p-4 w-full max-w-md h-[400px]">
+      <h3 className="text-lg font-semibold mb-3">
+        Chat with Seller {productName ? `of ${productName}` : ""}
+      </h3>
+
+      <div className="flex-grow overflow-y-auto border border-gray-200 rounded-md p-3 mb-4">
+        {messages.length === 0 ? (
+          <p className="text-gray-500 text-center">No messages yet</p>
+        ) : (
+          messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`mb-3 flex flex-col ${
+                msg.sender === "customer" ? "items-end" : "items-start"
+              }`}
+            >
+              <span
+                className={`inline-block px-3 py-2 rounded-lg max-w-xs break-words ${
+                  msg.sender === "customer"
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+              >
+                {msg.text}
+              </span>
+              <small className="text-gray-400 mt-1 text-xs">
+                {new Date(msg.timestamp).toLocaleTimeString()}
+              </small>
+            </div>
+          ))
+        )}
       </div>
 
       <input
@@ -66,10 +75,16 @@ const Chat = ({ productId, sellerId, customerId }) => {
         placeholder="Type your message..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
-        style={{ width: "100%", padding: 8 }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") sendMessage();
+        }}
+        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
       />
-      <button onClick={sendMessage} style={{ marginTop: 6, width: "100%" }}>
+      <button
+        onClick={sendMessage}
+        className="mt-2 bg-green-600 text-white rounded-md px-4 py-2 hover:bg-green-700 disabled:bg-green-300"
+        disabled={input.trim() === ""}
+      >
         Send
       </button>
     </div>

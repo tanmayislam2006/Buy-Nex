@@ -1,10 +1,11 @@
 import React from 'react';
-import ComingSoon from '../../../components/ComingSoon';
+import SellerChat from '../../../components/Chat/SellerChat';
 
 const OrderedProducts = () => {
+  const sellerId = "seller123";
     return (
       <div>
-        <ComingSoon />
+         <SellerChat sellerId={sellerId} />
       </div>
     );
 };
