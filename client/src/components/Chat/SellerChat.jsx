@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import useAxios from "../../Hooks/useAxios";
 
 const socket = io("http://localhost:5000"); // Update for production
 
@@ -7,7 +8,7 @@ const SellerChat = ({ sellerEmail }) => {
   const [conversations, setConversations] = useState({});
   const [activeCustomer, setActiveCustomer] = useState(null);
   const [input, setInput] = useState("");
-
+  const axiosInstance = useAxios();
   useEffect(() => {
     socket.emit("register", sellerEmail);
 
@@ -28,6 +29,19 @@ const SellerChat = ({ sellerEmail }) => {
       socket.off("receive_message");
     };
   }, [sellerEmail, activeCustomer]);
+
+  useEffect(() => {
+    if (activeCustomer) {
+      axiosInstance
+        .get(`/messages/${sellerEmail}/${activeCustomer}`)
+        .then((res) => {
+          setConversations((prev) => ({
+            ...prev,
+            [activeCustomer]: res.data,
+          }));
+        });
+    }
+  }, [activeCustomer, sellerEmail, axiosInstance]);
 
   const sendMessage = () => {
     if (!input.trim() || !activeCustomer) return;
@@ -92,7 +106,8 @@ const SellerChat = ({ sellerEmail }) => {
                 </span>
               </p>
               <h2 className="text-lg font-semibold text-gray-800 mt-1">
-                🛍️ {conversations[activeCustomer]?.[0]?.productName || "Product"}
+                🛍️{" "}
+                {conversations[activeCustomer]?.[0]?.productName || "Product"}
               </h2>
               <p className="text-xs text-gray-400">
                 Product ID:{" "}
