@@ -42,6 +42,32 @@ async function run() {
     const commentsCollection = BuyNexDB.collection("comments");
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
+    const shakilCollection = BuyNexDB.collection("addedFromShakil");
+
+
+
+app.post("/add-multiple-items", async (req, res) => {
+  const items = req.body; 
+
+  try {
+    if (!Array.isArray(items)) {
+      return res
+        .status(400)
+        .json({ error: "Data must be an array of objects." });
+    }
+
+    const result = await productsCollection.insertMany(items);
+
+    res.status(201).json({
+      message: `${result.insertedCount} items inserted successfully.`,
+      insertedIds: result.insertedIds,
+    });
+  } catch (error) {
+    console.error("Insert error:", error);
+    res.status(500).json({ error: "Failed to insert items." });
+  }
+});
+
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -286,26 +312,30 @@ async function run() {
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
-        product_name: "Computer.",
+        product_name: "Multiple Products",
         product_category: "Electronic",
         product_profile: "general",
-        cus_name: orderData.userEmail,
-        cus_email: orderData.userEmail,
-        cus_add1: orderData?.shippingAddress?.street,
-        cus_add2: "",
-        cus_city: orderData?.shippingAddress?.city,
-        cus_state: orderData?.shippingAddress?.state,
-        cus_postcode: orderData?.shippingAddress?.zipCode,
+
+        // ✅ Customer Info
+        cus_name: orderData.shippingAddress?.name || orderData.userEmail,
+        cus_email: orderData.shippingAddress?.email || orderData.userEmail,
+        cus_add1: orderData.shippingAddress?.street || "N/A",
+        cus_add2: orderData.shippingAddress?.area || "",
+        cus_city: orderData.shippingAddress?.city || "City",
+        cus_state: orderData.shippingAddress?.region || "",
+        cus_postcode: "0000", // <-- placeholder since zipCode nai
         cus_country: "Bangladesh",
-        cus_phone: orderData?.shippingAddress?.phone,
+        cus_phone: orderData.shippingAddress?.phone || "N/A",
         cus_fax: "",
-        ship_name: "Customer Name",
-        ship_add1: orderData?.shippingAddress?.street,
-        ship_add2: "",
-        ship_city: orderData?.shippingAddress?.city,
-        ship_state: orderData?.shippingAddress?.state,
-        ship_postcode: orderData?.shippingAddress?.zipCode,
-        ship_country: orderData?.shippingAddress?.country,
+
+        // ✅ Shipping Info (can use same)
+        ship_name: orderData.shippingAddress?.name || orderData.userEmail,
+        ship_add1: orderData.shippingAddress?.street || "N/A",
+        ship_add2: orderData.shippingAddress?.area || "",
+        ship_city: orderData.shippingAddress?.city || "City",
+        ship_state: orderData.shippingAddress?.region || "",
+        ship_postcode: "0000",
+        ship_country: "Bangladesh",
       };
 
       const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
@@ -314,13 +344,15 @@ async function run() {
         const apiResponse = await sslcz.init(data);
         let GatewayPageURL = apiResponse.GatewayPageURL;
         res.send(GatewayPageURL);
-        // Save order to DB
+
+        // Save order in DB
         await orderCollection.insertOne(orderData);
       } catch (error) {
         console.error("Init Payment Error:", error);
         res.status(500).send({ error: "Failed to initialize payment" });
       }
     });
+
     app.post("/payment/success/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;
       try {
@@ -333,6 +365,8 @@ async function run() {
             },
           }
         );
+        const findOrder = await orderCollection.findOne({ orderNumber })
+        console.log(findOrder);
 
         if (result.modifiedCount > 0) {
           res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);

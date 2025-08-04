@@ -32,6 +32,8 @@ const ProductDetails = () => {
     enabled: !!id,
   });
 
+  console.log(product);
+
   const { data: similarProducts = [], isLoading: isSimilarLoading } = useQuery({
     queryKey: ["similar-products", product?.category],
     queryFn: async () => {

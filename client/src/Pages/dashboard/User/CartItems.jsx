@@ -23,6 +23,8 @@ const CartItems = () => {
     },
   });
 
+  console.log(cart);
+
   const handleDelete = async (id) => {
     try {
       await axiosSecure.delete(`/cart/delete/${id}`);
@@ -67,7 +69,7 @@ const CartItems = () => {
                 <span className="font-semibold text-gray-700">SELECT ALL ({cart.length} ITEM{cart.length !== 1 ? 'S' : ''})</span>
               </div>
               <button onClick={handleClearCart} className="text-gray-500 hover:text-red-500 flex items-center gap-1 font-medium">
-                <FaTrashAlt /> DELETE
+                <FaTrashAlt /> DELETE All
               </button>
             </div>
             {cart.map((item) => (
