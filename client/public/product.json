@@ -1,7 +1,6 @@
 [
   {
-    "sellerId": "sellerA",
-    "id": 1,
+    "sellerEmail": "buynex@seller.com",
     "name": "Wireless Bluetooth Headphones",
     "description": "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
     "oldPrice": 129.99,
@@ -19,7 +18,11 @@
     },
     "rating": 4.5,
     "reviews": 245,
-    "tags": ["New", "Wireless", "Audio"],
+    "tags": [
+      "New",
+      "Wireless",
+      "Audio"
+    ],
     "weight": 0.25,
     "dimensions": {
       "length": 20.0,
@@ -27,11 +30,14 @@
       "height": 8.0,
       "unit": "cm"
     },
-    "seoKeywords": ["wireless headphones", "bluetooth headset", "noise cancelling"]
+    "seoKeywords": [
+      "wireless headphones",
+      "bluetooth headset",
+      "noise cancelling"
+    ]
   },
   {
-    "sellerId": "sellerB",
-    "id": 2,
+    "sellerEmail": "buynex@seller.com",
     "name": "Smart Fitness Watch",
     "description": "Track your health and fitness goals with this stylish smart watch. Features heart rate monitoring, step tracking, and notifications.",
     "oldPrice": 79.99,
@@ -48,7 +54,11 @@
     },
     "rating": 4.0,
     "reviews": 280,
-    "tags": ["Sale", "Smart", "Wearable"],
+    "tags": [
+      "Sale",
+      "Smart",
+      "Wearable"
+    ],
     "weight": 0.05,
     "dimensions": {
       "length": 4.0,
@@ -56,11 +66,14 @@
       "height": 1.0,
       "unit": "cm"
     },
-    "seoKeywords": ["smart watch", "fitness tracker", "health monitor"]
+    "seoKeywords": [
+      "smart watch",
+      "fitness tracker",
+      "health monitor"
+    ]
   },
   {
-    "sellerId": "sellerC",
-    "id": 3,
+    "sellerEmail": "buynex@seller.com",
     "name": "Ultra Slim Laptop",
     "description": "Powerful and portable, this ultra-slim laptop is perfect for work and entertainment on the go.",
     "oldPrice": 1099.99,
@@ -77,7 +90,11 @@
     },
     "rating": 4.7,
     "reviews": 560,
-    "tags": ["New", "Trending", "Powerful"],
+    "tags": [
+      "New",
+      "Trending",
+      "Powerful"
+    ],
     "weight": 1.5,
     "dimensions": {
       "length": 35.0,
@@ -85,11 +102,14 @@
       "height": 1.5,
       "unit": "cm"
     },
-    "seoKeywords": ["slim laptop", "portable computer", "dell laptop"]
+    "seoKeywords": [
+      "slim laptop",
+      "portable computer",
+      "dell laptop"
+    ]
   },
   {
-    "sellerId": "sellerA",
-    "id": 4,
+    "sellerEmail": "buynex@seller.com",
     "name": "Premium Smartphone",
     "description": "Experience the best with this premium smartphone. Stunning display, powerful camera, and long-lasting battery.",
     "oldPrice": 849.99,
@@ -106,7 +126,11 @@
     },
     "rating": 4.9,
     "reviews": 1120,
-    "tags": ["Bestseller", "New", "Premium"],
+    "tags": [
+      "Bestseller",
+      "New",
+      "Premium"
+    ],
     "weight": 0.18,
     "dimensions": {
       "length": 15.0,
@@ -114,11 +138,14 @@
       "height": 0.8,
       "unit": "cm"
     },
-    "seoKeywords": ["iphone", "apple smartphone", "premium phone"]
+    "seoKeywords": [
+      "iphone",
+      "apple smartphone",
+      "premium phone"
+    ]
   },
   {
-    "sellerId": "sellerD",
-    "id": 5,
+    "sellerEmail": "buynex@seller.com",
     "name": "4K Smart TV",
     "description": "Immerse yourself in stunning 4K resolution and smart features with this state-of-the-art television.",
     "oldPrice": 699.99,
@@ -135,7 +162,11 @@
     },
     "rating": 4.2,
     "reviews": 780,
-    "tags": ["Sale", "Smart", "Trending"],
+    "tags": [
+      "Sale",
+      "Smart",
+      "Trending"
+    ],
     "weight": 15.0,
     "dimensions": {
       "length": 124.0,
@@ -143,11 +174,14 @@
       "height": 8.0,
       "unit": "cm"
     },
-    "seoKeywords": ["4k tv", "smart television", "lg tv"]
+    "seoKeywords": [
+      "4k tv",
+      "smart television",
+      "lg tv"
+    ]
   },
   {
-    "sellerId": "sellerC",
-    "id": 6,
+    "sellerEmail": "buynex@seller.com",
     "name": "Digital Camera DSLR",
     "description": "Capture breathtaking photos and videos with this professional-grade DSLR camera.",
     "oldPrice": 750.00,
@@ -164,7 +198,11 @@
     },
     "rating": 4.3,
     "reviews": 350,
-    "tags": ["New", "Professional", "Photography"],
+    "tags": [
+      "New",
+      "Professional",
+      "Photography"
+    ],
     "weight": 0.6,
     "dimensions": {
       "length": 12.0,
@@ -172,11 +210,14 @@
       "height": 6.0,
       "unit": "cm"
     },
-    "seoKeywords": ["dslr camera", "sony camera", "digital photography"]
+    "seoKeywords": [
+      "dslr camera",
+      "sony camera",
+      "digital photography"
+    ]
   },
   {
-    "sellerId": "sellerE",
-    "id": 7,
+    "sellerEmail": "buynex@seller.com",
     "name": "Gaming Console Pro",
     "description": "Dive into immersive gaming worlds with this powerful next-gen gaming console.",
     "oldPrice": 450.00,
@@ -193,7 +234,11 @@
     },
     "rating": 4.6,
     "reviews": 920,
-    "tags": ["Trending", "Gaming", "Bestseller"],
+    "tags": [
+      "Trending",
+      "Gaming",
+      "Bestseller"
+    ],
     "weight": 4.5,
     "dimensions": {
       "length": 39.0,
@@ -201,11 +246,14 @@
       "height": 10.0,
       "unit": "cm"
     },
-    "seoKeywords": ["gaming console", "playstation", "xbox"]
+    "seoKeywords": [
+      "gaming console",
+      "playstation",
+      "xbox"
+    ]
   },
   {
-    "sellerId": "sellerF",
-    "id": 8,
+    "sellerEmail": "buynex@seller.com",
     "name": "Classic Denim Jeans",
     "description": "Timeless style and comfortable fit, these denim jeans are a wardrobe essential.",
     "oldPrice": 65.00,
@@ -222,7 +270,11 @@
     },
     "rating": 3.8,
     "reviews": 210,
-    "tags": ["Durable", "Classic", "Everyday"],
+    "tags": [
+      "Durable",
+      "Classic",
+      "Everyday"
+    ],
     "weight": 0.7,
     "dimensions": {
       "length": 100.0,
@@ -230,11 +282,14 @@
       "height": 2.0,
       "unit": "cm"
     },
-    "seoKeywords": ["denim jeans", "men's jeans", "casual pants"]
+    "seoKeywords": [
+      "denim jeans",
+      "men's jeans",
+      "casual pants"
+    ]
   },
   {
-    "sellerId": "sellerG",
-    "id": 9,
+    "sellerEmail": "buynex@seller.com",
     "name": "Casual T-Shirt (Men's)",
     "description": "Soft, breathable, and perfect for everyday wear. Made from organic cotton.",
     "oldPrice": 30.00,
@@ -251,7 +306,11 @@
     },
     "rating": 4.1,
     "reviews": 150,
-    "tags": ["Eco-friendly", "Comfort", "Basic"],
+    "tags": [
+      "Eco-friendly",
+      "Comfort",
+      "Basic"
+    ],
     "weight": 0.2,
     "dimensions": {
       "length": 70.0,
@@ -259,11 +318,14 @@
       "height": 1.0,
       "unit": "cm"
     },
-    "seoKeywords": ["men's t-shirt", "cotton tee", "casual wear"]
+    "seoKeywords": [
+      "men's t-shirt",
+      "cotton tee",
+      "casual wear"
+    ]
   },
   {
-    "sellerId": "sellerH",
-    "id": 10,
+    "sellerEmail": "buynex@seller.com",
     "name": "Elegant Sofa Set",
     "description": "Enhance your living space with this luxurious and comfortable sofa set, designed for modern homes.",
     "oldPrice": 1500.00,
@@ -280,7 +342,11 @@
     },
     "rating": 4.8,
     "reviews": 300,
-    "tags": ["Premium", "Furniture", "Luxury"],
+    "tags": [
+      "Premium",
+      "Furniture",
+      "Luxury"
+    ],
     "weight": 120.0,
     "dimensions": {
       "length": 220.0,
@@ -288,11 +354,14 @@
       "height": 80.0,
       "unit": "cm"
     },
-    "seoKeywords": ["sofa set", "living room furniture", "modern couch"]
+    "seoKeywords": [
+      "sofa set",
+      "living room furniture",
+      "modern couch"
+    ]
   },
   {
-    "sellerId": "sellerI",
-    "id": 11,
+    "sellerEmail": "buynex@seller.com",
     "name": "High-Performance Blender",
     "description": "Whip up smoothies, soups, and sauces with ease. Powerful motor and durable blades.",
     "oldPrice": 150.00,
@@ -309,7 +378,11 @@
     },
     "rating": 4.4,
     "reviews": 250,
-    "tags": ["New", "Kitchen", "Appliance"],
+    "tags": [
+      "New",
+      "Kitchen",
+      "Appliance"
+    ],
     "weight": 3.5,
     "dimensions": {
       "length": 20.0,
@@ -317,11 +390,14 @@
       "height": 40.0,
       "unit": "cm"
     },
-    "seoKeywords": ["blender", "kitchen appliance", "smoothie maker"]
+    "seoKeywords": [
+      "blender",
+      "kitchen appliance",
+      "smoothie maker"
+    ]
   },
   {
-    "sellerId": "sellerJ",
-    "id": 12,
+    "sellerEmail": "buynex@seller.com",
     "name": "Compact Toaster Oven",
     "description": "A versatile kitchen essential for toasting, baking, and broiling, perfect for small spaces.",
     "oldPrice": 99.99,
@@ -338,7 +414,11 @@
     },
     "rating": 3.9,
     "reviews": 180,
-    "tags": ["Compact", "Kitchen", "Sale"],
+    "tags": [
+      "Compact",
+      "Kitchen",
+      "Sale"
+    ],
     "weight": 2.8,
     "dimensions": {
       "length": 35.0,
@@ -346,11 +426,14 @@
       "height": 20.0,
       "unit": "cm"
     },
-    "seoKeywords": ["toaster oven", "mini oven", "kitchen appliance"]
+    "seoKeywords": [
+      "toaster oven",
+      "mini oven",
+      "kitchen appliance"
+    ]
   },
   {
-    "sellerId": "sellerK",
-    "id": 13,
+    "sellerEmail": "buynex@seller.com",
     "name": "Yoga Mat Pro",
     "description": "Premium non-slip yoga mat for all levels. Provides excellent grip and cushioning.",
     "oldPrice": 35.00,
@@ -367,7 +450,11 @@
     },
     "rating": 4.2,
     "reviews": 100,
-    "tags": ["New", "Eco-friendly", "Fitness"],
+    "tags": [
+      "New",
+      "Eco-friendly",
+      "Fitness"
+    ],
     "weight": 1.2,
     "dimensions": {
       "length": 61.0,
@@ -375,11 +462,14 @@
       "height": 10.0,
       "unit": "cm"
     },
-    "seoKeywords": ["yoga mat", "exercise mat", "fitness accessories"]
+    "seoKeywords": [
+      "yoga mat",
+      "exercise mat",
+      "fitness accessories"
+    ]
   },
   {
-    "sellerId": "sellerL",
-    "id": 14,
+    "sellerEmail": "buynex@seller.com",
     "name": "Official Size Basketball",
     "description": "Durable basketball for indoor and outdoor play. Excellent grip and bounce.",
     "oldPrice": 40.00,
@@ -396,7 +486,11 @@
     },
     "rating": 4.0,
     "reviews": 140,
-    "tags": ["Durable", "Sport", "Training"],
+    "tags": [
+      "Durable",
+      "Sport",
+      "Training"
+    ],
     "weight": 0.62,
     "dimensions": {
       "length": 24.0,
@@ -404,11 +498,14 @@
       "height": 24.0,
       "unit": "cm"
     },
-    "seoKeywords": ["basketball", "sports ball", "outdoor sports"]
+    "seoKeywords": [
+      "basketball",
+      "sports ball",
+      "outdoor sports"
+    ]
   },
   {
-    "sellerId": "sellerM",
-    "id": 15,
+    "sellerEmail": "buynex@seller.com",
     "name": "The Midnight Library",
     "description": "A compelling novel about choices, regrets, and finding happiness.",
     "oldPrice": 19.99,
@@ -425,7 +522,11 @@
     },
     "rating": 4.6,
     "reviews": 600,
-    "tags": ["Bestseller", "Fiction", "Read"],
+    "tags": [
+      "Bestseller",
+      "Fiction",
+      "Read"
+    ],
     "weight": 0.3,
     "dimensions": {
       "length": 20.0,
@@ -433,11 +534,14 @@
       "height": 2.0,
       "unit": "cm"
     },
-    "seoKeywords": ["novel", "fiction book", "bestselling book"]
+    "seoKeywords": [
+      "novel",
+      "fiction book",
+      "bestselling book"
+    ]
   },
   {
-    "sellerId": "sellerN",
-    "id": 16,
+    "sellerEmail": "buynex@seller.com",
     "name": "Beginner's Guide to React",
     "description": "Master ReactJS with this comprehensive guide, perfect for aspiring web developers.",
     "oldPrice": 30.00,
@@ -454,7 +558,11 @@
     },
     "rating": 4.1,
     "reviews": 220,
-    "tags": ["New", "Study", "Programming"],
+    "tags": [
+      "New",
+      "Study",
+      "Programming"
+    ],
     "weight": 0.45,
     "dimensions": {
       "length": 24.0,
@@ -462,11 +570,14 @@
       "height": 2.5,
       "unit": "cm"
     },
-    "seoKeywords": ["react tutorial", "web development book", "javascript react"]
+    "seoKeywords": [
+      "react tutorial",
+      "web development book",
+      "javascript react"
+    ]
   },
   {
-    "sellerId": "sellerO",
-    "id": 17,
+    "sellerEmail": "buynex@seller.com",
     "name": "World Atlas 2024",
     "description": "Explore the world with this updated atlas featuring detailed maps and geographical information.",
     "oldPrice": 28.00,
@@ -483,7 +594,11 @@
     },
     "rating": 4.3,
     "reviews": 170,
-    "tags": ["Trending", "Education", "Travel"],
+    "tags": [
+      "Trending",
+      "Education",
+      "Travel"
+    ],
     "weight": 1.0,
     "dimensions": {
       "length": 30.0,
@@ -491,11 +606,14 @@
       "height": 3.0,
       "unit": "cm"
     },
-    "seoKeywords": ["world map", "atlas book", "geography"]
+    "seoKeywords": [
+      "world map",
+      "atlas book",
+      "geography"
+    ]
   },
   {
-    "sellerId": "sellerP",
-    "id": 18,
+    "sellerEmail": "buynex@seller.com",
     "name": "Women's Designer Handbag",
     "description": "A stylish and spacious handbag, perfect for any occasion. Crafted with premium materials.",
     "oldPrice": 250.00,
@@ -512,7 +630,11 @@
     },
     "rating": 4.5,
     "reviews": 380,
-    "tags": ["Premium", "Fashion", "Luxury"],
+    "tags": [
+      "Premium",
+      "Fashion",
+      "Luxury"
+    ],
     "weight": 0.8,
     "dimensions": {
       "length": 30.0,
@@ -520,11 +642,14 @@
       "height": 25.0,
       "unit": "cm"
     },
-    "seoKeywords": ["designer handbag", "women's bag", "leather purse"]
+    "seoKeywords": [
+      "designer handbag",
+      "women's bag",
+      "leather purse"
+    ]
   },
   {
-    "sellerId": "sellerQ",
-    "id": 19,
+    "sellerEmail": "buynex@seller.com",
     "name": "Sport Running Shoes",
     "description": "Lightweight and comfortable running shoes with excellent cushioning for long runs.",
     "oldPrice": 100.00,
@@ -541,7 +666,11 @@
     },
     "rating": 4.4,
     "reviews": 450,
-    "tags": ["Sale", "Running", "Comfort"],
+    "tags": [
+      "Sale",
+      "Running",
+      "Comfort"
+    ],
     "weight": 0.5,
     "dimensions": {
       "length": 30.0,
@@ -549,11 +678,14 @@
       "height": 15.0,
       "unit": "cm"
     },
-    "seoKeywords": ["running shoes", "nike shoes", "athletic footwear"]
+    "seoKeywords": [
+      "running shoes",
+      "nike shoes",
+      "athletic footwear"
+    ]
   },
   {
-    "sellerId": "sellerR",
-    "id": 20,
+    "sellerEmail": "buynex@seller.com",
     "name": "Complete Art Painting Kit",
     "description": "Everything you need to start painting, including brushes, paints, and canvases.",
     "oldPrice": 45.00,
@@ -570,7 +702,11 @@
     },
     "rating": 3.7,
     "reviews": 90,
-    "tags": ["New", "Creative", "Hobby"],
+    "tags": [
+      "New",
+      "Creative",
+      "Hobby"
+    ],
     "weight": 1.5,
     "dimensions": {
       "length": 30.0,
@@ -578,11 +714,14 @@
       "height": 5.0,
       "unit": "cm"
     },
-    "seoKeywords": ["painting kit", "art supplies", "acrylic paints"]
+    "seoKeywords": [
+      "painting kit",
+      "art supplies",
+      "acrylic paints"
+    ]
   },
   {
-    "sellerId": "sellerS",
-    "id": 21,
+    "sellerEmail": "buynex@seller.com",
     "name": "Affordable Android Smartphone",
     "description": "A budget-friendly smartphone with essential features for everyday use.",
     "oldPrice": 220.00,
@@ -599,7 +738,11 @@
     },
     "rating": 3.9,
     "reviews": 550,
-    "tags": ["Sale", "Affordable", "Android"],
+    "tags": [
+      "Sale",
+      "Affordable",
+      "Android"
+    ],
     "weight": 0.19,
     "dimensions": {
       "length": 16.0,
@@ -607,11 +750,14 @@
       "height": 0.9,
       "unit": "cm"
     },
-    "seoKeywords": ["android phone", "xiaomi phone", "budget smartphone"]
+    "seoKeywords": [
+      "android phone",
+      "xiaomi phone",
+      "budget smartphone"
+    ]
   },
   {
-    "sellerId": "sellerA",
-    "id": 22,
+    "sellerEmail": "buynex@seller.com",
     "name": "Premium Wireless Earbuds",
     "description": "Immerse yourself in high-fidelity audio with these comfortable and feature-rich wireless earbuds.",
     "oldPrice": 180.00,
@@ -628,7 +774,11 @@
     },
     "rating": 4.7,
     "reviews": 700,
-    "tags": ["Wireless", "Premium", "Audio"],
+    "tags": [
+      "Wireless",
+      "Premium",
+      "Audio"
+    ],
     "weight": 0.01,
     "dimensions": {
       "length": 6.0,
@@ -636,11 +786,14 @@
       "height": 3.0,
       "unit": "cm"
     },
-    "seoKeywords": ["wireless earbuds", "bose earbuds", "noise cancelling headphones"]
+    "seoKeywords": [
+      "wireless earbuds",
+      "bose earbuds",
+      "noise cancelling headphones"
+    ]
   },
   {
-    "sellerId": "sellerT",
-    "id": 23,
+    "sellerEmail": "buynex@seller.com",
     "name": "Ergonomic Office Chair",
     "description": "Designed for maximum comfort and support during long working hours. Adjustable features for personalized comfort.",
     "oldPrice": 250.00,
@@ -657,7 +810,11 @@
     },
     "rating": 4.6,
     "reviews": 150,
-    "tags": ["New", "Comfort", "Office"],
+    "tags": [
+      "New",
+      "Comfort",
+      "Office"
+    ],
     "weight": 18.0,
     "dimensions": {
       "length": 60.0,
@@ -665,11 +822,14 @@
       "height": 120.0,
       "unit": "cm"
     },
-    "seoKeywords": ["office chair", "ergonomic chair", "desk chair"]
+    "seoKeywords": [
+      "office chair",
+      "ergonomic chair",
+      "desk chair"
+    ]
   },
   {
-    "sellerId": "sellerU",
-    "id": 24,
+    "sellerEmail": "buynex@seller.com",
     "name": "Gaming Mouse Pro",
     "description": "Achieve precision and speed with this high-performance gaming mouse, featuring customizable buttons and RGB lighting.",
     "oldPrice": 70.00,
@@ -686,7 +846,11 @@
     },
     "rating": 4.8,
     "reviews": 400,
-    "tags": ["Gaming", "Wireless", "New"],
+    "tags": [
+      "Gaming",
+      "Wireless",
+      "New"
+    ],
     "weight": 0.12,
     "dimensions": {
       "length": 12.0,
@@ -694,11 +858,14 @@
       "height": 4.0,
       "unit": "cm"
     },
-    "seoKeywords": ["gaming mouse", "wireless mouse", "logitech mouse"]
+    "seoKeywords": [
+      "gaming mouse",
+      "wireless mouse",
+      "logitech mouse"
+    ]
   },
   {
-    "id": 25,
-    "sellerId": "seller123",
+    "sellerEmail": "buynex@seller.com",
     "name": "Wireless Bluetooth Headphones",
     "description": "High-quality wireless Bluetooth headphones with noise cancellation, deep bass, and 20 hours of battery life.",
     "oldPrice": 79.99,
@@ -719,7 +886,12 @@
     },
     "rating": 4.5,
     "reviews": 245,
-    "tags": ["headphones", "wireless", "bluetooth", "audio"],
+    "tags": [
+      "headphones",
+      "wireless",
+      "bluetooth",
+      "audio"
+    ],
     "weight": 0.25,
     "dimensions": {
       "length": 20.0,
@@ -727,6 +899,11 @@
       "height": 8.0,
       "unit": "cm"
     },
-    "seoKeywords": ["New", "wireless headphones", "bluetooth headset", "noise cancelling"]
+    "seoKeywords": [
+      "New",
+      "wireless headphones",
+      "bluetooth headset",
+      "noise cancelling"
+    ]
   }
 ]

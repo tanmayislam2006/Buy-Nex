@@ -1,4 +1,5 @@
-import React, { use, useState } from "react";
+import React, {useState} from "react";
+import { PiChatsDuotone } from "react-icons/pi";
 import { Outlet, NavLink, useNavigate } from "react-router";
 import {
   FiMenu,
@@ -45,6 +46,7 @@ const DashboardLayout = () => {
     { to: "/add-product", label: "Add Product", icon: <FiBox /> },
     { to: "/manage-products", label: "Manage Products", icon: <FiClipboard /> },
     { to: "/ordered-products", label: "Ordered Products", icon: <FiBox /> },
+    { to: "/customer-chats", label: "Customer's Chat", icon: <PiChatsDuotone size={20} /> },
     { to: "/pending-sellers", label: "Pending Sellers", icon: <FiClipboard /> },
     { to: "/all-user", label: "All Users", icon: <FiUsers /> },
     { to: "/all-seller", label: "All Sellers", icon: <FiUsers /> },

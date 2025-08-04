@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/9a4a7b59-d856-4162-92e3-470105d419b0" alt="BuyNex Banner" width="800"/>
+  <img src="./client/src/assets/Banner/banner-2.png" alt="BuyNex Banner" width="800"/>
 </div>
 
 <h1 align="center">🛒 BuyNex E-Commerce Platform – AI Integration & Role-Based Features</h1>

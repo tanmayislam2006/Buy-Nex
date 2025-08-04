@@ -13,7 +13,7 @@ const Profile = () => {
   } else if (user.role === "customer" || !user.role) {
     return <UserProfile />;
   } else if (user.role === "seller") {
-    return <SellerProfile />;
+    return <UserProfile />;
   } else if (user.role === "admin") {
     return <AdminProfile />;
   }
