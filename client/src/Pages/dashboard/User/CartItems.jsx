@@ -41,100 +41,107 @@ const CartItems = () => {
     }
   };
   const handleBuyNow = (item) => {
-  navigate('/orderPage', { state: item });
-};
+    navigate('/orderPage', { state: item });
+  };
+
+  const handleUpdateQuantity = async (id, newQuantity) => {
+    if (newQuantity < 1) return;
+    try {
+      await axiosSecure.patch(`/cart/update/${id}`, { quantity: newQuantity });
+      refetch();
+    } catch (error) {
+      console.error("Quantity update error:", error);
+    }
+  };
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-20 pb-10">
-      <h2 className="text-2xl font-bold mb-6">Your Shopping Cart</h2>
-
-      {isLoading ? (
-        <Loading />
-      ) : cart.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-gray-500 mb-4">Your cart is empty.</p>
-          <Link
-            to="/all-products"
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition"
-          >
-            Continue Shopping
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-6">
+    <div className="max-w-7xl mx-auto px-4 pt-24 pb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Cart Items Section */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl shadow p-6">
+            <div className="flex items-center justify-between border-b pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked readOnly className="accent-primary" />
+                <span className="font-semibold text-gray-700">SELECT ALL ({cart.length} ITEM{cart.length !== 1 ? 'S' : ''})</span>
+              </div>
+              <button onClick={handleClearCart} className="text-gray-500 hover:text-red-500 flex items-center gap-1 font-medium">
+                <FaTrashAlt /> DELETE
+              </button>
+            </div>
             {cart.map((item) => (
-              <div
-                key={item._id}
-                className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white shadow-md p-4 rounded-lg"
-              >
-                {/* Product Info */}
-                <div className="flex items-center gap-4 w-full sm:w-2/3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded-md"
-                  />
-                  <div>
-                    <h4 className="text-lg font-semibold">{item.name}</h4>
-                    <p className="text-sm text-gray-600">
-                      Price: ${item.price}
-                    </p>
+              <div key={item._id} className="flex items-center justify-between gap-4 border-b py-4">
+                <div className="flex items-center gap-4 w-full">
+                  <input type="checkbox" checked readOnly className="accent-primary" />
+                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800">{item.name}</div>
+                    <div className="text-xs text-gray-500">No Brand, Color Family:Multicolor</div>
                   </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-3">
-                  <div className="flex gap-5 items-center">
-                    <p className="">{item.quantity}</p>
-                    <p className="font-semibold text-lg">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-primary font-bold text-lg">৳ {item.price}</span>
+                    <button className="text-gray-400 hover:text-primary"><span className="text-xl">♡</span></button>
+                    <button onClick={() => handleDelete(item._id)} className="text-gray-400 hover:text-red-500"><FaTrashAlt /></button>
                   </div>
-                  <div className="flex gap-5 items-center">
+                  <div className="flex items-center gap-2">
                     <button
-                     onClick={()=>handleBuyNow(item)}
-                      className="cursor-pointer bg-primary text-white px-4 py-1.5 rounded hover:bg-opacity-90 text-sm w-full sm:w-auto text-center"
+                      className="bg-gray-200 px-2 py-1 rounded text-lg font-bold"
+                      onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      title="Decrease quantity"
                     >
-                      Buy Now
+                      -
                     </button>
+                    <span className="font-semibold">{item.quantity}</span>
                     <button
-                      onClick={() => handleDelete(item._id)}
-                      className="text-red-500 hover:text-red-700"
-                      title="Remove Item"
+                      className="bg-gray-200 px-2 py-1 rounded text-lg font-bold"
+                      onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                      title="Increase quantity"
                     >
-                      <FaTrashAlt />
+                      +
                     </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Summary */}
-          <div className="mt-10 border-t pt-6 flex flex-col lg:flex-row justify-between items-center gap-6">
-            <div className="text-xl font-semibold">
-              Subtotal:{" "}
-              <span className="text-primary">${total.toFixed(2)}</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleClearCart}
-                className="bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600"
-              >
-                Clear Cart
+        </div>
+        {/* Order Summary Section */}
+        <div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <div className="mb-4">
+              <div className="text-gray-500 text-sm mb-2">Location</div>
+              <button className="text-primary font-medium flex items-center gap-1 text-sm mb-2">
+                <span className="material-icons">location_on</span> Add Shipping Address
               </button>
-              <button
-                onClick={()=>handleBuyNow(cart)}
-                className="bg-primary text-white px-6 py-2 rounded hover:bg-opacity-90 transition text-center"
-              >
-                Proceed to Checkout
-              </button>
+              <hr className="my-2" />
             </div>
+            <div className="mb-4">
+              <div className="font-semibold text-lg mb-2">Order Summary</div>
+              <div className="flex justify-between text-gray-700 mb-1">
+                <span>Subtotal ({cart.length} items)</span>
+                <span>৳ {total}</span>
+              </div>
+              <div className="flex justify-between text-gray-700 mb-1">
+                <span>Shipping Fee</span>
+                <span>৳ 80</span>
+              </div>
+            </div>
+            <div className="mb-4 flex gap-2">
+              <input type="text" placeholder="Enter Voucher Code" className="input input-bordered w-full" />
+              <button className="bg-blue-500 text-white px-6 rounded font-semibold">APPLY</button>
+            </div>
+            <div className="flex justify-between items-center font-bold text-lg mb-4">
+              <span>Total</span>
+              <span className="text-primary">৳ {total + 80}</span>
+            </div>
+            <button onClick={() => handleBuyNow(cart)} className="w-full bg-orange-500 text-white py-3 rounded font-semibold text-lg hover:bg-orange-600 transition">
+              PROCEED TO CHECKOUT ({cart.length})
+            </button>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
