@@ -36,7 +36,8 @@ io.on("connection", (socket) => {
     console.log("💬 New message", data);
 
     // Forward to the other user (based on sender)
-    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientEmail =
+      data.sender === "customer" ? sellerEmail : customerEmail;
     const recipientSocketId = users[recipientEmail];
 
     if (recipientSocketId) {
@@ -57,7 +58,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
 
 app.use(
   cors({
@@ -93,32 +93,6 @@ async function run() {
     const commentsCollection = BuyNexDB.collection("comments");
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
-    const shakilCollection = BuyNexDB.collection("addedFromShakil");
-
-
-
-app.post("/add-multiple-items", async (req, res) => {
-  const items = req.body; 
-
-  try {
-    if (!Array.isArray(items)) {
-      return res
-        .status(400)
-        .json({ error: "Data must be an array of objects." });
-    }
-
-    const result = await productsCollection.insertMany(items);
-
-    res.status(201).json({
-      message: `${result.insertedCount} items inserted successfully.`,
-      insertedIds: result.insertedIds,
-    });
-  } catch (error) {
-    console.error("Insert error:", error);
-    res.status(500).json({ error: "Failed to insert items." });
-  }
-});
-
 
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
@@ -349,6 +323,49 @@ app.post("/add-multiple-items", async (req, res) => {
         res.status(500).send({ message: "Failed to add item to cart" });
       }
     });
+
+    // single cart item delete
+    app.delete("/cart/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await cartCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting cart item:", error);
+        res.status(500).send({ message: "Failed to delete cart item" });
+      }
+    });
+
+    // product quentity update API
+    app.patch("/cart/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const { quantity } = req.body;
+      try {
+        const result = await cartCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { quantity } }
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        res.status(500).send({ message: "Failed to update quantity" });
+      }
+    });
+
+    // all cart item delete API 
+    app.delete("/cart/clear/:email", async (req, res) => {
+      const email = req.params.email;
+      try {
+        const result = await cartCollection.deleteMany({ userEmail: email });
+        res.send(result);
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        res.status(500).send({ message: "Failed to clear cart" });
+      }
+    });
+
     // -------------------------- PRODUCT API END -----------------------
     // -------------------------- PAYMENT  API END -----------------------
     //sslcommerz init
@@ -404,31 +421,36 @@ app.post("/add-multiple-items", async (req, res) => {
       }
     });
 
-    app.post("/payment/success/:orderNumber", async (req, res) => {
-      const { orderNumber } = req.params;
-      try {
-        const result = await orderCollection.updateOne(
-          { orderNumber },
-          {
-            $set: {
-              paymentStatus: "Paid",
-              status: "Order Placed",
-            },
-          }
-        );
-        const findOrder = await orderCollection.findOne({ orderNumber })
-        console.log(findOrder);
-
-        if (result.modifiedCount > 0) {
-          res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
-        } else {
-          res.status(404).send("Order not found");
-        }
-      } catch (err) {
-        console.error("Payment Success Error:", err);
-        res.status(500).send("Error updating order after payment success");
+app.post("/payment/success/:orderNumber", async (req, res) => {
+  const { orderNumber } = req.params;
+  try {
+    // 1. Update the order status
+    const result = await orderCollection.updateOne(
+      { orderNumber },
+      {
+        $set: {
+          paymentStatus: "Paid",
+          status: "Order Placed",
+        },
       }
+    );
+
+    // 2. Find the updated order
+    const findOrder = await orderCollection.findOne({ orderNumber });
+
+    // 3. Delete each product from the cart collection
+    const productIds = findOrder.products.map((product) => product._id);
+    const deleteResult = await cartCollection.deleteMany({
+      _id: { $in: productIds.map((id) => new ObjectId(id)) },
     });
+
+    // 4. Redirect if successful
+      res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+  } catch (err) {
+    console.error("Payment Success Error:", err);
+    res.status(500).send("Error updating order after payment success");
+  }
+});
 
     app.post("/payment/fail/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;

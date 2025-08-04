@@ -1,9 +1,10 @@
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useAxiosSecure from "../../../../Hooks/useAxiosSecure";
 import useAuth from "../../../../Hooks/useAuth";
+import { calculateShipping } from "../../../../Utils/Utils";
 
 const generateOrderId = (prefix = "BN") =>
   `ORD-${prefix}-${Math.floor(Math.random() * 1000)
@@ -34,15 +35,15 @@ const OrderPage = () => {
     ? [productData]
     : [];
   const subtotal = products.reduce(
-    (sum, p) => Math.ceil(sum + p.price * p.quantity),
+    (sum, p) => (sum + p.price * p.quantity),
     0
   );
-  const shippingCost = subtotal * 0.05;
-  const taxAmount = subtotal * 0.01;
+  const shippingCost = Math.ceil(calculateShipping(subtotal));
+  const taxAmount = Math.ceil(subtotal * 0.01);
   const discountAmount = 15;
-  const totalAmount = Math.ceil(
+  const totalAmount = (
     subtotal + shippingCost + taxAmount - discountAmount
-  );
+  ).toFixed(2);
 
   const {
     register,
@@ -81,7 +82,6 @@ const OrderPage = () => {
       updatedAt: new Date().toISOString(),
     };
     setOrderData(order);
-    console.log(order);
     toast.success("Order data save successfully");
   };
 
@@ -92,7 +92,6 @@ const OrderPage = () => {
         }
     try {
       axiosSecure.post("/ssl-payment-init", { orderData }).then((res) => {
-          console.log(res);
         window.location.replace(res.data);
       });
     } catch (error) {
@@ -103,7 +102,7 @@ const OrderPage = () => {
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 pt-20">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow space-y-4">
+        <div className="lg:col-span-2 sm:px-6 sm:pt-6 sm:rounded-lg sm:shadow space-y-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-4"
@@ -220,19 +219,24 @@ const OrderPage = () => {
               Save Delivery Information
             </button>
           </form>
-          <div className="mt-6 divide-y-2 divide-gray-200">
+          <div className="mt-6 divide-y divide-gray-200 border-t border-gray-200">
             {products.map((product, idx) => (
-              <div key={idx} className="py-4 flex justify-between text-sm">
-                <div className="flex items-center gap-4">
+              <div
+                key={idx}
+                className="py-4 px-2 flex items-center justify-between text-sm"
+              >
+                <div className="flex items-center gap-2 w-full">
                   <img
-                    className="w-16 h-16"
+                    className="w-10 h-10 sm:w-16 sm:h-16"
                     src={product.image}
                     alt={product.name}
                   />
-                  <p className="font-medium">{product.name}</p>
-                  <p className="text-gray-500">Qty: {product.quantity}</p>
+                  <p className="font-medium w-40 sm:min-w-60 sm:w-full">{product.name}</p>
+                  <p className="text-gray-500 w-16">Qty: {product.quantity}</p>
                 </div>
-                <p className="font-semibold">৳ {product.price}</p>
+                <p className="font-semibold w-16">
+                  $ {product.price * product.quantity}
+                </p>
               </div>
             ))}
           </div>
@@ -245,7 +249,7 @@ const OrderPage = () => {
           <div className="flex mb-4">
             <input
               placeholder="Enter Store/BuyNex Code"
-              className="input flex-1"
+              className="px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:border-primary flex-1"
             />
             <button
               type="button"
@@ -259,23 +263,23 @@ const OrderPage = () => {
           <div className="border-t border-gray-200 pt-4 text-sm space-y-1">
             <p className="flex justify-between">
               <span>Items Total ({products.length} Items)</span>
-              <span>৳ {subtotal}</span>
+              <span>$ {subtotal}</span>
             </p>
             <p className="flex justify-between">
               <span>Delivery Fee</span>
-              <span>৳ {shippingCost}</span>
+              <span>$ {shippingCost}</span>
             </p>
             <p className="flex justify-between">
               <span>Tax</span>
-              <span>৳ {taxAmount}</span>
+              <span>$ {taxAmount}</span>
             </p>
             <p className="flex justify-between">
               <span>Discount</span>
-              <span>- ৳ {discountAmount}</span>
+              <span>- $ {discountAmount}</span>
             </p>
             <p className="flex justify-between font-bold text-lg border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span>৳ {totalAmount}</span>
+              <span>$ {totalAmount}</span>
             </p>
             <p className="text-gray-500 text-xs mt-1">
               VAT included, where applicable
