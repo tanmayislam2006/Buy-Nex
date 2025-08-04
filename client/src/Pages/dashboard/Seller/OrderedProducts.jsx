@@ -1,13 +1,12 @@
-import React from 'react';
-import SellerChat from '../../../components/Chat/SellerChat';
+import React from "react";
+import ComingSoon from "../../../components/ComingSoon";
 
 const OrderedProducts = () => {
-  const sellerId = "seller123";
-    return (
-      <div>
-         <SellerChat sellerId={sellerId} />
-      </div>
-    );
+  return (
+    <div>
+      <ComingSoon />
+    </div>
+  );
 };
 
 export default OrderedProducts;

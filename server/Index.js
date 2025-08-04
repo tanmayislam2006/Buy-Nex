@@ -19,51 +19,45 @@ const io = new Server(server, {
   },
 });
 
-// Keep track of connected users { userId: socketId }
+// Handle socket connection
+// Map of active users: { email: socketId }
 const users = {};
 
-// Handle socket connection
 io.on("connection", (socket) => {
   console.log("⚡ New user connected:", socket.id);
 
-  // Register the user with their userId
-  socket.on("register", (userId) => {
-    users[userId] = socket.id;
-    console.log(`📌 Registered user ${userId} with socket ${socket.id}`);
+  socket.on("register", (email) => {
+    users[email] = socket.id;
+    console.log(`📌 Registered ${email} with socket ${socket.id}`);
   });
 
-  // Handle message sending from customer to seller
-  socket.on("send_message", async (data) => {
-    const { productId, sellerId, customerId, text, sender } = data;
+  socket.on("send_message", (data) => {
+    const { sellerEmail, customerEmail } = data;
+    console.log("💬 New message", data);
 
-    console.log("💬 New message received:", data);
+    // Forward to the other user (based on sender)
+    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientSocketId = users[recipientEmail];
 
-    // Determine who the receiver is
-    const receiverId = sender === "customer" ? sellerId : customerId;
-    const receiverSocketId = users[receiverId];
-
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receive_message", data);
-      console.log(`📨 Message sent to ${receiverId}`);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("receive_message", data);
+      console.log(`📨 Message sent to ${recipientEmail}`);
     } else {
-      console.log(`🚫 Receiver (${receiverId}) is not online`);
+      console.log(`🚫 ${recipientEmail} is not online`);
     }
-
-    // Optionally: You can save the message to DB here later
   });
 
-  // Handle user disconnect
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
-    for (const userId in users) {
-      if (users[userId] === socket.id) {
-        delete users[userId];
-        console.log(`🗑 Removed user ${userId} from active list`);
+    for (const email in users) {
+      if (users[email] === socket.id) {
+        delete users[email];
+        console.log(`🗑 Removed ${email} from active users`);
         break;
       }
     }
   });
 });
+
 
 app.use(
   cors({

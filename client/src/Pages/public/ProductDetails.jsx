@@ -451,11 +451,11 @@ const ProductDetails = () => {
                       </tr>
                     )}
 
-                    {product.sellerId && (
+                    {product.sellerEmail && (
                       <tr className="border-b border-gray-200">
                         <td className="px-4 py-2 w-1/3">Sold By</td>
                         <td className="px-4 py-2">
-                          {product.sellerId.replace("seller", "Seller ")}
+                          {product.sellerEmail}
                         </td>
                       </tr>
                     )}
@@ -512,8 +512,9 @@ const ProductDetails = () => {
       </div>
       <Chat
        productId={product?._id}
-       sellerId={product?.sellerId}
-       customerId={user?._id}
+       sellerEmail={product?.sellerEmail}
+       customerEmail={user?.email}
+       productName={product?.name}
       />
     </div>
   );
