@@ -36,7 +36,8 @@ io.on("connection", (socket) => {
     console.log("💬 New message", data);
 
     // Forward to the other user (based on sender)
-    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientEmail =
+      data.sender === "customer" ? sellerEmail : customerEmail;
     const recipientSocketId = users[recipientEmail];
 
     if (recipientSocketId) {
@@ -57,7 +58,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
 
 app.use(
   cors({
@@ -94,11 +94,10 @@ async function run() {
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
     const messagesCollection = BuyNexDB.collection("messages");
-
+    // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
     const users = {};
-
     io.on("connection", (socket) => {
       console.log("⚡ New user connected:", socket.id);
 
@@ -142,6 +141,7 @@ async function run() {
       });
     });
 
+    // -----------------------------SOCKET IO CODE END----------------
     // -------------------------- user api is here-----------------------
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -422,7 +422,7 @@ async function run() {
       }
     });
 
-    // all cart item delete API 
+    // all cart item delete API
     app.delete("/cart/clear/:email", async (req, res) => {
       const email = req.params.email;
       try {
@@ -435,7 +435,7 @@ async function run() {
     });
 
     // -------------------------- PRODUCT API END -----------------------
-    // -------------------------- PAYMENT  API END -----------------------
+    // -------------------------- PAYMENT  API START -----------------------
     //sslcommerz init
     app.post("/ssl-payment-init", async (req, res) => {
       const { orderData } = req.body;
@@ -489,36 +489,36 @@ async function run() {
       }
     });
 
-app.post("/payment/success/:orderNumber", async (req, res) => {
-  const { orderNumber } = req.params;
-  try {
-    // 1. Update the order status
-    const result = await orderCollection.updateOne(
-      { orderNumber },
-      {
-        $set: {
-          paymentStatus: "Paid",
-          status: "Order Placed",
-        },
+    app.post("/payment/success/:orderNumber", async (req, res) => {
+      const { orderNumber } = req.params;
+      try {
+        // 1. Update the order status
+        const result = await orderCollection.updateOne(
+          { orderNumber },
+          {
+            $set: {
+              paymentStatus: "Paid",
+              status: "Order Placed",
+            },
+          }
+        );
+
+        // 2. Find the updated order
+        const findOrder = await orderCollection.findOne({ orderNumber });
+
+        // 3. Delete each product from the cart collection
+        const productIds = findOrder.products.map((product) => product._id);
+        const deleteResult = await cartCollection.deleteMany({
+          _id: { $in: productIds.map((id) => new ObjectId(id)) },
+        });
+
+        // 4. Redirect if successful
+        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+      } catch (err) {
+        console.error("Payment Success Error:", err);
+        res.status(500).send("Error updating order after payment success");
       }
-    );
-
-    // 2. Find the updated order
-    const findOrder = await orderCollection.findOne({ orderNumber });
-
-    // 3. Delete each product from the cart collection
-    const productIds = findOrder.products.map((product) => product._id);
-    const deleteResult = await cartCollection.deleteMany({
-      _id: { $in: productIds.map((id) => new ObjectId(id)) },
     });
-
-    // 4. Redirect if successful
-      res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
-  } catch (err) {
-    console.error("Payment Success Error:", err);
-    res.status(500).send("Error updating order after payment success");
-  }
-});
 
     app.post("/payment/fail/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;
@@ -829,7 +829,22 @@ app.post("/payment/success/:orderNumber", async (req, res) => {
         }
       }
     );
+    // -------------------------- AI ASSISTANT  API START -----------------------
+    app.post("/api/ai-chat", async (req, res) => {
+      const { message } = req.body;
+      console.log(message);
+      const n8nResponse = await fetch("https://jaofor2390.app.n8n.cloud/webhook/read-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      // console.log(n8nResponse);
+      const data = await n8nResponse.json();
 
+      res.send({ reply: data.reply });
+    });
+
+    // -------------------------- AI ASSISTANT  API END -----------------------
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
