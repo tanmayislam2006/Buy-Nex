@@ -263,7 +263,7 @@ const OrderPage = () => {
           <div className="border-t border-gray-200 pt-4 text-sm space-y-1">
             <p className="flex justify-between">
               <span>Items Total ({products.length} Items)</span>
-              <span>$ {subtotal}</span>
+              <span>$ {(subtotal).toFixed(2)}</span>
             </p>
             <p className="flex justify-between">
               <span>Delivery Fee</span>
