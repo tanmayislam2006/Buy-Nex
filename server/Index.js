@@ -36,7 +36,8 @@ io.on("connection", (socket) => {
     console.log("💬 New message", data);
 
     // Forward to the other user (based on sender)
-    const recipientEmail = data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientEmail =
+      data.sender === "customer" ? sellerEmail : customerEmail;
     const recipientSocketId = users[recipientEmail];
 
     if (recipientSocketId) {
@@ -57,7 +58,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
 
 app.use(
   cors({
@@ -95,6 +95,10 @@ async function run() {
     const orderCollection = BuyNexDB.collection("orders");
 
     // -------------------------- user api is here-----------------------
+    app.get("/users", async (req, res) => {
+      const user = await usersCollection.find().toArray();
+      res.send(user);
+    });
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
