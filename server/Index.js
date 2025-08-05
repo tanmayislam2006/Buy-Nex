@@ -24,17 +24,12 @@ const io = new Server(server, {
 const users = {};
 
 io.on("connection", (socket) => {
-  console.log("⚡ New user connected:", socket.id);
-
   socket.on("register", (email) => {
     users[email] = socket.id;
-    console.log(`📌 Registered ${email} with socket ${socket.id}`);
   });
 
   socket.on("send_message", (data) => {
     const { sellerEmail, customerEmail } = data;
-    console.log("💬 New message", data);
-
     // Forward to the other user (based on sender)
     const recipientEmail =
       data.sender === "customer" ? sellerEmail : customerEmail;
@@ -42,9 +37,6 @@ io.on("connection", (socket) => {
 
     if (recipientSocketId) {
       io.to(recipientSocketId).emit("receive_message", data);
-      console.log(`📨 Message sent to ${recipientEmail}`);
-    } else {
-      console.log(`🚫 ${recipientEmail} is not online`);
     }
   });
 
