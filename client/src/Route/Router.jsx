@@ -34,6 +34,7 @@ import ProductStatus from "../Pages/dashboard/User/ProductStatus";
 import PaymentSuccess from "../Pages/dashboard/User/Order/PaymentSuccess";
 import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
 import CustomerChat from "../Pages/dashboard/Seller/CustomerChat";
+import AdminOverview from "../Pages/dashboard/Admin/AdminOverview";
 
 const router = createBrowserRouter([
   // Public routes
@@ -172,7 +173,7 @@ const router = createBrowserRouter([
       },
       {
         path: "dashboard/admin",
-        Component: Home,
+        Component: AdminOverview,
       },
       {
         path: "pending-sellers",
