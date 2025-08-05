@@ -831,11 +831,12 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
+      const sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
       const { message } = req.body;
       const n8nResponse = await fetch("https://jaofor2390.app.n8n.cloud/webhook/read-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message,sessionId }),
       });
       // console.log(n8nResponse);
       const data = await n8nResponse.json();
