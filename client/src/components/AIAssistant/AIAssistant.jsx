@@ -5,7 +5,7 @@ import { FaPaperPlane } from "react-icons/fa";
 import useAxios from "../../Hooks/useAxios";
 
 const AIAssistant = () => {
-    const axiosInstance=useAxios()
+  const axiosInstance=useAxios()
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Hi! I'm your AI shopping assistant. How can I help you today?" },
@@ -45,7 +45,7 @@ const AIAssistant = () => {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-20 right-6 w-5/12 h-9/12 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden z-40">
+        <div className="fixed bottom-20 right-6 w-5/12 h-8/12 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden z-40">
           <div className="bg-orange-500 text-white p-3 font-semibold">
             AI Assistant
           </div>
