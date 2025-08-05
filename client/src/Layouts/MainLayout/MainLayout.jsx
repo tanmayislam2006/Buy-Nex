@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "../../components/Navbar";
 import { Outlet } from "react-router";
 import Footer from "../../components/Footer";
+import AIAssistant from "../../components/AIAssistant/AIAssistant";
 
 const MainLayout = () => {
   return (
@@ -13,6 +14,7 @@ const MainLayout = () => {
       <footer>
         <Footer />
       </footer>
+      <AIAssistant/>
     </div>
   );
 };

@@ -1,13 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Link } from "react-router";
+import useAxios from "./../../Hooks/useAxios";
 
 const socket = io("http://localhost:5000"); // Change this for production
 
 const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
+  const axiosInstance = useAxios();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
+
+  // Fetch message history
+  useEffect(() => {
+    if (sellerEmail && customerEmail) {
+      axiosInstance
+        .get(`/messages/${sellerEmail}/${customerEmail}`)
+        .then((res) => {
+          setMessages(res.data);
+        });
+    }
+  }, [sellerEmail, customerEmail, axiosInstance]);
 
   // Register socket connection for customer
   useEffect(() => {
@@ -62,7 +75,7 @@ const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
   }
 
   return (
-    <div className="flex flex-col border border-gray-300 rounded-lg p-5 w-full max-w-md mx-auto h-[500px] shadow bg-white">
+    <div className="flex flex-col border border-gray-300 rounded-lg p-5 w-full max-w-sm mx-auto h-[500px] shadow bg-white">
       {/* Header with product info */}
       <div className="mb-4 border-b pb-3">
         <h2 className="text-lg font-semibold text-gray-800">

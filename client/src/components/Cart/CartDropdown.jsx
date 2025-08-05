@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router"; 
 
-const CartDropdown = ({ cartItems }) => {
+const CartDropdown = ({ cartItems, setShowCartDropdown }) => {
   return (
     <div className="absolute right-4 top-full mt-2 w-72 bg-white shadow-lg rounded-md p-4 z-50">
       <h4 className="font-semibold mb-2">Cart Preview</h4>
@@ -28,6 +28,7 @@ const CartDropdown = ({ cartItems }) => {
         )}
       </ul>
       <Link
+        onClick={() => setShowCartDropdown(false)}
         to="/cart"
         className="block mt-4 text-center text-sm font-semibold text-primary hover:underline"
       >
