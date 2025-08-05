@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 const Navbar = () => {
   const axiosInstance = useAxios();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logoutUser,firebaseUser } = useAuth();
+  const { user, logoutUser, firebaseUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const menu = [
@@ -33,9 +33,7 @@ const Navbar = () => {
     queryKey: ["cartItems"],
     queryFn: async () => {
       if (!user) return [];
-      const response = await axiosInstance.get(
-        `/cart/${firebaseUser?.email}`
-      );
+      const response = await axiosInstance.get(`/cart/${firebaseUser?.email}`);
       return response.data;
     },
   });
@@ -89,7 +87,12 @@ const Navbar = () => {
                   {cartItem?.length}
                 </span>
               </button>
-              {showCartDropdown && <CartDropdown cartItems={cartItem} />}
+              {showCartDropdown && (
+                <CartDropdown
+                  setShowCartDropdown={setShowCartDropdown}
+                  cartItems={cartItem}
+                />
+              )}
               {user ? (
                 <UserDropdown />
               ) : (

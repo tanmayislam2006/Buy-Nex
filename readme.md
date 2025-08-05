@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/9a4a7b59-d856-4162-92e3-470105d419b0" alt="BuyNex Banner" width="800"/>
+  <img src="./client/src/assets/Banner/banner-2.png" alt="BuyNex Banner" width="800"/>
 </div>
 
 <h1 align="center">🛒 BuyNex E-Commerce Platform – AI Integration & Role-Based Features</h1>
@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
   <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"/>
   <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
+  <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io"/>
 </div>
 
 ---
@@ -25,17 +26,18 @@ BuyNex is a full-featured, responsive e-commerce web application designed with m
 ## ✨ Key Features
 
 - **Multi-Role System:** Dedicated dashboards and features for Customers, Sellers, and Admins.
-- **AI-Powered Search:** Smart product search with autocomplete, typo correction, and recommendations.
-- **Personalized Recommendations:** Suggests products based on user behavior and browsing history.
-- **AI Chat Assistant:** 24/7 customer support via an intelligent chatbot.
-- **Automated Content Generation:** AI-powered tools for sellers to generate product titles and descriptions.
-- **Sales & Inventory Forecasting:** Predictive analytics for admins to forecast sales and manage inventory.
-- **Sentiment Analysis:** Summarizes and analyzes customer reviews to provide actionable insights.
-- **Image-Based Search:** Allows customers to search for products by uploading an image.
+- **Real-time Chat:** Customer-seller communication facilitated by Socket.io.
+- **Secure Authentication:** Firebase-powered authentication with role-based access control.
+- **Product Management:** Sellers can add, manage, and track their products.
+- **Order Management:** Users can view order history and track product status.
+- **Admin Dashboard:** Comprehensive dashboard for managing users, sellers, and orders.
+- **Payment Integration:** Supports online payments with SSLCommerz.
 
 ---
 
-## 🤖 AI Integration Features
+## 🤖 AI Integration Features (Vision)
+
+The following AI-powered features are part of the project's vision to enhance the user experience:
 
 | AI Feature                  | Description                                  | Target Role | Tech/API Suggestions          |
 | --------------------------- | -------------------------------------------- | ----------- | ----------------------------- |
@@ -54,22 +56,21 @@ BuyNex is a full-featured, responsive e-commerce web application designed with m
 ### 🛍️ Customer
 
 - Browse and filter products with ease.
-- Enjoy a smart search experience with AI-powered recommendations.
-- Get instant support from the AI-assisted chat for order and product queries.
-- View summarized reviews with sentiment analysis to make informed decisions.
+- Engage in real-time chat with sellers.
+- Track order history and payment status.
+- Securely checkout using integrated payment gateways.
 
 ### 🧑‍💼 Seller
 
-- Add and manage products with AI-generated descriptions.
-- Track orders, inventory, and customer questions in a dedicated dashboard.
-- Access AI-powered analytics to understand product popularity and market trends.
+- Add and manage products in a dedicated dashboard.
+- Communicate with customers via chat.
+- Track orders and manage inventory.
 
 ### 👑 Admin
 
-- Manage users, sellers, and overall platform activity.
-- Utilize AI-based content moderation for text and images.
-- Leverage sales trend predictions for strategic planning.
-- View sentiment analysis on customer reviews to monitor platform health.
+- Manage all users and sellers on the platform.
+- Oversee all orders and platform activity.
+- Manage seller verification and approvals.
 
 ---
 
@@ -77,7 +78,7 @@ BuyNex is a full-featured, responsive e-commerce web application designed with m
 
 ### Prerequisites
 
-- Node.js 
+- Node.js
 - npm or yarn
 - Git
 
@@ -102,7 +103,7 @@ BuyNex is a full-featured, responsive e-commerce web application designed with m
    ```
 
 4. **Set up environment variables:**
-   - Create a `.env` file in the `client` directory and add your Firebase and other client-side keys.
+   - Create a `.env.local` file in the `client` directory and add your Firebase and other client-side keys.
    - Create a `.env` file in the `server` directory and add your MongoDB connection string and other server-side keys.
 
 5. **Run the application:**
@@ -119,21 +120,18 @@ buynex/
 │   ├── src/
 │   │   ├── assets/
 │   │   ├── components/
-│   │   ├── context/
-│   │   ├── firebase/
-│   │   ├── hooks/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   └── ...
+│   │   ├── Context/
+│   │   ├── Firebase/
+│   │   ├── Hooks/
+│   │   ├── Layouts/
+│   │   ├── Pages/
+│   │   └── Route/
 │   ├── package.json
-│   └── ...
+│   └── vite.config.js
 └── server/
-    ├── controllers/
-    ├── models/
-    ├── routes/
-    ├── index.js
-    ├── package.json
-    └── ...
+    ├── data.js
+    ├── Index.js
+    └── package.json
 ```
 
 ---

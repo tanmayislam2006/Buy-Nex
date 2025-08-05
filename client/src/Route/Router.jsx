@@ -33,6 +33,7 @@ import OrderPage from "../Pages/dashboard/User/Order/OrderPage";
 import ProductStatus from "../Pages/dashboard/User/ProductStatus";
 import PaymentSuccess from "../Pages/dashboard/User/Order/PaymentSuccess";
 import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
+import CustomerChat from "../Pages/dashboard/Seller/CustomerChat";
 
 const router = createBrowserRouter([
   // Public routes
@@ -164,6 +165,10 @@ const router = createBrowserRouter([
       {
         path: "ordered-products",
         Component: OrderedProducts,
+      },
+      {
+        path: "customer-chats",
+        Component: CustomerChat,
       },
       {
         path: "dashboard/admin",
