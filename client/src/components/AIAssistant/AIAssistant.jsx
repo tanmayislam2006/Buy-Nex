@@ -21,8 +21,8 @@ const AIAssistant = () => {
 
     try {
       const res = await axiosInstance.post("/api/ai-chat", { message: input }); // You’ll connect this to your n8n webhook
+      console.log(res.data);
       const botReply = res.data.reply;
-
       setMessages((prev) => [...prev, { role: "assistant", text: botReply }]);
     } catch {
       setMessages((prev) => [
@@ -45,7 +45,7 @@ const AIAssistant = () => {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden z-40">
+        <div className="fixed bottom-20 right-6 w-5/12 h-9/12 bg-white rounded-xl shadow-lg flex flex-col overflow-hidden z-40">
           <div className="bg-orange-500 text-white p-3 font-semibold">
             AI Assistant
           </div>

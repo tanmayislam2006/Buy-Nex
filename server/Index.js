@@ -24,17 +24,12 @@ const io = new Server(server, {
 const users = {};
 
 io.on("connection", (socket) => {
-  console.log("⚡ New user connected:", socket.id);
-
   socket.on("register", (email) => {
     users[email] = socket.id;
-    console.log(`📌 Registered ${email} with socket ${socket.id}`);
   });
 
   socket.on("send_message", (data) => {
     const { sellerEmail, customerEmail } = data;
-    console.log("💬 New message", data);
-
     // Forward to the other user (based on sender)
     const recipientEmail =
       data.sender === "customer" ? sellerEmail : customerEmail;
@@ -42,9 +37,6 @@ io.on("connection", (socket) => {
 
     if (recipientSocketId) {
       io.to(recipientSocketId).emit("receive_message", data);
-      console.log(`📨 Message sent to ${recipientEmail}`);
-    } else {
-      console.log(`🚫 ${recipientEmail} is not online`);
     }
   });
 
@@ -831,17 +823,16 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
+      const sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
       const { message } = req.body;
-      console.log(message);
       const n8nResponse = await fetch("https://jaofor2390.app.n8n.cloud/webhook/read-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message,sessionId }),
       });
       // console.log(n8nResponse);
       const data = await n8nResponse.json();
-
-      res.send({ reply: data.reply });
+      res.send({ reply: data.output });
     });
 
     // -------------------------- AI ASSISTANT  API END -----------------------
