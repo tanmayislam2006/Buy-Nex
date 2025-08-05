@@ -234,8 +234,8 @@ const OrderPage = () => {
                   <p className="font-medium w-40 sm:min-w-60 sm:w-full">{product.name}</p>
                   <p className="text-gray-500 w-16">Qty: {product.quantity}</p>
                 </div>
-                <p className="font-semibold w-16">
-                  $ {product.price * product.quantity}
+                <p className="font-semibold w-20">
+                  $ {(product.price * product.quantity).toFixed(2)}
                 </p>
               </div>
             ))}
