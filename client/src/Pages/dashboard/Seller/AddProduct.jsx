@@ -1,11 +1,62 @@
-import React from "react";
-import ImageUpload from "../../../shared/ImageUpload";
+import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
-// import useAuth from "../../../Hooks/useAuth";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { MdDelete } from "react-icons/md";
+import ImageUpload from "../../../shared/ImageUpload";
 
 const AddProduct = () => {
-  // const {user}=useAuth()
   const { handleSubmit, register, watch } = useForm();
+  const [imageLinks, setImageLinks] = useState([]);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleImageUpload = (files) => {
+    files.forEach((file) => {
+      const apiKey = import.meta.env.VITE_IMMGBB_API_KEY;
+      const formData = new FormData();
+      formData.append("image", file);
+
+      axios
+        .post(`https://api.imgbb.com/1/upload?key=${apiKey}`, formData)
+        .then((response) => {
+          setImageLinks((prevLinks) => [...prevLinks, response.data.data.url]);
+          toast.success("Image uploaded successfully");
+        })
+        .catch((error) => {
+          console.error("Error uploading image:", error);
+          toast.error("Error uploading image");
+        });
+    });
+  };
+
+  const handleRemoveImage = (index) => {
+    setImageLinks((prevLinks) => prevLinks.filter((_, i) => i !== index));
+  };
+
+  const onDrop = useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+    const files = [...event.dataTransfer.files];
+    handleImageUpload(files);
+  }, []);
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(true);
+  }, []);
+
+  const onDragLeave = useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+  }, []);
+
+  const onFileSelect = (event) => {
+    const files = [...event.target.files];
+    handleImageUpload(files);
+  };
 
   const onSubmit = (data) => {
     const { length, width, height, unit, tags, ...product } = data;
@@ -16,6 +67,7 @@ const AddProduct = () => {
       unit,
     };
     product.tags = tags.split(",").map((e) => e.trim());
+    product.images = imageLinks;
     console.log(product);
   };
 
@@ -41,17 +93,44 @@ const AddProduct = () => {
               <label className="label">
                 <span className="label-text">Product Images</span>
               </label>
-              <div className="p-4 border-4">
-                <ImageUpload />
-                {/* <img className='h-32 w-32 rounded-xl object-cover' src="https://www.bigfootdigital.co.uk/wp-content/uploads/2020/07/image-optimisation-scaled.jpg" alt="" /> */}
-              </div>
-              <div>
+              <div
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                className={`relative group border-2 rounded-lg border-dashed p-4 ${
+                  isDragActive ? "border-blue-500" : "border-gray-300"
+                }`}
+              >
                 <input
-                  id="upload-image"
                   type="file"
+                  multiple
+                  onChange={onFileSelect}
                   className="hidden"
-                  accept="image/*"
+                  id="file-upload"
                 />
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <div className="flex justify-center">
+                  <ImageUpload isDragActive={isDragActive}/>
+                  </div>
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {imageLinks.map((link, idx) => (
+                  <div key={idx} className="relative">
+                    <img
+                      className="h-32 w-32 rounded-xl object-cover"
+                      src={link}
+                      alt="product image"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(idx)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <MdDelete size={20} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -291,33 +370,3 @@ const AddProduct = () => {
 };
 
 export default AddProduct;
-
-// export const ProductModel = {
-//   id: "string/UUID", =>sever
-//   sellerId: "string/UUID",=>waiting
-//   name: "string",  (done)
-//   description: "string",(done)
-//   price: "decimal/float",(done)
-//   currency: "string",(done)
-//   sku: "string",(done)
-//   inventory: "integer",(done)
-//   images: ["string (URL)"],(done)
-//   categoryId: "string/UUID",(done)
-//   brandId: "string/UUID",
-//   specifications: "object/JSONB", // Flexible schema for varying product attributes
-//   status: "enum/string", // 'Active', 'Draft', 'Pending Approval', 'Archived'
-//   createdAt: "timestamp", =>server time
-//   updatedAt: "timestamp", =>server time
-//   averageRating: "float", =>0
-//   totalReviews: "integer", =>0
-//   tags: ["string"], (done)
-//   weight: "float", =>string
-//   dimensions: {
-//     length: "float",
-//     width: "float",
-//     height: "float",
-//     unit: "string",
-//   },
-//   isFeatured: "boolean", =>false
-//   discountPercentage: "float", =>0
-// };
