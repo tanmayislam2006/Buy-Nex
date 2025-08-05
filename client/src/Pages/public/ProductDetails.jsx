@@ -3,13 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
 import { FaStar, FaBoxOpen, FaComments, FaShoppingCart } from "react-icons/fa";
-import { IoMdArrowRoundBack } from "react-icons/io";
+import { IoMdArrowRoundBack, IoMdChatboxes } from "react-icons/io";
 import Loading from "../../components/Loading";
 import { FiShoppingBag } from "react-icons/fi";
 import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
+import Chat from "../../components/Chat/Chat";
 
 const ProductDetails = () => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { user } = useAuth();
   const { id } = useParams();
   const axiosInstance = useAxios();
@@ -31,6 +33,8 @@ const ProductDetails = () => {
     },
     enabled: !!id,
   });
+
+  console.log(product);
 
   const { data: similarProducts = [], isLoading: isSimilarLoading } = useQuery({
     queryKey: ["similar-products", product?.category],
@@ -89,6 +93,17 @@ const ProductDetails = () => {
     } catch (error) {
       toast.error("Error adding item to cart: " + error.message);
     }
+  };
+
+
+  // Function to handle chat button click
+  const handleChat = () => {
+    if (!user) {
+      toast.error("Please log in to chat with the seller.");
+      navigate("/auth/login");
+      return;
+    }
+    setIsChatOpen(!isChatOpen);
   };
 
   // Helper functions
@@ -273,7 +288,7 @@ const ProductDetails = () => {
       <div className="flex items-center rounded-lg overflow-hidden">
         <button
           onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-          className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
+          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
           disabled={quantity <= 1}
         >
           -
@@ -281,7 +296,7 @@ const ProductDetails = () => {
         <span className="px-4 py-1 m-1 border border-neutral">{quantity}</span>
         <button
           onClick={() => setQuantity((prev) => prev + 1)}
-          className="px-3 py-1 bg-gray-100 hover:bg-gray-200"
+          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
           disabled={quantity >= product.inventory}
         >
           +
@@ -289,9 +304,10 @@ const ProductDetails = () => {
       </div>
       <button
         onClick={handleAddToCart}
-        className="btn btn-primary flex items-center gap-2"
+        className="btn btn-soft btn-primary flex items-center gap-2 duration-500"
       >
-        <FaShoppingCart /> Add to Cart
+        <FaShoppingCart />
+        <span className="hidden sm:inline"> Add to Cart</span>
       </button>
       <button
         onClick={handleBuyNow}
@@ -303,36 +319,34 @@ const ProductDetails = () => {
   );
 
   return (
-    <div className="py-8 lg:py-20  max-w-7xl mx-auto px-5 text-sm">
+    <div className="py-5 pb-15 lg:py-20 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 text-sm relative">
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
-        className="flex items-center gap-2 text-primary mb-6"
+        className="flex items-center gap-2 text-primary mb-6 cursor-pointer"
       >
         <IoMdArrowRoundBack /> Back to Products
       </button>
 
-      <div className="flex flex-col md:flex-row gap-8 border-b border-r border-gray-200 pb-10 pr-6 rounded">
+      <div className="flex flex-col md:flex-row gap-8 sm:border-b sm:border-r border-gray-200 pb-10 sm:pr-6 rounded">
         {/* Image Section */}
-        <div className="flex-1">{renderImageGallery()}</div>
+        <div className="w-full md:w-1/2">{renderImageGallery()}</div>
 
         {/* Product Info */}
-        <div className="flex-1 space-y-4">
+        <div className="w-full md:w-1/2 space-y-4">
           <div className="space-y-1">
-            <h1 className="text-xl  lg:text-3xl font-bold text-accent">
+            <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-accent">
               {product.name}
             </h1>
             {product.brand && product.brand !== "N/A" && (
-              <div className=" flex items-center gap-2 text-base">
-                <span className="font-semibold text-gray-600 ">Brand :</span>
+              <div className="flex items-center gap-2 text-sm md:text-base">
+                <span className="font-semibold text-gray-600">Brand :</span>
                 <span className="text-green-600 font-medium">
                   {product.brand}
                 </span>
               </div>
             )}
           </div>
-          {/* Brand Info */}
-
           <p className="text-gray-700">{product.description}</p>
           {renderTags()}
           {renderPriceSection()}
@@ -351,10 +365,10 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row mt-12 justify-between gap-10">
+      <div className="flex flex-col lg:flex-row mt-12 justify-between gap-10">
         {/* Specification Section */}
-        <div className=" flex-1">
-          <h3 className="font-bold text-accent text-2xl mb-8 pb-2 relative inline-block">
+        <div className="w-full lg:w-2/3">
+          <h3 className="font-bold text-accent text-xl sm:text-2xl mb-8 pb-2 relative inline-block">
             Product Details
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></span>
           </h3>
@@ -362,7 +376,7 @@ const ProductDetails = () => {
           <div className="grid gap-8">
             {/* Specification Table */}
             <div className="text-gray-700">
-              <h3 className="font-semibold text-xl mb-4 pb-2 relative inline-block group">
+              <h3 className="font-semibold text-lg sm:text-xl mb-4 pb-2 relative inline-block group">
                 Specification Information
                 <span className="absolute left-0 -bottom-0 w-0 group-hover:w-full h-[2px] bg-orange-500 transition-all duration-500 rounded-full"></span>
               </h3>
@@ -409,7 +423,7 @@ const ProductDetails = () => {
 
             {/* Additional Info Table */}
             <div className="text-gray-700">
-              <h3 className="font-semibold text-xl mb-4 pb-2 relative inline-block group">
+              <h3 className="font-semibold text-lg sm:text-xl mb-4 pb-2 relative inline-block group">
                 Additional Information
                 <span className="absolute left-0 -bottom-0 w-0 group-hover:w-full h-[2px] bg-orange-500 transition-all duration-300 rounded-full"></span>
               </h3>
@@ -450,12 +464,10 @@ const ProductDetails = () => {
                       </tr>
                     )}
 
-                    {product.sellerId && (
+                    {product.sellerEmail && (
                       <tr className="border-b border-gray-200">
                         <td className="px-4 py-2 w-1/3">Sold By</td>
-                        <td className="px-4 py-2">
-                          {product.sellerId.replace("seller", "Seller ")}
-                        </td>
+                        <td className="px-4 py-2">{product.sellerEmail}</td>
                       </tr>
                     )}
                   </tbody>
@@ -465,8 +477,8 @@ const ProductDetails = () => {
           </div>
         </div>
         {/* Right Side: Similar Products */}
-        <div>
-          <h3 className="font-bold text-2xl mb-6 pb-1 relative inline-block text-accent">
+        <div className="w-full lg:w-1/3">
+          <h3 className="font-bold text-xl sm:text-2xl mb-6 pb-1 relative inline-block text-accent">
             Similar Products
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></span>
           </h3>
@@ -483,7 +495,7 @@ const ProductDetails = () => {
                     "https://img.icons8.com/sf-regular-filled/96/shopping-cart.png"
                   }
                   alt={item.name}
-                  className="w-18 h-18 object-cover rounded"
+                  className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded"
                 />
                 <div className="flex-1">
                   <p className="text-sm font-medium line-clamp-1">
@@ -507,6 +519,37 @@ const ProductDetails = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      {/* Chat Button and Chat Popup */}
+      <div>
+        <button
+          onClick={handleChat}
+          className="btn btn-primary fixed bottom-5 border-none right-5 md:right-12 z-50 rounded-full text-2xl py-6 px-3 shadow-lg hover:bg-accent transition duration-300"
+        >
+          <IoMdChatboxes />
+        </button>
+        {/* Chat Popup Animation */}
+        <div
+          className={`fixed bottom-5 right-5 z-40`}
+          style={{
+            transform: isChatOpen
+              ? "scale(1) translateX(-20px) sm:translateX(-70px)"
+              : "scale(0.2) translateX(0) translateY(100px)",
+            opacity: isChatOpen ? 1 : 0,
+            pointerEvents: isChatOpen ? "auto" : "none",
+            transition:
+              "transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s",
+            transformOrigin: "bottom right",
+            maxWidth: "95vw",
+          }}
+        >
+          <Chat
+            productId={product?._id}
+            sellerEmail={product?.sellerEmail}
+            customerEmail={user?.email}
+            productName={product?.name}
+          />
         </div>
       </div>
     </div>

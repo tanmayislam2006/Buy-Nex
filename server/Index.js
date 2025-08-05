@@ -1,3 +1,5 @@
+const http = require("http");
+const { Server } = require("socket.io");
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
@@ -8,6 +10,47 @@ const app = express();
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false; //true for live, false for sandbox
+const server = http.createServer(app);
+
+// Initialize Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins (change for production)
+  },
+});
+
+// Handle socket connection
+// Map of active users: { email: socketId }
+const users = {};
+
+io.on("connection", (socket) => {
+  socket.on("register", (email) => {
+    users[email] = socket.id;
+  });
+
+  socket.on("send_message", (data) => {
+    const { sellerEmail, customerEmail } = data;
+    // Forward to the other user (based on sender)
+    const recipientEmail =
+      data.sender === "customer" ? sellerEmail : customerEmail;
+    const recipientSocketId = users[recipientEmail];
+
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("receive_message", data);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const email in users) {
+      if (users[email] === socket.id) {
+        delete users[email];
+        console.log(`🗑 Removed ${email} from active users`);
+        break;
+      }
+    }
+  });
+});
+
 app.use(
   cors({
     origin: [
@@ -42,18 +85,70 @@ async function run() {
     const commentsCollection = BuyNexDB.collection("comments");
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
+    const messagesCollection = BuyNexDB.collection("messages");
+    // -----------------------------SOCKET IO CODE END----------------
+    // Handle socket connection
+    // Map of active users: { email: socketId }
+    const users = {};
+    io.on("connection", (socket) => {
+      console.log("⚡ New user connected:", socket.id);
 
+      socket.on("register", (email) => {
+        users[email] = socket.id;
+        console.log(`📌 Registered ${email} with socket ${socket.id}`);
+      });
+
+      socket.on("send_message", async (data) => {
+        const { sellerEmail, customerEmail } = data;
+        console.log("💬 New message", data);
+
+        // Save message to the database
+        try {
+          await messagesCollection.insertOne(data);
+        } catch (error) {
+          console.error("Error saving message to database:", error);
+        }
+
+        // Forward to the other user (based on sender)
+        const recipientEmail =
+          data.sender === "customer" ? sellerEmail : customerEmail;
+        const recipientSocketId = users[recipientEmail];
+
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit("receive_message", data);
+          console.log(`📨 Message sent to ${recipientEmail}`);
+        } else {
+          console.log(`🚫 ${recipientEmail} is not online`);
+        }
+      });
+
+      socket.on("disconnect", () => {
+        for (const email in users) {
+          if (users[email] === socket.id) {
+            delete users[email];
+            console.log(`🗑 Removed ${email} from active users`);
+            break;
+          }
+        }
+      });
+    });
+
+    // -----------------------------SOCKET IO CODE END----------------
     // -------------------------- user api is here-----------------------
+    app.get("/users", async (req, res) => {
+      const user = await usersCollection.find().toArray();
+      res.send(user);
+    });
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       res.send(user);
     });
-    app.get("/order-history/:userEmail",async (req,res)=>{
-      const {userEmail}=req.params
-      const orderHistory=await orderCollection.find({userEmail}).toArray()
-      res.send(orderHistory)
+    app.get("/order-history/:userEmail", async (req, res) => {
+      const { userEmail } = req.params;
+      const orderHistory = await orderCollection.find({ userEmail }).toArray();
+      res.send(orderHistory);
     });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
@@ -64,6 +159,26 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    // Get messages between a seller and a customer
+    app.get("/messages/:sellerEmail/:customerEmail", async (req, res) => {
+      const { sellerEmail, customerEmail } = req.params;
+      try {
+        const messages = await messagesCollection
+          .find({
+            $or: [
+              { sellerEmail, customerEmail },
+              { sellerEmail: customerEmail, customerEmail: sellerEmail },
+            ],
+          })
+          .sort({ timestamp: 1 })
+          .toArray();
+        res.send(messages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).send({ message: "Failed to fetch messages" });
+      }
     });
 
     app.put("/user/:email", async (req, res) => {
@@ -272,8 +387,51 @@ async function run() {
         res.status(500).send({ message: "Failed to add item to cart" });
       }
     });
+
+    // single cart item delete
+    app.delete("/cart/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const result = await cartCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting cart item:", error);
+        res.status(500).send({ message: "Failed to delete cart item" });
+      }
+    });
+
+    // product quentity update API
+    app.patch("/cart/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const { quantity } = req.body;
+      try {
+        const result = await cartCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { quantity } }
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        res.status(500).send({ message: "Failed to update quantity" });
+      }
+    });
+
+    // all cart item delete API
+    app.delete("/cart/clear/:email", async (req, res) => {
+      const email = req.params.email;
+      try {
+        const result = await cartCollection.deleteMany({ userEmail: email });
+        res.send(result);
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        res.status(500).send({ message: "Failed to clear cart" });
+      }
+    });
+
     // -------------------------- PRODUCT API END -----------------------
-    // -------------------------- PAYMENT  API END -----------------------
+    // -------------------------- PAYMENT  API START -----------------------
     //sslcommerz init
     app.post("/ssl-payment-init", async (req, res) => {
       const { orderData } = req.body;
@@ -286,26 +444,30 @@ async function run() {
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
-        product_name: "Computer.",
+        product_name: "Multiple Products",
         product_category: "Electronic",
         product_profile: "general",
-        cus_name: orderData.userEmail,
-        cus_email: orderData.userEmail,
-        cus_add1: orderData?.shippingAddress?.street,
-        cus_add2: "",
-        cus_city: orderData?.shippingAddress?.city,
-        cus_state: orderData?.shippingAddress?.state,
-        cus_postcode: orderData?.shippingAddress?.zipCode,
+
+        // ✅ Customer Info
+        cus_name: orderData.shippingAddress?.name || orderData.userEmail,
+        cus_email: orderData.shippingAddress?.email || orderData.userEmail,
+        cus_add1: orderData.shippingAddress?.street || "N/A",
+        cus_add2: orderData.shippingAddress?.area || "",
+        cus_city: orderData.shippingAddress?.city || "City",
+        cus_state: orderData.shippingAddress?.region || "",
+        cus_postcode: "0000", // <-- placeholder since zipCode nai
         cus_country: "Bangladesh",
-        cus_phone: orderData?.shippingAddress?.phone,
+        cus_phone: orderData.shippingAddress?.phone || "N/A",
         cus_fax: "",
-        ship_name: "Customer Name",
-        ship_add1: orderData?.shippingAddress?.street,
-        ship_add2: "",
-        ship_city: orderData?.shippingAddress?.city,
-        ship_state: orderData?.shippingAddress?.state,
-        ship_postcode: orderData?.shippingAddress?.zipCode,
-        ship_country: orderData?.shippingAddress?.country,
+
+        // ✅ Shipping Info (can use same)
+        ship_name: orderData.shippingAddress?.name || orderData.userEmail,
+        ship_add1: orderData.shippingAddress?.street || "N/A",
+        ship_add2: orderData.shippingAddress?.area || "",
+        ship_city: orderData.shippingAddress?.city || "City",
+        ship_state: orderData.shippingAddress?.region || "",
+        ship_postcode: "0000",
+        ship_country: "Bangladesh",
       };
 
       const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
@@ -314,16 +476,19 @@ async function run() {
         const apiResponse = await sslcz.init(data);
         let GatewayPageURL = apiResponse.GatewayPageURL;
         res.send(GatewayPageURL);
-        // Save order to DB
+
+        // Save order in DB
         await orderCollection.insertOne(orderData);
       } catch (error) {
         console.error("Init Payment Error:", error);
         res.status(500).send({ error: "Failed to initialize payment" });
       }
     });
+
     app.post("/payment/success/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;
       try {
+        // 1. Update the order status
         const result = await orderCollection.updateOne(
           { orderNumber },
           {
@@ -334,11 +499,17 @@ async function run() {
           }
         );
 
-        if (result.modifiedCount > 0) {
-          res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
-        } else {
-          res.status(404).send("Order not found");
-        }
+        // 2. Find the updated order
+        const findOrder = await orderCollection.findOne({ orderNumber });
+
+        // 3. Delete each product from the cart collection
+        const productIds = findOrder.products.map((product) => product._id);
+        const deleteResult = await cartCollection.deleteMany({
+          _id: { $in: productIds.map((id) => new ObjectId(id)) },
+        });
+
+        // 4. Redirect if successful
+        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
       } catch (err) {
         console.error("Payment Success Error:", err);
         res.status(500).send("Error updating order after payment success");
@@ -654,7 +825,21 @@ async function run() {
         }
       }
     );
+    // -------------------------- AI ASSISTANT  API START -----------------------
+    app.post("/api/ai-chat", async (req, res) => {
+      const sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      const { message } = req.body;
+      const n8nResponse = await fetch("https://jaofor2390.app.n8n.cloud/webhook/read-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message,sessionId }),
+      });
+      // console.log(n8nResponse);
+      const data = await n8nResponse.json();
+      res.send({ reply: data.output });
+    });
 
+    // -------------------------- AI ASSISTANT  API END -----------------------
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -664,7 +849,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
+server.listen(port, () => {
   const time = new Date().toLocaleTimeString();
-  console.log(`Server is running on ${time} port http://localhost:${port}`);
+  console.log(`🚀 Server is running on http://localhost:${port} at ${time}`);
 });
