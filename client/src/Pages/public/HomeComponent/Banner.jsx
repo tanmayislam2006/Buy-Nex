@@ -74,8 +74,7 @@ const Banner = () => {
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         loop={true}
         speed={1000}
-        className="mySwiper h-full"
-      >
+        className="mySwiper h-full">
         {bannerDetails.map((banner) => (
           <SwiperSlide key={banner.id} className="relative h-full">
             <div
@@ -84,14 +83,12 @@ const Banner = () => {
                 backgroundImage: `url('${banner.image}')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-              }}
-            >
+              }}>
               <motion.div
                 className="p-8 max-w-xl"
                 initial={{ opacity: 0, x: -100 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
+                transition={{ duration: 0.5 }}>
                 <span className="text-xl font-medium rounded-2xl block mb-2">
                   {banner.subtitle}
                 </span>
@@ -103,8 +100,7 @@ const Banner = () => {
                   href={banner.cta.link}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold transition duration-300 inline-block"
-                >
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-semibold transition duration-300 inline-block">
                   {banner.cta.text}
                 </motion.a>
               </motion.div>
