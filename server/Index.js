@@ -19,38 +19,6 @@ const io = new Server(server, {
   },
 });
 
-// Handle socket connection
-// Map of active users: { email: socketId }
-const users = {};
-
-io.on("connection", (socket) => {
-  socket.on("register", (email) => {
-    users[email] = socket.id;
-  });
-
-  socket.on("send_message", (data) => {
-    const { sellerEmail, customerEmail } = data;
-    // Forward to the other user (based on sender)
-    const recipientEmail =
-      data.sender === "customer" ? sellerEmail : customerEmail;
-    const recipientSocketId = users[recipientEmail];
-
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit("receive_message", data);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    for (const email in users) {
-      if (users[email] === socket.id) {
-        delete users[email];
-        console.log(`🗑 Removed ${email} from active users`);
-        break;
-      }
-    }
-  });
-});
-
 app.use(
   cors({
     origin: [
@@ -91,24 +59,17 @@ async function run() {
     // Map of active users: { email: socketId }
     const users = {};
     io.on("connection", (socket) => {
-      console.log("⚡ New user connected:", socket.id);
-
       socket.on("register", (email) => {
         users[email] = socket.id;
-        console.log(`📌 Registered ${email} with socket ${socket.id}`);
       });
-
       socket.on("send_message", async (data) => {
         const { sellerEmail, customerEmail } = data;
-        console.log("💬 New message", data);
-
         // Save message to the database
         try {
           await messagesCollection.insertOne(data);
         } catch (error) {
           console.error("Error saving message to database:", error);
         }
-
         // Forward to the other user (based on sender)
         const recipientEmail =
           data.sender === "customer" ? sellerEmail : customerEmail;
@@ -116,9 +77,6 @@ async function run() {
 
         if (recipientSocketId) {
           io.to(recipientSocketId).emit("receive_message", data);
-          console.log(`📨 Message sent to ${recipientEmail}`);
-        } else {
-          console.log(`🚫 ${recipientEmail} is not online`);
         }
       });
 
@@ -126,7 +84,6 @@ async function run() {
         for (const email in users) {
           if (users[email] === socket.id) {
             delete users[email];
-            console.log(`🗑 Removed ${email} from active users`);
             break;
           }
         }
@@ -827,16 +784,59 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
-      const sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-      const { message } = req.body;
-      const n8nResponse = await fetch("https://jaofor2390.app.n8n.cloud/webhook/read-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message,sessionId }),
-      });
-      // console.log(n8nResponse);
-      const data = await n8nResponse.json();
-      res.send({ reply: data.output });
+      const { message  } = req.body; 
+      try {
+        const n8nResponse = await fetch(
+          "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message }), // Pass the user's UID as sessionId to n8n
+          }
+        );
+
+        // Error handling for n8n response
+        if (!n8nResponse.ok) {
+          const errorText = await n8nResponse.text();
+          console.error(
+            `n8n webhook responded with status ${n8nResponse.status}: ${errorText}`
+          );
+          return res
+            .status(n8nResponse.status)
+            .send({ error: "Error from AI service", details: errorText });
+        }
+
+        const contentType = n8nResponse.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const rawText = await n8nResponse.text();
+          console.error(
+            "n8n webhook did not respond with JSON. Raw response:",
+            rawText
+          );
+          return res.status(500).send({
+            error: "AI service did not return a valid JSON response.",
+          });
+        }
+
+        const data = await n8nResponse.json();
+        // Ensure 'output' property exists in the response from n8n
+        if (data && data.output) {
+          res.send({ reply: data.output });
+        } else {
+          console.error(
+            "n8n response did not contain an 'output' property:",
+            data
+          );
+          res.status(500).send({
+            error: "AI service response malformed or missing 'output'.",
+          });
+        }
+      } catch (error) {
+        console.error("Error communicating with n8n webhook:", error);
+        res.status(500).send({
+          error: "Failed to connect to AI service or parse its response.",
+        });
+      }
     });
 
     // -------------------------- AI ASSISTANT  API END -----------------------

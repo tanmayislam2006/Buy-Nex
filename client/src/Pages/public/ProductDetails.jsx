@@ -517,7 +517,7 @@ const ProductDetails = () => {
         <div
           className={`fixed bottom-5 right-5 z-40`}
           style={{
-            transform: isChatOpen ? "scale(1) " : "scale(0.2) translateX(0) ",
+            transform: isChatOpen ? "scale(1)" : "scale(0.2)",
             opacity: isChatOpen ? 1 : 0,
             pointerEvents: isChatOpen ? "auto" : "none",
             transition:
