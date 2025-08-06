@@ -1,6 +1,7 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode } from "swiper/modules";
+import { motion } from "framer-motion";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -149,23 +150,22 @@ const products = [
     liked: false,
   },
 ];
-
 const NewArrival = () => {
   return (
     <div className="w-full py-10">
       <div className="container mx-auto px-4">
-        <h4 className="font-semibold text-3xl text-center">
-          New <span className="text-primary">Arrival</span>
+        <h4 className="font-semibold text-3xl text-center mb-2">
+          New <span className="text-orange-500">Arrival</span>
         </h4>
         <div className="divider my-4"></div>
 
         <Swiper
-          spaceBetween={30}
-          //   freeMode={true}
-          autoplay={{ delay: 1000, disableOnInteraction: false }}
-          modules={[Autoplay]}
+          spaceBetween={24}
+          freeMode={true}
+          autoplay={{ delay: 2000, disableOnInteraction: false }}
+          modules={[Autoplay, FreeMode]}
           loop={true}
-          speed={2000}
+          speed={1200}
           breakpoints={{
             320: { slidesPerView: 1.2 },
             480: { slidesPerView: 2 },
@@ -179,7 +179,14 @@ const NewArrival = () => {
         >
           {products.map((product, index) => (
             <SwiperSlide key={index} className="flex justify-center">
-              <ProductCard product={product} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
             </SwiperSlide>
           ))}
         </Swiper>
@@ -187,4 +194,5 @@ const NewArrival = () => {
     </div>
   );
 };
+
 export default NewArrival;

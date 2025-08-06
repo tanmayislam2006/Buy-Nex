@@ -4,11 +4,16 @@ import NewArrival from "./HomeComponent/NewArrival";
 import WhatWeOffer from "./HomeComponent/WhatWeOffer";
 import LimitedOffer from "./HomeComponent/LimitedOffer";
 import TopShop from "./HomeComponent/TopShop";
+import Banner from "./HomeComponent/Banner";
 
 const Home = () => {
   return (
     <div className="min-h-screen  bg-[#e1e4e9]">
-      <ComingSoon showBack={false} />
+      {/* <ComingSoon showBack={false} /> */}
+
+      <section>
+        <Banner />
+      </section>
 
       <section>
         <NewArrival />
