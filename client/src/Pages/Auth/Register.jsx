@@ -33,6 +33,7 @@ const Register = () => {
           lastLogin: new Date().toISOString(),
           isVerified: false,
           role: "customer",
+          uid: result.user.uid,
         };
         await axiosInstance.post("/register", profileInfo);
         await refetchUserData();
@@ -63,6 +64,7 @@ const Register = () => {
           isVerified: false,
           createdAt,
           lastLogin,
+          uid: res.user.uid,
         };
         await axiosInstance.post("/register", profileInfo);
         await refetchUserData();
