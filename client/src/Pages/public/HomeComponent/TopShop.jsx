@@ -115,7 +115,7 @@ const shops = [
 
 const TopShop = () => {
   return (
-    <div className="bg-white rounded-lg shadow-md">
+    <div className="bg-white rounded-2xl shadow-md">
       <div className="p-6">
         <h2 className="text-3xl font-bold text-center mb-4"><span className="text-primary">Top</span> Shops</h2>
         <p className="text-gray-600 text-center">
