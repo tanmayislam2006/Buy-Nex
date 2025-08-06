@@ -234,8 +234,8 @@ const OrderPage = () => {
                   <p className="font-medium w-40 sm:min-w-60 sm:w-full">{product.name}</p>
                   <p className="text-gray-500 w-16">Qty: {product.quantity}</p>
                 </div>
-                <p className="font-semibold w-16">
-                  $ {product.price * product.quantity}
+                <p className="font-semibold w-20">
+                  $ {(product.price * product.quantity).toFixed(2)}
                 </p>
               </div>
             ))}
@@ -263,7 +263,7 @@ const OrderPage = () => {
           <div className="border-t border-gray-200 pt-4 text-sm space-y-1">
             <p className="flex justify-between">
               <span>Items Total ({products.length} Items)</span>
-              <span>$ {subtotal}</span>
+              <span>$ {(subtotal).toFixed(2)}</span>
             </p>
             <p className="flex justify-between">
               <span>Delivery Fee</span>

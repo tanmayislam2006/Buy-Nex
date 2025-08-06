@@ -95,7 +95,6 @@ const ProductDetails = () => {
     }
   };
 
-
   // Function to handle chat button click
   const handleChat = () => {
     if (!user) {
@@ -142,8 +141,7 @@ const ProductDetails = () => {
                   ? "btn-primary border-primary"
                   : "text-accent"
               }
-            `}
-            >
+            `}>
               {color}
             </button>
           ))}
@@ -177,8 +175,7 @@ const ProductDetails = () => {
                 selectedImage === i
                   ? "border-primary border-2"
                   : "border border-gray-200 "
-              }`}
-            >
+              }`}>
               <img
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
@@ -238,8 +235,7 @@ const ProductDetails = () => {
           size={18}
         />
         <span
-          className={product.inventory > 0 ? "text-green-600" : "text-red-500"}
-        >
+          className={product.inventory > 0 ? "text-green-600" : "text-red-500"}>
           {product.inventory > 0
             ? `${product.inventory} In Stock`
             : "Out of Stock"}
@@ -274,8 +270,7 @@ const ProductDetails = () => {
         {product.tags.map((tag, idx) => (
           <span
             key={idx}
-            className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full hover:bg-green-100 cursor-pointer transition"
-          >
+            className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full hover:bg-green-100 cursor-pointer transition">
             #{tag}
           </span>
         ))}
@@ -289,30 +284,26 @@ const ProductDetails = () => {
         <button
           onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
           className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
-          disabled={quantity <= 1}
-        >
+          disabled={quantity <= 1}>
           -
         </button>
         <span className="px-4 py-1 m-1 border border-neutral">{quantity}</span>
         <button
           onClick={() => setQuantity((prev) => prev + 1)}
           className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer"
-          disabled={quantity >= product.inventory}
-        >
+          disabled={quantity >= product.inventory}>
           +
         </button>
       </div>
       <button
         onClick={handleAddToCart}
-        className="btn btn-soft btn-primary flex items-center gap-2 duration-500"
-      >
+        className="btn btn-soft btn-primary flex items-center gap-2 duration-500">
         <FaShoppingCart />
         <span className="hidden sm:inline"> Add to Cart</span>
       </button>
       <button
         onClick={handleBuyNow}
-        className="btn bg-green-700 hover:bg-green-800 text-white btn-soft flex items-center gap-2 duration-500 transition"
-      >
+        className="btn bg-green-700 hover:bg-green-800 text-white btn-soft flex items-center gap-2 duration-500 transition">
         <FiShoppingBag /> Buy now
       </button>
     </div>
@@ -323,8 +314,7 @@ const ProductDetails = () => {
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
-        className="flex items-center gap-2 text-primary mb-6 cursor-pointer"
-      >
+        className="flex items-center gap-2 text-primary mb-6 cursor-pointer">
         <IoMdArrowRoundBack /> Back to Products
       </button>
 
@@ -388,8 +378,7 @@ const ProductDetails = () => {
                         <tr>
                           <td
                             colSpan="2"
-                            className="bg-orange-50 text-primary font-semibold px-4 py-2"
-                          >
+                            className="bg-orange-50 text-primary font-semibold px-4 py-2">
                             Product Specifications
                           </td>
                         </tr>
@@ -400,8 +389,7 @@ const ProductDetails = () => {
                     <tr>
                       <td
                         colSpan="2"
-                        className="bg-orange-50 text-primary font-semibold px-4 py-2"
-                      >
+                        className="bg-orange-50 text-primary font-semibold px-4 py-2">
                         Physical Details
                       </td>
                     </tr>
@@ -433,8 +421,7 @@ const ProductDetails = () => {
                     <tr>
                       <td
                         colSpan={2}
-                        className="bg-orange-50 text-primary font-semibold px-4 py-2"
-                      >
+                        className="bg-orange-50 text-primary font-semibold px-4 py-2">
                         Details
                       </td>
                     </tr>
@@ -454,8 +441,7 @@ const ProductDetails = () => {
                             {product.seoKeywords.map((keyword, i) => (
                               <span
                                 key={i}
-                                className="px-2 py-1 bg-gray-100 rounded text-xs"
-                              >
+                                className="px-2 py-1 bg-gray-100 rounded text-xs">
                                 {keyword}
                               </span>
                             ))}
@@ -487,8 +473,7 @@ const ProductDetails = () => {
               <div
                 key={item._id}
                 className="flex gap-4 p-3 border border-secondary rounded-lg hover:shadow-sm shadow-secondary duration-500 transition cursor-pointer"
-                onClick={() => navigate(`/product-details/${item._id}`)}
-              >
+                onClick={() => navigate(`/product-details/${item._id}`)}>
                 <img
                   src={
                     item.images?.[0] ||
@@ -525,25 +510,21 @@ const ProductDetails = () => {
       <div>
         <button
           onClick={handleChat}
-          className="btn btn-primary fixed bottom-5 border-none right-5 md:right-12 z-50 rounded-full text-2xl py-6 px-3 shadow-lg hover:bg-accent transition duration-300"
-        >
+          className="btn btn-primary fixed bottom-5 border-none right-5 md:right-12 z-50 rounded-full text-2xl py-6 px-3 shadow-lg hover:bg-accent transition duration-300">
           <IoMdChatboxes />
         </button>
         {/* Chat Popup Animation */}
         <div
           className={`fixed bottom-5 right-5 z-40`}
           style={{
-            transform: isChatOpen
-              ? "scale(1) translateX(-20px) sm:translateX(-70px)"
-              : "scale(0.2) translateX(0) translateY(100px)",
+            transform: isChatOpen ? "scale(1) " : "scale(0.2) translateX(0) ",
             opacity: isChatOpen ? 1 : 0,
             pointerEvents: isChatOpen ? "auto" : "none",
             transition:
               "transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s",
             transformOrigin: "bottom right",
             maxWidth: "95vw",
-          }}
-        >
+          }}>
           <Chat
             productId={product?._id}
             sellerEmail={product?.sellerEmail}
