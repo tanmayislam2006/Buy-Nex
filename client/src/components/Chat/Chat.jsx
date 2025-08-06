@@ -75,41 +75,73 @@ const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
   }
 
   return (
-    <div className="flex flex-col border border-gray-300 rounded-lg p-5 w-full max-w-sm mx-auto h-[500px] shadow bg-white">
-      {/* Header with product info */}
-      <div className="mb-4 border-b pb-3">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Chat about: <span className="text-green-600">{productName}</span>
-        </h2>
-        <p className="text-sm text-gray-500">
-          Product ID:{" "}
-          <span className="font-mono text-gray-700">{productId}</span>
-        </p>
+    <div className="flex flex-col border border-gray-200 rounded-xl p-6 w-full max-w-md mx-auto h-[520px] shadow-lg bg-white relative">
+      {/* Chat tail */}
+      <div className="absolute -bottom-3 right-4 w-6 h-6 bg-white rotate-45 z-10 border-b border-r border-gray-200"></div>
+      {/* Header */}
+      <div className="mb-5 border-b border-gray-300 pb-4 flex items-center gap-3">
+        <div className="bg-orange-100 rounded-full w-10 h-10 flex items-center justify-center">
+          <svg
+            width="24"
+            height="24"
+            fill="none"
+            stroke="#F85606"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12h8M12 8v8" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-800">
+            Chat about: <span className="text-primary">{productName}</span>
+          </h2>
+          <p className="text-xs text-gray-500">
+            Product ID:{" "}
+            <span className="font-mono text-gray-700">{productId}</span>
+          </p>
+        </div>
       </div>
 
-      {/* Messages box */}
-      <div className="flex-grow overflow-y-auto border rounded-md p-4 bg-gray-50">
+      {/* Messages */}
+      <div className="flex-grow overflow-auto">
         {messages.length === 0 ? (
-          <p className="text-center text-gray-500">No messages yet</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <svg
+              width="40"
+              height="40"
+              fill="none"
+              stroke="gray"
+              strokeWidth="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p className="mt-2">No messages yet</p>
+          </div>
         ) : (
           messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`mb-3 flex flex-col ${
+              className={`mb-4 flex flex-col ${
                 msg.sender === "customer" ? "items-end" : "items-start"
               }`}
             >
               <span
-                className={`px-4 py-2 rounded-lg max-w-xs break-words shadow ${
+                className={`px-4 py-2 rounded-md max-w-xs break-words shadow-md ${
                   msg.sender === "customer"
-                    ? "bg-green-500 text-white"
+                    ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-800"
                 }`}
               >
                 {msg.text}
               </span>
               <small className="text-xs text-gray-400 mt-1">
-                {new Date(msg.timestamp).toLocaleTimeString()}
+                {new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </small>
             </div>
           ))
@@ -117,20 +149,20 @@ const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input and send */}
-      <div className="mt-4 flex gap-2">
+      {/* Input */}
+      <div className="mt-5 flex gap-2">
         <input
           type="text"
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+          className="w-full px-4 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim()}
-          className="btn btn-primary"
+          className="btn btn-primary text-white font-semibold disabled:bg-gray-400 disabled:text-gray-300 cursor-pointer"
         >
           Send
         </button>

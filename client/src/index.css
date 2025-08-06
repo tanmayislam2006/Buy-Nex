@@ -19,3 +19,14 @@
 body {
   overflow-x: hidden;
 }
+
+.product-chat-icon::after{
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  rotate: 45deg;
+  background-color: white;
+}
