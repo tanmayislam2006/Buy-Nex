@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./Component/ProductCard";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { motion } from "framer-motion";
+import Pagination from "../../../shared/Pagination";
 
 const products = [
   {
@@ -144,7 +148,6 @@ const products = [
     liked: false,
   },
 ];
-
 const LimitedOffer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -154,63 +157,80 @@ const LimitedOffer = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const goToPage = (pageNum) => {
     if (pageNum < 1 || pageNum > totalPages) return;
     setCurrentPage(pageNum);
   };
 
-  //   countdown timer
-
+  // countdown
   const startSeconds = 183600;
   const [timeLeft, setTimeLeft] = useState(startSeconds);
 
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    AOS.init({ duration: 800, once: true });
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, []);
 
   const formatTime = (totalSeconds) => {
     const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, "0") + "h";
     const mins =
       String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0") + "m";
-    const secs = String(totalSeconds % 60).padStart(2, "0");
-    return `${hrs}:${mins}:${secs}` + "s ";
+    const secs = String(totalSeconds % 60).padStart(2, "0") + "s";
+    return `${hrs}:${mins}:${secs}`;
   };
 
   return (
-    <div className="px-4 py-10  mx-auto">
-      <div className="flex items-center justify-center gap-6 mb-6">
+    <div className="px-4 py-10 mx-auto max-w-7xl">
+      <motion.div
+        className="flex items-center justify-center gap-6 mb-6"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <h2 className="text-center text-2xl whitespace-nowrap md:text-3xl font-semibold">
           Limited Time Offer
         </h2>
-        <div>
-          <span className="text-lg p-2 bg-gray-700 text-white rounded-2xl">
-            {formatTime(timeLeft)}
-          </span>
-        </div>
-      </div>
+        <span className="text-lg p-2 bg-gray-700 text-white rounded-2xl">
+          {formatTime(timeLeft)}
+        </span>
+      </motion.div>
 
-      <div className="divider"></div>
+      <div className="divider" />
 
-      <div className="mt-8 grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6  gap-3">
-        {currentProducts.map((product) => (
-          <ProductCard key={product.id} product={product} offers={50} />
+      <div
+        className="mt-8 grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        data-aos="fade-up"
+      >
+        {currentProducts.map((product, index) => (
+          <motion.div
+            key={product.id}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <ProductCard product={product} offers={50} />
+          </motion.div>
         ))}
       </div>
 
-      <div className="flex justify-center mt-8 space-x-3">
+      <div
+        className="flex justify-center mt-10 space-x-3"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      >
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-3 py-1 rounded ${
+          className={`px-4 py-1 rounded ${
             currentPage === 1
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-700 text-white"
+              : "bg-gray-700 text-white hover:bg-gray-800"
           }`}
         >
           Prev
@@ -222,10 +242,10 @@ const LimitedOffer = () => {
             <button
               key={pageNum}
               onClick={() => goToPage(pageNum)}
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded transition ${
                 currentPage === pageNum
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               {pageNum}
@@ -236,10 +256,10 @@ const LimitedOffer = () => {
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-1 rounded ${
+          className={`px-4 py-1 rounded ${
             currentPage === totalPages
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-700 text-white"
+              : "bg-gray-700 text-white hover:bg-gray-800"
           }`}
         >
           Next
