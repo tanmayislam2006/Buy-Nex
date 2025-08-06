@@ -36,9 +36,18 @@ const ProductCard = ({ product, offers }) => {
           {product.title}
         </p>
 
-        <span className="text-lg font-bold text-gray-900">
-          ${product.price}
-        </span>
+        <div className="text-lg font-bold text-gray-900 space-x-2">
+          <span>
+            {offers && "$" + (product.price - (product.price * offers) / 100)}
+          </span>
+          <span
+            className={`${
+              offers && "line-through text-red-400"
+            }`}
+          >
+            ${product.price}
+          </span>
+        </div>
 
         <div className="flex items-center justify-between mt-2">
           <div className="flex gap-1.5">
