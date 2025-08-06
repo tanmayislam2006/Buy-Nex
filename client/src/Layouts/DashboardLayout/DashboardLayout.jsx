@@ -51,6 +51,7 @@ const DashboardLayout = () => {
     { to: "/all-user", label: "All Users", icon: <FiUsers /> },
     { to: "/all-seller", label: "All Sellers", icon: <FiUsers /> },
     { to: "/total-orders", label: "Total Orders", icon: <FiBox /> },
+    { to: "dashboard/seller", label: "Seller Overview", icon: <FiBox /> },
   ];
 
   if (!user) {

@@ -107,6 +107,35 @@ async function run() {
       const orderHistory = await orderCollection.find({ userEmail }).toArray();
       res.send(orderHistory);
     });
+
+    app.get("/seller-orders/:sellerEmail", async (req, res) => {
+      const { sellerEmail } = req.params;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      try {
+        const query = {
+          "products.sellerEmail": sellerEmail
+        };
+
+        const totalOrders = await orderCollection.countDocuments(query);
+        const sellerOrders = await orderCollection.find(query)
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.send({
+          orders: sellerOrders,
+          totalOrders,
+          currentPage: page,
+          totalPages: Math.ceil(totalOrders / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller orders:", error);
+        res.status(500).send({ message: "Failed to fetch seller orders" });
+      }
+    });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
       const user = req.body;
@@ -116,6 +145,37 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    app.get("/seller-stats", async (req, res) => {
+      const { email } = req.query;
+      try {
+        const totalProducts = await productsCollection.countDocuments({ sellerEmail: email });
+
+        const totalOrdersResult = await orderCollection.aggregate([
+          { $unwind: "$products" },
+          { $match: { "products.sellerEmail": email } },
+          { $group: { _id: null, totalOrders: { $sum: 1 }, totalSales: { $sum: "$products.price" } } }
+        ]).toArray();
+
+        const totalOrders = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
+        const totalSales = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
+
+        const pendingOrders = await orderCollection.countDocuments({
+          "products.sellerEmail": email,
+          status: { $ne: "Delivered" } // Assuming 'Delivered' is the final status
+        });
+
+        res.send({
+          totalProducts,
+          totalOrders,
+          totalSales,
+          pendingOrders,
+        });
+      } catch (error) {
+        console.error("Error fetching seller stats:", error);
+        res.status(500).send({ message: "Failed to fetch seller statistics" });
+      }
     });
 
     // Get messages between a seller and a customer

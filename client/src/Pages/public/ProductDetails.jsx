@@ -44,6 +44,7 @@ const ProductDetails = () => {
     enabled: !!product?.category && !!product?._id,
   });
 
+
   if (isLoading || isSimilarLoading) return <Loading />;
 
   if (isError)
@@ -107,6 +108,8 @@ const ProductDetails = () => {
   const renderSpecifications = () => {
     if (!product.specifications) return null;
 
+
+   
     return Object.entries(product.specifications).map(([key, value]) => (
       <tr key={key} className="border-b border-gray-200">
         <td className="px-4 py-2 w-1/3 capitalize">
@@ -121,6 +124,7 @@ const ProductDetails = () => {
     if (!product.specifications?.color) return null;
 
     const colors = product.specifications.color.split(",").map((c) => c.trim());
+
 
     return (
       <div className="flex gap-2 items-center mt-3">
@@ -162,6 +166,7 @@ const ProductDetails = () => {
       );
     }
 
+    console.log(similarProducts)
     return (
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Thumbnails - vertical on desktop */}
@@ -480,7 +485,7 @@ const ProductDetails = () => {
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></span>
           </h3>
           <div className="space-y-2 text-gray-600">
-            {similarProducts.map((item) => (
+            {similarProducts?.map((item) => (
               <div
                 key={item._id}
                 className="flex gap-4 p-3 border border-secondary rounded-lg hover:shadow-sm shadow-secondary duration-500 transition cursor-pointer"
