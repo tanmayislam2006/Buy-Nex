@@ -35,6 +35,7 @@ import PaymentSuccess from "../Pages/dashboard/User/Order/PaymentSuccess";
 import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
 import CustomerChat from "../Pages/dashboard/Seller/CustomerChat";
 import AdminOverview from "../Pages/dashboard/Admin/AdminOverview";
+import UpdateProduct from "../Pages/dashboard/Seller/UpdateProduct";
 
 const router = createBrowserRouter([
   // Public routes
@@ -158,6 +159,10 @@ const router = createBrowserRouter([
       {
         path: "add-product",
         Component: AddProduct,
+      },
+      {
+        path: "update-product/:id",
+        Component: UpdateProduct,
       },
       {
         path: "manage-products",
