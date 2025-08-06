@@ -257,26 +257,41 @@ async function run() {
     });
 
     app.get("/products", async (req, res) => {
-      const category = req.query.category;
-      const excludeId = req.query.excludeId;
-
+      const { category, excludeId, page = 1, limit = 10, sellerEmail } = req.query;
       const query = {};
 
       if (category) {
         query.category = category;
       }
-
       if (excludeId) {
         query._id = { $ne: new ObjectId(excludeId) };
       }
-
-      let cursor = productsCollection.find(query);
-      if (category) {
-        cursor = cursor.limit(5);
+      if (sellerEmail) {
+        query.sellerEmail = sellerEmail;
       }
 
-      const products = await cursor.toArray();
-      res.send(products);
+      try {
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const products = await productsCollection
+          .find(query)
+          .skip(skip)
+          .limit(limitNumber)
+          .toArray();
+        const totalProducts = await productsCollection.countDocuments(query);
+
+        res.send({
+          products,
+          totalProducts,
+          totalPages: Math.ceil(totalProducts / limitNumber),
+          currentPage: pageNumber,
+        });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).send({ message: "Failed to fetch products" });
+      }
     });
 
     // Endpoint for single product details (remains separate and uses _id)
@@ -306,6 +321,42 @@ async function run() {
         res.status(500).send({ message: "Failed to add product" });
       }
     });
+
+    // Endpoint to delete a product
+    app.delete("/products/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await productsCollection.deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        res.status(200).send({ message: "Product deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).send({ message: "Failed to delete product" });
+      }
+    });
+
+    // Endpoint to update a product
+    app.put("/products/:id", async (req, res) => {
+      const { id } = req.params;
+      const product = req.body;
+      try {
+        const result = await productsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: product }
+        );
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        res.status(200).send({ message: "Product updated successfully" });
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).send({ message: "Failed to update product" });
+      }
+    });
+
+    // ---------get all added products
     //  ------cart API START -----------------------
     // Get cart items for a user
     app.get("/cart/:email", async (req, res) => {
