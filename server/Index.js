@@ -784,23 +784,59 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
-      const sessionId =
-        "guest_" +
-        Date.now() +
-        "_" +
-        Math.random().toString(36).substring(2, 10);
-      const { message } = req.body;
-      const n8nResponse = await fetch(
-        "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, sessionId }),
+      const { message  } = req.body; 
+      try {
+        const n8nResponse = await fetch(
+          "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message }), // Pass the user's UID as sessionId to n8n
+          }
+        );
+
+        // Error handling for n8n response
+        if (!n8nResponse.ok) {
+          const errorText = await n8nResponse.text();
+          console.error(
+            `n8n webhook responded with status ${n8nResponse.status}: ${errorText}`
+          );
+          return res
+            .status(n8nResponse.status)
+            .send({ error: "Error from AI service", details: errorText });
         }
-      );
-      // console.log(n8nResponse);
-      const data = await n8nResponse.json();
-      res.send({ reply: data.output });
+
+        const contentType = n8nResponse.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const rawText = await n8nResponse.text();
+          console.error(
+            "n8n webhook did not respond with JSON. Raw response:",
+            rawText
+          );
+          return res.status(500).send({
+            error: "AI service did not return a valid JSON response.",
+          });
+        }
+
+        const data = await n8nResponse.json();
+        // Ensure 'output' property exists in the response from n8n
+        if (data && data.output) {
+          res.send({ reply: data.output });
+        } else {
+          console.error(
+            "n8n response did not contain an 'output' property:",
+            data
+          );
+          res.status(500).send({
+            error: "AI service response malformed or missing 'output'.",
+          });
+        }
+      } catch (error) {
+        console.error("Error communicating with n8n webhook:", error);
+        res.status(500).send({
+          error: "Failed to connect to AI service or parse its response.",
+        });
+      }
     });
 
     // -------------------------- AI ASSISTANT  API END -----------------------
