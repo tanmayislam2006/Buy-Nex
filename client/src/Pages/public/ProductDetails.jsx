@@ -525,23 +525,24 @@ const ProductDetails = () => {
       <div>
         <button
           onClick={handleChat}
-          className="btn btn-primary fixed bottom-5 border-none right-5 md:right-12 z-50 rounded-full text-2xl py-6 px-3 shadow-lg hover:bg-accent transition duration-300"
+          className="btn btn-primary fixed bottom-24 border-none right-6 z-50 rounded-full text-2xl py-7 px-4 shadow-lg hover:bg-accent transition duration-300"
         >
           <IoMdChatboxes />
         </button>
         {/* Chat Popup Animation */}
         <div
-          className={`fixed bottom-5 right-5 z-40`}
+          className={`fixed bottom-6 right-5 z-40`}
           style={{
+            transition:
+              "opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.68,-0.55,.27,1.55)",
             transform: isChatOpen
-              ? "scale(1)"
-              : "scale(0.2)",
+              ? "scale(1) translateY(-150px) translateX(-6px)"
+              : "scale(0.85) translateY(-100px) translateX(0)",
             opacity: isChatOpen ? 1 : 0,
             pointerEvents: isChatOpen ? "auto" : "none",
-            transition:
-              "transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s",
             transformOrigin: "bottom right",
             maxWidth: "95vw",
+            willChange: "opacity, transform",
           }}
         >
           <Chat
