@@ -54,6 +54,7 @@ const Login = () => {
           isVerified: false,
           createdAt,
           lastLogin,
+          uid: res.user.uid,
         };
         await axiosInstance.post("/register", profileInfo);
         await refetchUserData();
