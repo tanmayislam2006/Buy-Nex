@@ -6,27 +6,38 @@ import { MdDelete } from "react-icons/md";
 import ImageUpload from "../../../shared/ImageUpload";
 
 const AddProduct = () => {
-  const { handleSubmit, register, watch } = useForm();
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm();
   const [imageLinks, setImageLinks] = useState([]);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleImageUpload = (files) => {
-    files.forEach((file) => {
-      const apiKey = import.meta.env.VITE_IMMGBB_API_KEY;
+    const apiKey = import.meta.env.VITE_IMMGBB_API_KEY;
+    const uploadPromises = files.map((file) => {
       const formData = new FormData();
       formData.append("image", file);
-
-      axios
-        .post(`https://api.imgbb.com/1/upload?key=${apiKey}`, formData)
-        .then((response) => {
-          setImageLinks((prevLinks) => [...prevLinks, response.data.data.url]);
-          toast.success("Image uploaded successfully");
-        })
-        .catch((error) => {
-          console.error("Error uploading image:", error);
-          toast.error("Error uploading image");
-        });
+      return axios.post(`https://api.imgbb.com/1/upload?key=${apiKey}`, formData);
     });
+
+    toast.promise(
+      Promise.all(uploadPromises),
+      {
+        loading: "Uploading images...",
+        success: (responses) => {
+          const newImageLinks = responses.map((res) => res.data.data.url);
+          setImageLinks((prevLinks) => [...prevLinks, ...newImageLinks]);
+          return "Images uploaded successfully";
+        },
+        error: "Error uploading images",
+      }
+    );
   };
 
   const handleRemoveImage = (index) => {
@@ -38,7 +49,9 @@ const AddProduct = () => {
     event.stopPropagation();
     setIsDragActive(false);
     const files = [...event.dataTransfer.files];
-    handleImageUpload(files);
+    if (files.length > 0) {
+      handleImageUpload(files);
+    }
   }, []);
 
   const onDragOver = useCallback((event) => {
@@ -55,23 +68,49 @@ const AddProduct = () => {
 
   const onFileSelect = (event) => {
     const files = [...event.target.files];
-    handleImageUpload(files);
+    if (files.length > 0) {
+      handleImageUpload(files);
+    }
   };
 
-  const onSubmit = (data) => {
-    const { length, width, height, unit, tags, ...product } = data;
-    product.dimensions = {
-      length,
-      width,
-      height,
-      unit,
-    };
-    product.tags = tags.split(",").map((e) => e.trim());
-    product.images = imageLinks;
-    console.log(product);
+  const onSubmit = async (data) => {
+    if (imageLinks.length === 0) {
+      toast.error("Please upload at least one product image.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { length, width, height, unit, tags, ...product } = data;
+      product.dimensions = {
+        length,
+        width,
+        height,
+        unit,
+      };
+      product.tags = tags.split(",").map((e) => e.trim());
+      product.images = imageLinks;
+
+      const res = await axios.post("http://localhost:5000/products", product);
+
+      if (res.status === 201) {
+        toast.success("Product added successfully!");
+        reset();
+        setImageLinks([]);
+      } else {
+        throw new Error("Failed to add product");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "An unexpected error occurred.");
+      toast.error(err.response?.data?.message || "Failed to add product.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const tagsValue = watch("tags"); // Watch the textarea for live changes
+  const tagsValue = watch("tags");
   const tagsArray = tagsValue
     ?.split(",")
     .map((tag) => tag.trim())
@@ -134,17 +173,17 @@ const AddProduct = () => {
               </div>
             </div>
 
-            {/* Product Name */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Product Name</span>
               </label>
               <input
                 type="text"
-                {...register("productName")}
+                {...register("productName", { required: "Product name is required" })}
                 placeholder="e.g., Wireless Headphones"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full ${errors.productName ? "input-error" : ""}`}
               />
+              {errors.productName && <span className="text-red-500 text-sm">{errors.productName.message}</span>}
             </div>
 
             {/* Product Price */}
@@ -155,9 +194,14 @@ const AddProduct = () => {
               <input
                 type="number"
                 placeholder="e.g., 99.99"
-                {...register("price")}
-                className="input input-bordered w-full"
+                {...register("price", { 
+                  required: "Price is required", 
+                  valueAsNumber: true, 
+                  min: { value: 0, message: "Price must be positive" } 
+                })}
+                className={`input input-bordered w-full ${errors.price ? "input-error" : ""}`}
               />
+              {errors.price && <span className="text-red-500 text-sm">{errors.price.message}</span>}
             </div>
 
             <div className="form-control">
@@ -167,9 +211,10 @@ const AddProduct = () => {
               <input
                 type="text"
                 placeholder="e.g., BDT"
-                {...register("currency")}
-                className="input input-bordered w-full"
+                {...register("currency", { required: "Currency is required" })}
+                className={`input input-bordered w-full ${errors.currency ? "input-error" : ""}`}
               />
+              {errors.currency && <span className="text-red-500 text-sm">{errors.currency.message}</span>}
             </div>
 
             {/* Product Category */}
@@ -178,10 +223,11 @@ const AddProduct = () => {
                 <span className="label-text">Category</span>
               </label>
               <select
-                {...register("category")}
-                className="select select-bordered w-full"
+                {...register("category", { required: "Category is required" })}
+                className={`select select-bordered w-full ${errors.category ? "select-error" : ""}`}
+                defaultValue=""
               >
-                <option disabled selected>
+                <option value="" disabled>
                   Select Category
                 </option>
                 <option>Electronics</option>
@@ -189,6 +235,7 @@ const AddProduct = () => {
                 <option>Home & Garden</option>
                 <option>Sports</option>
               </select>
+              {errors.category && <span className="text-red-500 text-sm">{errors.category.message}</span>}
             </div>
 
             {/* SKU */}
@@ -197,11 +244,12 @@ const AddProduct = () => {
                 <span className="label-text">SKU</span>
               </label>
               <input
-                {...register("sku")}
+                {...register("sku", { required: "SKU is required" })}
                 type="text"
                 placeholder="e.g., WRL-HP-001"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full ${errors.sku ? "input-error" : ""}`}
               />
+              {errors.sku && <span className="text-red-500 text-sm">{errors.sku.message}</span>}
             </div>
 
             {/* Inventory */}
@@ -210,11 +258,16 @@ const AddProduct = () => {
                 <span className="label-text">Inventory</span>
               </label>
               <input
-                {...register("inventory")}
+                {...register("inventory", { 
+                  required: "Inventory is required", 
+                  valueAsNumber: true, 
+                  min: { value: 0, message: "Inventory must be a positive number" } 
+                })}
                 type="number"
                 placeholder="e.g., 150"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full ${errors.inventory ? "input-error" : ""}`}
               />
+              {errors.inventory && <span className="text-red-500 text-sm">{errors.inventory.message}</span>}
             </div>
 
             {/* Product Brand */}
@@ -223,11 +276,12 @@ const AddProduct = () => {
                 <span className="label-text">Brand</span>
               </label>
               <input
-                {...register("brand")}
+                {...register("brand", { required: "Brand is required" })}
                 type="text"
                 placeholder="e.g., Sony"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full ${errors.brand ? "input-error" : ""}`}
               />
+              {errors.brand && <span className="text-red-500 text-sm">{errors.brand.message}</span>}
             </div>
 
             {/* Product Status */}
@@ -236,10 +290,11 @@ const AddProduct = () => {
                 <span className="label-text">Status</span>
               </label>
               <select
-                {...register("status")}
-                className="select select-bordered w-full"
+                {...register("status", { required: "Status is required" })}
+                className={`select select-bordered w-full ${errors.status ? "select-error" : ""}`}
+                defaultValue=""
               >
-                <option disabled selected>
+                <option value="" disabled>
                   Select Status
                 </option>
                 <option>Active</option>
@@ -247,6 +302,7 @@ const AddProduct = () => {
                 <option>Pending Approval</option>
                 <option>Archived</option>
               </select>
+              {errors.status && <span className="text-red-500 text-sm">{errors.status.message}</span>}
             </div>
 
             {/* Product tags */}
@@ -255,10 +311,11 @@ const AddProduct = () => {
                 <span className="label-text">Product tags</span>
               </label>
               <textarea
-                {...register("tags")}
-                className="textarea textarea-bordered h-24 w-full"
+                {...register("tags", { required: "Tags are required" })}
+                className={`textarea textarea-bordered h-24 w-full ${errors.tags ? "textarea-error" : ""}`}
                 placeholder="Add tag using comma separate e.g., mobile,xiaomi,touch, etc..."
               ></textarea>
+              {errors.tags && <span className="text-red-500 text-sm">{errors.tags.message}</span>}
 
               {/* Tag Preview */}
               <div className="mt-2 flex flex-wrap gap-2">
@@ -350,19 +407,21 @@ const AddProduct = () => {
                 <span className="label-text">Description</span>
               </label>
               <textarea
-                {...register("description")}
-                className="textarea textarea-bordered h-24 w-full"
+                {...register("description", { required: "Description is required" })}
+                className={`textarea textarea-bordered h-24 w-full ${errors.description ? "textarea-error" : ""}`}
                 placeholder="Brief description of the product..."
               ></textarea>
+              {errors.description && <span className="text-red-500 text-sm">{errors.description.message}</span>}
             </div>
 
             {/* Submit Button */}
             <div className="card-actions justify-end md:col-span-2 mt-4">
-              <button type="submit" className="btn btn-primary">
-                Add Product
+              <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                {isLoading ? <span className="loading loading-spinner"></span> : "Add Product"}
               </button>
             </div>
           </form>
+          {error && <div className="text-red-500 mt-4">{error}</div>}
         </div>
       </div>
     </div>
