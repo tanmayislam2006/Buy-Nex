@@ -6,54 +6,52 @@ const socket = io("http://localhost:5000"); // Update for production
 
 const SellerChat = ({ sellerEmail }) => {
   const [conversations, setConversations] = useState({});
-  const [activeCustomer, setActiveCustomer] = useState(null);
-  const [input, setInput] = useState("");
+  const [inputs, setInputs] = useState({});
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const axiosInstance = useAxios();
+
   useEffect(() => {
     socket.emit("register", sellerEmail);
-
     socket.on("receive_message", (message) => {
       const { customerEmail } = message;
+      if (!customerEmail) return;
 
       setConversations((prev) => ({
         ...prev,
         [customerEmail]: [...(prev[customerEmail] || []), message],
       }));
-
-      if (!activeCustomer) {
-        setActiveCustomer(customerEmail);
-      }
     });
 
     return () => {
       socket.off("receive_message");
     };
-  }, [sellerEmail, activeCustomer]);
+  }, [sellerEmail]);
 
+  // Load messages when a new customer appears in the conversation
   useEffect(() => {
-    if (activeCustomer) {
-      axiosInstance
-        .get(`/messages/${sellerEmail}/${activeCustomer}`)
-        .then((res) => {
-          setConversations((prev) => ({
-            ...prev,
-            [activeCustomer]: res.data,
-          }));
-        });
-    }
-  }, [activeCustomer, sellerEmail, axiosInstance]);
+    const customerEmails = Object.keys(conversations);
+    customerEmails.forEach((email) => {
+      axiosInstance.get(`/messages/${sellerEmail}/${email}`).then((res) => {
+        setConversations((prev) => ({
+          ...prev,
+          [email]: res.data,
+        }));
+      });
+    });
+  }, [axiosInstance, conversations, sellerEmail]);
 
-  const sendMessage = () => {
-    if (!input.trim() || !activeCustomer) return;
+  const sendMessage = (customerEmail) => {
+    const input = inputs[customerEmail]?.trim();
+    if (!input) return;
 
-    const firstMsg = conversations[activeCustomer]?.[0];
+    const firstMsg = conversations[customerEmail]?.[0];
 
     const message = {
       productId: firstMsg?.productId || null,
       productName: firstMsg?.productName || "",
       sellerEmail,
-      customerEmail: activeCustomer,
-      text: input.trim(),
+      customerEmail,
+      text: input,
       sender: "seller",
       timestamp: new Date().toISOString(),
     };
@@ -62,107 +60,109 @@ const SellerChat = ({ sellerEmail }) => {
 
     setConversations((prev) => ({
       ...prev,
-      [activeCustomer]: [...(prev[activeCustomer] || []), message],
+      [customerEmail]: [...(prev[customerEmail] || []), message],
     }));
 
-    setInput("");
+    setInputs((prev) => ({ ...prev, [customerEmail]: "" }));
   };
 
   return (
-    <div className="flex h-[600px] w-full max-w-6xl border rounded-md shadow-lg mx-auto bg-white overflow-hidden">
-      {/* 👥 Customer List */}
-      <div className="w-1/3 border-r overflow-y-auto p-4 bg-gray-100">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Customers</h2>
-
-        {Object.keys(conversations).length === 0 && (
-          <p className="text-sm text-gray-500">No customers yet</p>
-        )}
-
-        {Object.keys(conversations).map((customerEmail) => (
-          <button
-            key={customerEmail}
-            onClick={() => setActiveCustomer(customerEmail)}
-            className={`block w-full text-left px-4 py-3 mb-2 rounded-lg transition duration-300 text-sm font-medium break-words ${
-              activeCustomer === customerEmail
-                ? "bg-blue-600 text-white shadow"
-                : "bg-white hover:bg-blue-50 text-gray-700 border"
-            }`}
-          >
-            {customerEmail}
-          </button>
-        ))}
+    <div className="flex w-full max-w-6xl mx-auto p-4 gap-6">
+      {/* Customer List */}
+      <div className="w-1/4 border-r pr-4">
+        <h3 className="font-bold mb-2">Customers</h3>
+        <ul>
+          {Object.keys(conversations).length === 0 ? (
+            <li className="text-gray-500">No conversations yet</li>
+          ) : (
+            Object.keys(conversations).map((customerEmail) => (
+              <li
+                key={customerEmail}
+                className={`cursor-pointer p-2 rounded ${
+                  selectedCustomer === customerEmail ? "bg-blue-100" : ""
+                }`}
+                onClick={() => setSelectedCustomer(customerEmail)}
+              >
+                {customerEmail}
+              </li>
+            ))
+          )}
+        </ul>
       </div>
 
-      {/* 💬 Chat Panel */}
-      <div className="w-2/3 flex flex-col p-5 relative">
-        {activeCustomer ? (
-          <>
-            {/* Header: Product Info */}
-            <div className="mb-4 border-b pb-3">
+      {/* Chat Window */}
+      <div className="flex-1">
+        {selectedCustomer ? (
+          <div className="border rounded-md shadow-md bg-white p-4">
+            <div className="mb-2 border-b pb-2">
               <p className="text-sm text-gray-500">
                 Chatting with:{" "}
-                <span className="font-medium text-blue-600">
-                  {activeCustomer}
-                </span>
+                <span className="text-blue-600 font-medium">{selectedCustomer}</span>
               </p>
-              <h2 className="text-lg font-semibold text-gray-800 mt-1">
-                🛍️{" "}
-                {conversations[activeCustomer]?.[0]?.productName || "Product"}
+              <h2 className="text-lg font-semibold">
+                🛍️ {conversations[selectedCustomer]?.[0]?.productName || "Product"}
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 Product ID:{" "}
-                <span className="text-gray-600 font-mono">
-                  {conversations[activeCustomer]?.[0]?.productId || "N/A"}
+                <span className="font-mono">
+                  {conversations[selectedCustomer]?.[0]?.productId || "N/A"}
                 </span>
               </p>
             </div>
 
-            {/* Messages */}
-            <div className="flex-grow overflow-y-auto border rounded-md p-4 bg-gray-50">
-              {(conversations[activeCustomer] || []).map((msg, idx) => (
+            <div className="max-h-64 overflow-y-auto space-y-2 mb-3">
+              {conversations[selectedCustomer]?.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`mb-4 flex flex-col ${
+                  className={`flex flex-col ${
                     msg.sender === "seller" ? "items-end" : "items-start"
                   }`}
                 >
                   <span
-                    className={`px-4 py-2 rounded-xl max-w-sm break-words shadow ${
+                    className={`px-4 py-2 rounded-xl text-sm max-w-xs break-words shadow ${
                       msg.sender === "seller"
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-900"
+                        : "bg-gray-200 text-black"
                     }`}
                   >
                     {msg.text}
                   </span>
-                  <small className="text-gray-400 mt-1 text-xs">
+                  <small className="text-xs text-gray-400">
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </small>
                 </div>
               ))}
             </div>
 
-            {/* Input Box */}
-            <div className="flex gap-2 mt-4">
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendMessage(selectedCustomer);
+              }}
+            >
               <input
                 type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                 placeholder="Type your message..."
-                className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                value={inputs[selectedCustomer] || ""}
+                onChange={(e) =>
+                  setInputs((prev) => ({
+                    ...prev,
+                    [selectedCustomer]: e.target.value,
+                  }))
+                }
+                className="flex-grow border rounded-md px-4 py-2"
               />
               <button
-                onClick={sendMessage}
-                disabled={!input.trim()}
-                className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300"
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 Send
               </button>
-            </div>
-          </>
+            </form>
+          </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="text-gray-500 flex items-center justify-center h-full">
             Select a customer to start chatting
           </div>
         )}
