@@ -80,7 +80,7 @@ const ManageProducts = () => {
       header: "Image",
       cell: ({ row }) => (
         <img
-          src={row.original.images[0]}
+          src={row.original.images[0] ||"https://img.icons8.com/windows/96/shopping-cart.png"}
           alt={row.original.name}
           className="w-16 h-16 object-cover rounded"
         />

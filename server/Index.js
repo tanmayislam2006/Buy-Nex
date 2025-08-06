@@ -255,43 +255,25 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product data" });
       }
     });
-
     app.get("/products", async (req, res) => {
-      const { category, excludeId, page = 1, limit = 10, sellerEmail } = req.query;
+      const category = req.query.category;
+      const excludeId = req.query.excludeId;
       const query = {};
-
       if (category) {
         query.category = category;
       }
+
       if (excludeId) {
         query._id = { $ne: new ObjectId(excludeId) };
       }
-      if (sellerEmail) {
-        query.sellerEmail = sellerEmail;
+
+      let cursor = productsCollection.find(query);
+      if (category) {
+        cursor = cursor.limit(5);
       }
 
-      try {
-        const pageNumber = parseInt(page);
-        const limitNumber = parseInt(limit);
-        const skip = (pageNumber - 1) * limitNumber;
-
-        const products = await productsCollection
-          .find(query)
-          .skip(skip)
-          .limit(limitNumber)
-          .toArray();
-        const totalProducts = await productsCollection.countDocuments(query);
-
-        res.send({
-          products,
-          totalProducts,
-          totalPages: Math.ceil(totalProducts / limitNumber),
-          currentPage: pageNumber,
-        });
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        res.status(500).send({ message: "Failed to fetch products" });
-      }
+      const products = await cursor.toArray();
+      res.send(products);
     });
 
     // Endpoint for single product details (remains separate and uses _id)
