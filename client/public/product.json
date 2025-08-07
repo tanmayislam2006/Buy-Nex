@@ -37,40 +37,40 @@
     ]
   },
   {
-    "sellerEmail": "buynex@seller.com",
-    "name": "Smart Fitness Watch",
-    "description": "Track your health and fitness goals with this stylish smart watch. Features heart rate monitoring, step tracking, and notifications.",
-    "oldPrice": 79.99,
-    "price": 59.99,
-    "inventory": 25,
-    "images": [],
-    "category": "Electronics",
-    "brand": "Samsung",
+    // "sellerEmail": "buynex@seller.com",
+    // "name": "Smart Fitness Watch",
+    // "description": "Track your health and fitness goals with this stylish smart watch. Features heart rate monitoring, step tracking, and notifications.",
+    // "oldPrice": 79.99,
+    // "price": 59.99,
+    // "inventory": 25,
+    // "images": [],
+    // "category": "Electronics",
+    // "brand": "Samsung",
     "specifications": {
       "color": "Black, Silver",
       "display": "AMOLED",
       "waterResistance": "5 ATM",
       "batteryLife": "7 days"
     },
-    "rating": 4.0,
-    "reviews": 280,
-    "tags": [
-      "Sale",
-      "Smart",
-      "Wearable"
-    ],
-    "weight": 0.05,
-    "dimensions": {
-      "length": 4.0,
-      "width": 3.5,
-      "height": 1.0,
-      "unit": "cm"
-    },
-    "seoKeywords": [
-      "smart watch",
-      "fitness tracker",
-      "health monitor"
-    ]
+    // "rating": 4.0,
+    // "reviews": 280,
+    // "tags": [
+    //   "Sale",
+    //   "Smart",
+    //   "Wearable"
+    // ],
+    // "weight": 0.05,
+    // "dimensions": {
+    //   "length": 4.0,
+    //   "width": 3.5,
+    //   "height": 1.0,
+    //   "unit": "cm"
+    // },
+    // "seoKeywords": [
+    //   "smart watch",
+    //   "fitness tracker",
+    //   "health monitor"
+    // ]
   },
   {
     "sellerEmail": "buynex@seller.com",
