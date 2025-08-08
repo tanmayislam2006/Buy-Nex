@@ -153,10 +153,6 @@ const router = createBrowserRouter([
         Component: PaymentHistory,
       },
       {
-        path: "dashboard/seller",
-        Component: SellerOverview,
-      },
-      {
         path: "add-product",
         Component: AddProduct,
       },
@@ -175,10 +171,6 @@ const router = createBrowserRouter([
       {
         path: "customer-chats",
         Component: CustomerChat,
-      },
-      {
-        path: "dashboard/admin",
-        Component: AdminOverview,
       },
       {
         path: "pending-sellers",
