@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import {
   FiShoppingBag,
   FiUser,
@@ -22,6 +22,8 @@ const Navbar = () => {
   const { user, logoutUser, firebaseUser } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
+  const navigate = useNavigate();
+  const [searchText, setSearchText] = useState("");
   const menu = [
     { label: "Home", to: "/" },
     { label: "Blogs", to: "/blogs" },
@@ -44,6 +46,12 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchText.trim()) return;
+    navigate(`/all-products?search=${encodeURIComponent(searchText.trim())}`);
+    setSearchText("");
+  };
   return (
     <header className="sticky top-0 z-50 w-full max-w-[2000px] mx-auto">
       {/* Initial Large Navbar */}
@@ -62,9 +70,14 @@ const Navbar = () => {
             {/* Logo */}
             <MainLogo />
             {/* Search */}
-            <form className="flex-1 mx-8 max-w-2xl hidden md:flex">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex-1 mx-8 max-w-2xl hidden md:flex"
+            >
               <input
                 type="text"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
                 placeholder="I'm looking for..."
                 className="w-full px-4 py-2 border border-gray-200 rounded-l-full focus:outline-none"
               />

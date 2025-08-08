@@ -254,103 +254,98 @@ async function run() {
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
 
     // Endpoint for all products data (including filters, counts, pagination)
-    app.get("/all-product-data", async (req, res) => {
-      const {
-        category,
-        brand,
-        minPrice,
-        maxPrice,
-        minRating,
-        sortBy,
-        page,
-        limit,
-      } = req.query;
+ app.get("/all-product-data", async (req, res) => {
+  const {
+    category,
+    brand,
+    minPrice,
+    maxPrice,
+    minRating,
+    sortBy,
+    page,
+    limit,
+    search,
+  } = req.query;
 
-      let matchQuery = {}; // This will be the $match stage for all facets
+  let matchQuery = {};
 
-      if (category) matchQuery.category = category;
-      if (brand) matchQuery.brand = brand;
-      if (minRating) matchQuery.rating = { $gte: parseFloat(minRating) };
-      if (minPrice || maxPrice) {
-        matchQuery.price = {};
-        if (minPrice) matchQuery.price.$gte = parseFloat(minPrice);
-        if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
-      }
+  if (category) matchQuery.category = category;
+  if (brand) matchQuery.brand = brand;
+  if (minRating) matchQuery.rating = { $gte: parseFloat(minRating) };
+  if (minPrice || maxPrice) {
+    matchQuery.price = {};
+    if (minPrice) matchQuery.price.$gte = parseFloat(minPrice);
+    if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
+  }
 
-      let sortOptions = {};
-      // Default sort by _id descending (newest) if no sortBy specified
-      if (sortBy === "Newest") {
-        sortOptions._id = -1;
-      } else if (sortBy === "Price: Low to High") {
-        sortOptions.price = 1;
-      } else if (sortBy === "Price: High to Low") {
-        sortOptions.price = -1;
-      } else {
-        sortOptions._id = -1; // Fallback default
-      }
+  if (search) {
+    const regex = new RegExp(search, "i");
+    matchQuery.$or = [
+      { name: { $regex: regex } },
+      { description: { $regex: regex } },
+      { tags: { $regex: regex } },
+    ];
+  }
 
-      const pageNumber = parseInt(page) || 1;
-      const productsPerPage = parseInt(limit) || 8;
-      const skip = (pageNumber - 1) * productsPerPage;
+  let sortOptions = {};
+  if (sortBy === "Price: Low to High") sortOptions.price = 1;
+  else if (sortBy === "Price: High to Low") sortOptions.price = -1;
+  else sortOptions._id = -1; // Default/Newest
 
-      try {
-        const result = await productsCollection
-          .aggregate([
-            // Initial match stage to filter products before any other operations
-            // This ensures that category/brand counts reflect the currently filtered set
-            { $match: matchQuery },
-            {
-              $facet: {
-                // Pipeline 1: Get paginated, sorted products
-                products: [
-                  { $sort: sortOptions },
-                  { $skip: skip },
-                  { $limit: productsPerPage },
-                ],
-                // Pipeline 2: Get total count of filtered products
-                totalCount: [{ $count: "count" }],
-                // Pipeline 3: Get category counts based on the filtered products
-                categoryCounts: [
-                  { $group: { _id: "$category", count: { $sum: 1 } } },
-                  { $project: { name: "$_id", count: 1, _id: 0 } },
-                  { $sort: { name: 1 } },
-                ],
-                // Pipeline 4: Get brand counts based on the filtered products
-                brandCounts: [
-                  { $group: { _id: "$brand", count: { $sum: 1 } } },
-                  { $project: { name: "$_id", count: 1, _id: 0 } },
-                  { $sort: { name: 1 } },
-                ],
-              },
-            },
-          ])
-          .toArray();
+  const pageNumber = parseInt(page) || 1;
+  const productsPerPage = parseInt(limit) || 8;
+  const skip = (pageNumber - 1) * productsPerPage;
 
-        // The result of $facet is an array containing a single document
-        const aggregatedData = result[0];
+  try {
+    const result = await productsCollection
+      .aggregate([
+        { $match: matchQuery },
+        {
+          $facet: {
+            products: [
+              { $sort: sortOptions },
+              { $skip: skip },
+              { $limit: productsPerPage },
+            ],
+            totalCount: [{ $count: "count" }],
+            categoryCounts: [
+              { $group: { _id: "$category", count: { $sum: 1 } } },
+              { $project: { name: "$_id", count: 1, _id: 0 } },
+              { $sort: { name: 1 } },
+            ],
+            brandCounts: [
+              { $group: { _id: "$brand", count: { $sum: 1 } } },
+              { $project: { name: "$_id", count: 1, _id: 0 } },
+              { $sort: { name: 1 } },
+            ],
+          },
+        },
+      ])
+      .toArray();
 
-        // Extract data, handling cases where counts might be empty if no products match
-        const products = aggregatedData.products || [];
-        const totalProducts =
-          aggregatedData.totalCount.length > 0
-            ? aggregatedData.totalCount[0].count
-            : 0;
-        const categoryCounts = aggregatedData.categoryCounts || [];
-        const brandCounts = aggregatedData.brandCounts || [];
+    const aggregatedData = result[0];
+    const products = aggregatedData.products || [];
+    const totalProducts =
+      aggregatedData.totalCount.length > 0
+        ? aggregatedData.totalCount[0].count
+        : 0;
+    const categoryCounts = aggregatedData.categoryCounts || [];
+    const brandCounts = aggregatedData.brandCounts || [];
 
-        res.send({
-          products,
-          totalProducts,
-          currentPage: pageNumber,
-          totalPages: Math.ceil(totalProducts / productsPerPage),
-          categoryCounts,
-          brandCounts,
-        });
-      } catch (error) {
-        console.error("Error fetching all product data:", error);
-        res.status(500).send({ message: "Failed to fetch product data" });
-      }
+    res.send({
+      products,
+      totalProducts,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalProducts / productsPerPage),
+      categoryCounts,
+      brandCounts,
     });
+  } catch (error) {
+    console.error("Error fetching all product data:", error);
+    res.status(500).send({ message: "Failed to fetch product data" });
+  }
+});
+
     app.get("/products", async (req, res) => {
       const category = req.query.category;
       const excludeId = req.query.excludeId;
