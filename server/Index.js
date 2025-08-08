@@ -178,6 +178,42 @@ async function run() {
       }
     });
 
+
+    // manage
+    app.get("/manage-products", async (req, res) => {
+      try {
+        let { page = 1, limit = 10, sellerEmail } = req.query;
+    
+        page = parseInt(page);
+        limit = parseInt(limit);
+    
+        if (!sellerEmail) {
+          return res.status(400).json({ message: "Seller email is required" });
+        }
+    
+        const skip = (page - 1) * limit;
+    
+        const total = await productsCollection.countDocuments({ sellerEmail });
+    
+        const products = await productsCollection
+          .find({ sellerEmail })
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+    
+        res.json({
+          products,
+          total,
+          page,
+          totalPages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+
     // Get messages between a seller and a customer
     app.get("/messages/:sellerEmail/:customerEmail", async (req, res) => {
       const { sellerEmail, customerEmail } = req.params;
@@ -315,6 +351,9 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product data" });
       }
     });
+
+
+    
     app.get("/products", async (req, res) => {
       const category = req.query.category;
       const excludeId = req.query.excludeId;
@@ -382,7 +421,7 @@ async function run() {
     // Endpoint to update a product
     app.put("/products/:id", async (req, res) => {
       const { id } = req.params;
-      const product = req.body;
+      const { _id, ...product } = req.body;
       try {
         const result = await productsCollection.updateOne(
           { _id: new ObjectId(id) },
