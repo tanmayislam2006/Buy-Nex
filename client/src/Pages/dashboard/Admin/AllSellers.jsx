@@ -1,18 +1,14 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import DataTable from "../../../shared/DataTable";
 import DataCardGrid from "../../../shared/DataCardGrid";
 import { FaStore } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import { ImSpinner2 } from "react-icons/im";
-
-const fetchUsers = async () => {
-  const res = await axios.get("http://localhost:5000/users");
-  return res.data;
-};
+import useAxios from "../../../Hooks/useAxios";
 
 const AllSellers = () => {
+  const axiosInstance = useAxios();
   const {
     data: users = [],
     isLoading,
@@ -20,7 +16,10 @@ const AllSellers = () => {
     error,
   } = useQuery({
     queryKey: ["users"],
-    queryFn: fetchUsers,
+    queryFn: async () => {
+      const res = await axiosInstance.get("/users");
+      return res.data;
+    },
   });
 
   const sellerUsers = users.filter((user) => user.role === "seller");

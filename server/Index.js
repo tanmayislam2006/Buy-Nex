@@ -116,11 +116,12 @@ async function run() {
 
       try {
         const query = {
-          "products.sellerEmail": sellerEmail
+          "products.sellerEmail": sellerEmail,
         };
 
         const totalOrders = await orderCollection.countDocuments(query);
-        const sellerOrders = await orderCollection.find(query)
+        const sellerOrders = await orderCollection
+          .find(query)
           .skip(skip)
           .limit(limit)
           .toArray();
@@ -145,73 +146,6 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
-    });
-
-    app.get("/seller-stats", async (req, res) => {
-      const { email } = req.query;
-      try {
-        const totalProducts = await productsCollection.countDocuments({ sellerEmail: email });
-
-        const totalOrdersResult = await orderCollection.aggregate([
-          { $unwind: "$products" },
-          { $match: { "products.sellerEmail": email } },
-          { $group: { _id: null, totalOrders: { $sum: 1 }, totalSales: { $sum: "$products.price" } } }
-        ]).toArray();
-
-        const totalOrders = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
-        const totalSales = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
-
-        const pendingOrders = await orderCollection.countDocuments({
-          "products.sellerEmail": email,
-          status: { $ne: "Delivered" } // Assuming 'Delivered' is the final status
-        });
-
-        res.send({
-          totalProducts,
-          totalOrders,
-          totalSales,
-          pendingOrders,
-        });
-      } catch (error) {
-        console.error("Error fetching seller stats:", error);
-        res.status(500).send({ message: "Failed to fetch seller statistics" });
-      }
-    });
-
-
-    // manage
-    app.get("/manage-products", async (req, res) => {
-      try {
-        let { page = 1, limit = 10, sellerEmail } = req.query;
-    
-        page = parseInt(page);
-        limit = parseInt(limit);
-    
-        if (!sellerEmail) {
-          return res.status(400).json({ message: "Seller email is required" });
-        }
-    
-        const skip = (page - 1) * limit;
-    
-        const total = await productsCollection.countDocuments({ sellerEmail });
-    
-        const products = await productsCollection
-          .find({ sellerEmail })
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .toArray();
-    
-        res.json({
-          products,
-          total,
-          page,
-          totalPages: Math.ceil(total / limit),
-        });
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        res.status(500).json({ message: "Server error" });
-      }
     });
 
     // Get messages between a seller and a customer
@@ -254,97 +188,97 @@ async function run() {
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
 
     // Endpoint for all products data (including filters, counts, pagination)
- app.get("/all-product-data", async (req, res) => {
-  const {
-    category,
-    brand,
-    minPrice,
-    maxPrice,
-    minRating,
-    sortBy,
-    page,
-    limit,
-    search,
-  } = req.query;
+    app.get("/all-product-data", async (req, res) => {
+      const {
+        category,
+        brand,
+        minPrice,
+        maxPrice,
+        minRating,
+        sortBy,
+        page,
+        limit,
+        search,
+      } = req.query;
 
-  let matchQuery = {};
+      let matchQuery = {};
 
-  if (category) matchQuery.category = category;
-  if (brand) matchQuery.brand = brand;
-  if (minRating) matchQuery.rating = { $gte: parseFloat(minRating) };
-  if (minPrice || maxPrice) {
-    matchQuery.price = {};
-    if (minPrice) matchQuery.price.$gte = parseFloat(minPrice);
-    if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
-  }
+      if (category) matchQuery.category = category;
+      if (brand) matchQuery.brand = brand;
+      if (minRating) matchQuery.rating = { $gte: parseFloat(minRating) };
+      if (minPrice || maxPrice) {
+        matchQuery.price = {};
+        if (minPrice) matchQuery.price.$gte = parseFloat(minPrice);
+        if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
+      }
 
-  if (search) {
-    const regex = new RegExp(search, "i");
-    matchQuery.$or = [
-      { name: { $regex: regex } },
-      { description: { $regex: regex } },
-      { tags: { $regex: regex } },
-    ];
-  }
+      if (search) {
+        const regex = new RegExp(search, "i");
+        matchQuery.$or = [
+          { name: { $regex: regex } },
+          { description: { $regex: regex } },
+          { tags: { $regex: regex } },
+        ];
+      }
 
-  let sortOptions = {};
-  if (sortBy === "Price: Low to High") sortOptions.price = 1;
-  else if (sortBy === "Price: High to Low") sortOptions.price = -1;
-  else sortOptions._id = -1; // Default/Newest
+      let sortOptions = {};
+      if (sortBy === "Price: Low to High") sortOptions.price = 1;
+      else if (sortBy === "Price: High to Low") sortOptions.price = -1;
+      else sortOptions._id = -1; // Default/Newest
 
-  const pageNumber = parseInt(page) || 1;
-  const productsPerPage = parseInt(limit) || 8;
-  const skip = (pageNumber - 1) * productsPerPage;
+      const pageNumber = parseInt(page) || 1;
+      const productsPerPage = parseInt(limit) || 8;
+      const skip = (pageNumber - 1) * productsPerPage;
 
-  try {
-    const result = await productsCollection
-      .aggregate([
-        { $match: matchQuery },
-        {
-          $facet: {
-            products: [
-              { $sort: sortOptions },
-              { $skip: skip },
-              { $limit: productsPerPage },
-            ],
-            totalCount: [{ $count: "count" }],
-            categoryCounts: [
-              { $group: { _id: "$category", count: { $sum: 1 } } },
-              { $project: { name: "$_id", count: 1, _id: 0 } },
-              { $sort: { name: 1 } },
-            ],
-            brandCounts: [
-              { $group: { _id: "$brand", count: { $sum: 1 } } },
-              { $project: { name: "$_id", count: 1, _id: 0 } },
-              { $sort: { name: 1 } },
-            ],
-          },
-        },
-      ])
-      .toArray();
+      try {
+        const result = await productsCollection
+          .aggregate([
+            { $match: matchQuery },
+            {
+              $facet: {
+                products: [
+                  { $sort: sortOptions },
+                  { $skip: skip },
+                  { $limit: productsPerPage },
+                ],
+                totalCount: [{ $count: "count" }],
+                categoryCounts: [
+                  { $group: { _id: "$category", count: { $sum: 1 } } },
+                  { $project: { name: "$_id", count: 1, _id: 0 } },
+                  { $sort: { name: 1 } },
+                ],
+                brandCounts: [
+                  { $group: { _id: "$brand", count: { $sum: 1 } } },
+                  { $project: { name: "$_id", count: 1, _id: 0 } },
+                  { $sort: { name: 1 } },
+                ],
+              },
+            },
+          ])
+          .toArray();
 
-    const aggregatedData = result[0];
-    const products = aggregatedData.products || [];
-    const totalProducts =
-      aggregatedData.totalCount.length > 0
-        ? aggregatedData.totalCount[0].count
-        : 0;
-    const categoryCounts = aggregatedData.categoryCounts || [];
-    const brandCounts = aggregatedData.brandCounts || [];
+        const aggregatedData = result[0];
+        const products = aggregatedData.products || [];
+        const totalProducts =
+          aggregatedData.totalCount.length > 0
+            ? aggregatedData.totalCount[0].count
+            : 0;
+        const categoryCounts = aggregatedData.categoryCounts || [];
+        const brandCounts = aggregatedData.brandCounts || [];
 
-    res.send({
-      products,
-      totalProducts,
-      currentPage: pageNumber,
-      totalPages: Math.ceil(totalProducts / productsPerPage),
-      categoryCounts,
-      brandCounts,
+        res.send({
+          products,
+          totalProducts,
+          currentPage: pageNumber,
+          totalPages: Math.ceil(totalProducts / productsPerPage),
+          categoryCounts,
+          brandCounts,
+        });
+      } catch (error) {
+        console.error("Error fetching all product data:", error);
+        res.status(500).send({ message: "Failed to fetch product data" });
+      }
     });
-  } catch (error) {
-    console.error("Error fetching all product data:", error);
-    res.status(500).send({ message: "Failed to fetch product data" });
-  }
-});
 
     app.get("/products", async (req, res) => {
       const category = req.query.category;
@@ -382,7 +316,83 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product" });
       }
     });
+    // manage products
+    app.get("/manage-products", async (req, res) => {
+      try {
+        let { page = 1, limit = 10, sellerEmail } = req.query;
 
+        page = parseInt(page);
+        limit = parseInt(limit);
+
+        if (!sellerEmail) {
+          return res.status(400).json({ message: "Seller email is required" });
+        }
+
+        const skip = (page - 1) * limit;
+
+        const total = await productsCollection.countDocuments({ sellerEmail });
+
+        const products = await productsCollection
+          .find({ sellerEmail })
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.json({
+          products,
+          total,
+          page,
+          totalPages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // seller ordered products here
+    app.get("/seller-stats", async (req, res) => {
+      const { email } = req.query;
+      try {
+        const totalProducts = await productsCollection.countDocuments({
+          sellerEmail: email,
+        });
+
+        const totalOrdersResult = await orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": email } },
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: "$products.price" },
+              },
+            },
+          ])
+          .toArray();
+
+        const totalOrders =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
+        const totalSales =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
+
+        const pendingOrders = await orderCollection.countDocuments({
+          "products.sellerEmail": email,
+          status: { $ne: "Delivered" }, // Assuming 'Delivered' is the final status
+        });
+
+        res.send({
+          totalProducts,
+          totalOrders,
+          totalSales,
+          pendingOrders,
+        });
+      } catch (error) {
+        console.error("Error fetching seller stats:", error);
+        res.status(500).send({ message: "Failed to fetch seller statistics" });
+      }
+    });
     // Endpoint to add a new product (remains as is)
     app.post("/products", async (req, res) => {
       const product = req.body;
@@ -399,7 +409,9 @@ async function run() {
     app.delete("/products/:id", async (req, res) => {
       const { id } = req.params;
       try {
-        const result = await productsCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await productsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
         if (result.deletedCount === 0) {
           return res.status(404).send({ message: "Product not found" });
         }
@@ -429,7 +441,6 @@ async function run() {
       }
     });
 
-    // ---------get all added products
     //  ------cart API START -----------------------
     // Get cart items for a user
     app.get("/cart/:email", async (req, res) => {
@@ -908,7 +919,7 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
-      const { message  } = req.body; 
+      const { message } = req.body;
       try {
         const n8nResponse = await fetch(
           "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
