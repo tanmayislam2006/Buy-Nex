@@ -54,6 +54,7 @@ async function run() {
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
     const messagesCollection = BuyNexDB.collection("messages");
+    const becomeASellerApplication = BuyNexDB.collection("application");
     // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
@@ -973,12 +974,41 @@ async function run() {
         });
       }
     });
-
     // -------------------------- AI ASSISTANT  API END -----------------------
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // -------------------------- ADMIN API START -----------------------
+    // get all seller applications
+    app.get("/seller-application", async (req, res) => {
+      try {
+        const applications = await becomeASellerApplication.find().toArray();
+        res.status(200).send(applications);
+      } catch (error) {
+        console.error("Error fetching seller applications:", error);
+        res.status(500).send({ error: "Failed to fetch seller applications." });
+      }
+    });
+
+    app.post("/seller-application", async (req, res) => {
+      // also added a vaildetion if any email is already available in the db do not send it twice send status 409
+      const applicationData = req.body;
+      try {
+        const existingApplication = await becomeASellerApplication.findOne({
+          sellerEmail: applicationData.sellerEmail,
+        });
+        if (existingApplication) {
+          return res.status(201).send({ error: "Email already exists." });
+        }
+        const result = await becomeASellerApplication.insertOne(
+          applicationData
+        );
+        res
+          .status(201)
+          .send({ success: true, applicationId: result.insertedId });
+      } catch (error) {
+        console.error("Error creating seller application:", error);
+        res.status(500).send({ error: "Failed to create seller application." });
+      }
+    });
+    // -------------------------- ADMIN API END -----------------------
   } finally {
   }
 }
