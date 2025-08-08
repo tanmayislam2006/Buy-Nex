@@ -351,9 +351,6 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product data" });
       }
     });
-
-
-    
     app.get("/products", async (req, res) => {
       const category = req.query.category;
       const excludeId = req.query.excludeId;

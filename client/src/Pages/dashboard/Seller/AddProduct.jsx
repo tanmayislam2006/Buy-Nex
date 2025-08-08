@@ -8,6 +8,7 @@ import useAuth from "../../../Hooks/useAuth";
 
 const AddProduct = ({ product: initialProduct }) => {
   const { user } = useAuth();
+  
   const sellerEmail = user.email;
   const { handleSubmit, register, watch, formState: { errors }, reset, setValue } = useForm();
   const [imageLinks, setImageLinks] = useState([]);
