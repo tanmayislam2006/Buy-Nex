@@ -28,6 +28,8 @@ const AddProduct = ({ product: initialProduct }) => {
           setValue(key, initialProduct[key].join(", "));
         } else if (key === "specifications") {
           setValue(key, Object.entries(initialProduct[key]).map(([specKey, specValue]) => `${specKey}: ${specValue}`).join("\n"));
+        }else if(key === "seoKeywords"){
+          setValue(key, initialProduct.seoKeywords.join(", "));
         } else {
           setValue(key, initialProduct[key]);
         }
@@ -100,7 +102,7 @@ const AddProduct = ({ product: initialProduct }) => {
     setIsLoading(true);
     setError(null);
 
-    const { length, width, height, unit, tags, ...product } = data;
+    const { length, width,seoKeywords, height, unit, tags, ...product } = data;
     product.dimensions = {
       length,
       width,
@@ -110,7 +112,7 @@ const AddProduct = ({ product: initialProduct }) => {
     product.tags = tags.split(",").map((e) => e.trim());
     product.sellerEmail = sellerEmail;
     product.images = imageLinks;
-
+    product.seoKeywords = seoKeywords.split(",").map((e) => e.trim());
     const specLines = product.specifications.split("\n");
     const specObj = {};
     for (const line of specLines) {
