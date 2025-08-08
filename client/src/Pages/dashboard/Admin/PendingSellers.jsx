@@ -50,6 +50,7 @@ const PendingSellers = () => {
       try {
         await axiosInstance.put(`/seller-application/${seller._id}`, {
           status: newStatus,
+          email: seller.sellerEmail,
         });
         Swal.fire(
           `${actionText}d!`,

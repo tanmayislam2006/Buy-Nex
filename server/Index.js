@@ -1001,14 +1001,13 @@ async function run() {
     });
 
     app.post("/seller-application", async (req, res) => {
-      // also added a vaildetion if any email is already available in the db do not send it twice send status 409
       const applicationData = req.body;
       try {
         const existingApplication = await becomeASellerApplication.findOne({
           sellerEmail: applicationData.sellerEmail,
         });
         if (existingApplication) {
-          return res.status(201).send({ error: "Email already exists." });
+          return res.send({ message: "You have already applied to become a seller." });
         }
         const result = await becomeASellerApplication.insertOne(
           applicationData
@@ -1030,6 +1029,11 @@ async function run() {
           { _id: new ObjectId(id) },
           { $set: updatedData }
         );
+        const changeUserRole = await usersCollection.updateOne(
+          { email: updatedData.email },
+          { $set: { role: "seller" } }
+        );
+
         if (result.matchedCount === 0) {
           return res.status(404).send({ error: "Application not found." });
         }
