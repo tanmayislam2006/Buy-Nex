@@ -979,8 +979,21 @@ async function run() {
     // get all seller applications
     app.get("/seller-application", async (req, res) => {
       try {
-        const applications = await becomeASellerApplication.find().toArray();
-        res.status(200).send(applications);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalDocs = await becomeASellerApplication.countDocuments();
+        const applications = await becomeASellerApplication
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.status(200).send({
+          data: applications,
+          totalPages: Math.ceil(totalDocs / limit),
+        });
       } catch (error) {
         console.error("Error fetching seller applications:", error);
         res.status(500).send({ error: "Failed to fetch seller applications." });
@@ -1006,6 +1019,44 @@ async function run() {
       } catch (error) {
         console.error("Error creating seller application:", error);
         res.status(500).send({ error: "Failed to create seller application." });
+      }
+    });
+
+    app.put("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      try {
+        const result = await becomeASellerApplication.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application updated." });
+      } catch (error) {
+        console.error("Error updating seller application:", error);
+        res.status(500).send({ error: "Failed to update seller application." });
+      }
+    });
+
+    app.delete("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await becomeASellerApplication.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application deleted." });
+      } catch (error) {
+        console.error("Error deleting seller application:", error);
+        res.status(500).send({ error: "Failed to delete seller application." });
       }
     });
     // -------------------------- ADMIN API END -----------------------

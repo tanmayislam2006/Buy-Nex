@@ -21,10 +21,13 @@ const BecomeSeller = () => {
       [e.target.name]: e.target.value,
     });
   };
-
+  const applicationInfo={
+    ...formData,
+    status: "pending",
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axiosInstance.post("/seller-application", formData);
+    const res = await axiosInstance.post("/seller-application", applicationInfo);
     if (res.data.success) {
       toast.success("Application submitted successfully!");
       setFormData({
@@ -33,9 +36,6 @@ const BecomeSeller = () => {
         phone: "",
         age: "",
       });
-    }
-    if (res.status === 201) {
-      toast.error("You have already applied to become a seller.");
     }
   };
   return (
