@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { BlogContext } from "../BlogContext/BlogContext.jsx";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import useAxios from "../../Hooks/useAxios.jsx";
 
 const BlogProvider = ({ children }) => {
+  const axiosInstance=useAxios()
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(""); 
   const [category, setCategory] = useState("");
-
   const itemsPerPage = 4;
 
   const {
@@ -17,7 +17,7 @@ const BlogProvider = ({ children }) => {
   } = useQuery({
     queryKey: ["blogs", currentPage, search, category],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/blogs`, {
+      const res = await axiosInstance.get(`/blogs`, {
         params: {
           page: currentPage,
           limit: itemsPerPage,
@@ -33,7 +33,7 @@ const BlogProvider = ({ children }) => {
   const { data, isLoading: articalLoading } = useQuery({
     queryKey: ["blogs-details"],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/articles-category`);
+      const res = await axiosInstance.get(`/articles-category`);
       return res.data;
     },
   });

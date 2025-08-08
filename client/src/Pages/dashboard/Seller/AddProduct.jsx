@@ -1,16 +1,24 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { MdDelete } from "react-icons/md";
 import ImageUpload from "../../../shared/ImageUpload";
 import useAuth from "../../../Hooks/useAuth";
+import useAxiosSecure from "../../../Hooks/useAxiosSecure";
+import axios from "axios";
 
 const AddProduct = ({ product: initialProduct }) => {
   const { user } = useAuth();
-  
+  const axiosSecure = useAxiosSecure();
   const sellerEmail = user.email;
-  const { handleSubmit, register, watch, formState: { errors }, reset, setValue } = useForm();
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useForm();
   const [imageLinks, setImageLinks] = useState([]);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +35,14 @@ const AddProduct = ({ product: initialProduct }) => {
         } else if (key === "tags") {
           setValue(key, initialProduct[key].join(", "));
         } else if (key === "specifications") {
-          setValue(key, Object.entries(initialProduct[key]).map(([specKey, specValue]) => `${specKey}: ${specValue}`).join("\n"));
+          setValue(
+            key,
+            Object.entries(initialProduct[key])
+              .map(([specKey, specValue]) => `${specKey}: ${specValue}`)
+              .join("\n")
+          );
+        } else if (key === "seoKeywords") {
+          setValue(key, initialProduct.seoKeywords.join(", "));
         } else {
           setValue(key, initialProduct[key]);
         }
@@ -100,7 +115,7 @@ const AddProduct = ({ product: initialProduct }) => {
     setIsLoading(true);
     setError(null);
 
-    const { length, width, height, unit, tags, ...product } = data;
+    const { length, width, seoKeywords, height, unit, tags, ...product } = data;
     product.dimensions = {
       length,
       width,
@@ -110,7 +125,7 @@ const AddProduct = ({ product: initialProduct }) => {
     product.tags = tags.split(",").map((e) => e.trim());
     product.sellerEmail = sellerEmail;
     product.images = imageLinks;
-
+    product.seoKeywords = seoKeywords.split(",").map((e) => e.trim());
     const specLines = product.specifications.split("\n");
     const specObj = {};
     for (const line of specLines) {
@@ -124,21 +139,28 @@ const AddProduct = ({ product: initialProduct }) => {
     try {
       let res;
       if (initialProduct) {
-        res = await axios.put(`http://localhost:5000/products/${initialProduct._id}`, product);
+        res = await axiosSecure.put(
+          `/products/${initialProduct._id}`,
+          product
+        );
       } else {
         product.rating = 0;
         product.review = 0;
-        res = await axios.post("http://localhost:5000/products", product);
+        res = await axiosSecure.post("/products", product);
       }
 
       if (res.status === 200 || res.status === 201) {
-        toast.success(`Product ${initialProduct ? 'updated' : 'added'} successfully!`);
+        toast.success(
+          `Product ${initialProduct ? "updated" : "added"} successfully!`
+        );
         if (!initialProduct) {
           reset();
           setImageLinks([]);
         }
       } else {
-        throw new Error(`Failed to ${initialProduct ? 'update' : 'add'} product`);
+        throw new Error(
+          `Failed to ${initialProduct ? "update" : "add"} product`
+        );
       }
     } catch (err) {
       setError(
@@ -146,7 +168,10 @@ const AddProduct = ({ product: initialProduct }) => {
           err.message ||
           "An unexpected error occurred."
       );
-      toast.error(err.response?.data?.message || `Failed to ${initialProduct ? 'update' : 'add'} product.`);
+      toast.error(
+        err.response?.data?.message ||
+          `Failed to ${initialProduct ? "update" : "add"} product.`
+      );
     } finally {
       setIsLoading(false);
     }

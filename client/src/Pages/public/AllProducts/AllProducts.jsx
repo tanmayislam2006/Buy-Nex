@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
   FaLaptop,
   FaTshirt,
@@ -14,7 +14,6 @@ import useAxios from "../../../Hooks/useAxios";
 import ProductFilters from "./ProductFilters";
 import Loading from "../../../components/Loading";
 
-// Category icon mapping
 const categoryIcons = {
   Electronics: <FaLaptop />,
   Fashion: <FaTshirt />,
@@ -26,11 +25,14 @@ const categoryIcons = {
 
 const AllProducts = () => {
   const axiosInstance = useAxios();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+const search = searchParams.get("search") || "";
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedRating, setSelectedRating] = useState(0);
-  const [priceRange, setPriceRange] = useState([0, 200]);
+  const [priceRange, setPriceRange] = useState([0, 2000]);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("Newest");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -51,9 +53,15 @@ const AllProducts = () => {
       sortBy,
       page,
       limit,
+      search,
     ],
     queryFn: async () => {
-      const params = { page, limit, sortBy };
+      const params = {
+        page,
+        limit,
+        sortBy,
+        search,
+      };
       if (selectedCategory) params.category = selectedCategory;
       if (selectedBrand) params.brand = selectedBrand;
       if (selectedRating) params.minRating = selectedRating;
@@ -81,7 +89,7 @@ const AllProducts = () => {
     setSelectedCategory("");
     setSelectedBrand("");
     setSelectedRating(0);
-    setPriceRange([0, 200]);
+    setPriceRange([0, 2000]);
     setPage(1);
     setSortBy("Newest");
   };
@@ -96,7 +104,6 @@ const AllProducts = () => {
 
   return (
     <div className="p-4 lg:p-8 max-w-[1600px] mx-auto lg:pt-32">
-      {/* Drawer toggle for mobile */}
       <div className="flex justify-end lg:hidden mb-4">
         <button
           onClick={() => setDrawerOpen(true)}
@@ -107,7 +114,7 @@ const AllProducts = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Sidebar (desktop only) */}
+        {/* Sidebar */}
         <aside className="hidden lg:block w-full lg:w-64 bg-white rounded-lg p-6 shadow-sm">
           <ProductFilters
             priceRange={priceRange}
@@ -124,11 +131,11 @@ const AllProducts = () => {
           />
         </aside>
 
-        {/* Drawer for small devices */}
+        {/* Drawer for mobile */}
         {drawerOpen && (
           <>
             <div
-              className="fixed inset-0  bg-opacity-40 z-40"
+              className="fixed inset-0 bg-black/40 z-40"
               onClick={() => setDrawerOpen(false)}
             />
             <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 p-6 overflow-y-auto">
@@ -158,9 +165,17 @@ const AllProducts = () => {
           </>
         )}
 
-        {/* Main Section */}
+        {/* Main content */}
         <main className="flex-1">
           <h1 className="text-2xl font-bold mb-2">All Products</h1>
+
+          {search && (
+            <p className="mb-4 text-gray-600">
+              Showing results for:{" "}
+              <span className="font-semibold">"{search}"</span>
+            </p>
+          )}
+
           <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {categoriesWithCounts.map((cat) => (
               <div key={cat.name}>
@@ -224,7 +239,7 @@ const AllProducts = () => {
                   <div className="font-semibold text-sm mb-1">
                     {product.name}
                   </div>
-                  <div className="text-xs text-gray-500 mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="text-xs text-gray-500 mb-2 truncate">
                     {product.description}
                   </div>
                   <div className="flex items-center gap-1 mb-1">

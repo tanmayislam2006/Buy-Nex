@@ -5,9 +5,9 @@ import { Link, useParams } from "react-router";
 import { IoIosSend, IoMdArrowRoundBack } from "react-icons/io";
 import toast from "react-hot-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import Loading from "../../components/Loading";
 import { AiFillLike } from "react-icons/ai";
+import useAxios from "../../Hooks/useAxios";
 
   // Helper to show "x time ago"
   const getTimeAgo = (date) => {
@@ -30,6 +30,7 @@ import { AiFillLike } from "react-icons/ai";
 
 
 const BlogDetails = () => {
+  const axiosInstance=useAxios()
   const { id } = useParams();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const BlogDetails = () => {
   } = useQuery({
     queryKey: ["blogs-details", id],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/blog/${id}`);
+      const res = await axiosInstance.get(`/blog/${id}`);
       return res.data;
     },
   });
@@ -51,12 +52,10 @@ const BlogDetails = () => {
   const { data: comments = [], isLoading: commentsLoading } = useQuery({
     queryKey: ["blog-comments", id],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:5000/blog/${id}/comments`);
+      const res = await axiosInstance.get(`/blog/${id}/comments`);
       return res.data;
     },
   });
-
-  console.log(comments);
   // Add comment mutation
   const [form, setForm] = useState({ text: "" });
   const [editId, setEditId] = useState(null);
@@ -69,7 +68,7 @@ const BlogDetails = () => {
       if (!form.text || form.text.trim() === "") {
         throw new Error("Message is required");
       }
-      await axios.post(`http://localhost:5000/blog/${id}/comments`, newComment);
+      await axiosInstance.post(`/blog/${id}/comments`, newComment);
     },
     onSuccess: () => {
       toast.success("Comment Submitted Successfully");
@@ -96,8 +95,8 @@ const BlogDetails = () => {
       ) {
         throw new Error("You are not allowed to delete this comment");
       }
-      await axios.delete(
-        `http://localhost:5000/blog/${id}/comments/${commentId}`
+      await axiosInstance.delete(
+        `/blog/${id}/comments/${commentId}`
       );
     },
     onSuccess: () => {
@@ -112,8 +111,8 @@ const BlogDetails = () => {
   // Edit comment mutation
   const editMutation = useMutation({
     mutationFn: async ({ commentId, text }) => {
-      await axios.put(
-        `http://localhost:5000/blog/${id}/comments/${commentId}`,
+      await axiosInstance.put(
+        `/blog/${id}/comments/${commentId}`,
         { text }
       );
     },
@@ -128,8 +127,8 @@ const BlogDetails = () => {
   // Like/unlike comment mutation
   const likeMutation = useMutation({
     mutationFn: async (commentId) => {
-      await axios.post(
-        `http://localhost:5000/blog/${id}/comments/${commentId}/like`,
+      await axiosInstance.post(
+        `/blog/${id}/comments/${commentId}/like`,
         { userId: user?.uid || user?.email }
       );
     },
@@ -144,8 +143,8 @@ const BlogDetails = () => {
       if (!reply || reply.trim() === "") {
         throw new Error("Message is required");
       }
-      await axios.post(
-        `http://localhost:5000/blog/${id}/comments/${commentId}/reply`,
+      await axiosInstance.post(
+        `/blog/${id}/comments/${commentId}/reply`,
         {
           author: user?.displayName || user?.name || "Anonymous",
           email: user?.email,

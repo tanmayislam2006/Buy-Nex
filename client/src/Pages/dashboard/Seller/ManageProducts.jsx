@@ -7,14 +7,14 @@ import {
   getFilteredRowModel,
 } from "@tanstack/react-table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import useAxios from "../../../Hooks/useAxios";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import useAuth from "../../../Hooks/useAuth";
 import Swal from "sweetalert2";
 import { Link } from "react-router";
+import useAxios from "../../../Hooks/useAxios";
 
 const ManageProducts = () => {
-  const axios = useAxios();
+  const axiosInstance = useAxios();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [pagination, setPagination] = useState({
@@ -23,9 +23,9 @@ const ManageProducts = () => {
   });
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["products", pagination.pageIndex, pagination.pageSize, user?.email],
+    queryKey: ["manage-products", pagination.pageIndex, pagination.pageSize, user?.email],
     queryFn: async () => {
-      const response = await axios.get("/products", {
+      const response = await axiosInstance.get("/manage-products", {
         params: {
           page: pagination.pageIndex + 1,
           limit: pagination.pageSize,
@@ -39,7 +39,7 @@ const ManageProducts = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (productId) => {
-      const response = await axios.delete(`/products/${productId}`);
+      const response = await axiosInstance.delete(`/products/${productId}`);
       return response.data;
     },
     onSuccess: () => {

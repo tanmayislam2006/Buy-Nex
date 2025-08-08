@@ -54,6 +54,7 @@ async function run() {
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
     const messagesCollection = BuyNexDB.collection("messages");
+    const becomeASellerApplication = BuyNexDB.collection("application");
     // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
@@ -116,11 +117,12 @@ async function run() {
 
       try {
         const query = {
-          "products.sellerEmail": sellerEmail
+          "products.sellerEmail": sellerEmail,
         };
 
         const totalOrders = await orderCollection.countDocuments(query);
-        const sellerOrders = await orderCollection.find(query)
+        const sellerOrders = await orderCollection
+          .find(query)
           .skip(skip)
           .limit(limit)
           .toArray();
@@ -145,37 +147,6 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
-    });
-
-    app.get("/seller-stats", async (req, res) => {
-      const { email } = req.query;
-      try {
-        const totalProducts = await productsCollection.countDocuments({ sellerEmail: email });
-
-        const totalOrdersResult = await orderCollection.aggregate([
-          { $unwind: "$products" },
-          { $match: { "products.sellerEmail": email } },
-          { $group: { _id: null, totalOrders: { $sum: 1 }, totalSales: { $sum: "$products.price" } } }
-        ]).toArray();
-
-        const totalOrders = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
-        const totalSales = totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
-
-        const pendingOrders = await orderCollection.countDocuments({
-          "products.sellerEmail": email,
-          status: { $ne: "Delivered" } // Assuming 'Delivered' is the final status
-        });
-
-        res.send({
-          totalProducts,
-          totalOrders,
-          totalSales,
-          pendingOrders,
-        });
-      } catch (error) {
-        console.error("Error fetching seller stats:", error);
-        res.status(500).send({ message: "Failed to fetch seller statistics" });
-      }
     });
 
     // Get messages between a seller and a customer
@@ -228,9 +199,10 @@ async function run() {
         sortBy,
         page,
         limit,
+        search,
       } = req.query;
 
-      let matchQuery = {}; // This will be the $match stage for all facets
+      let matchQuery = {};
 
       if (category) matchQuery.category = category;
       if (brand) matchQuery.brand = brand;
@@ -241,17 +213,19 @@ async function run() {
         if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
       }
 
-      let sortOptions = {};
-      // Default sort by _id descending (newest) if no sortBy specified
-      if (sortBy === "Newest") {
-        sortOptions._id = -1;
-      } else if (sortBy === "Price: Low to High") {
-        sortOptions.price = 1;
-      } else if (sortBy === "Price: High to Low") {
-        sortOptions.price = -1;
-      } else {
-        sortOptions._id = -1; // Fallback default
+      if (search) {
+        const regex = new RegExp(search, "i");
+        matchQuery.$or = [
+          { name: { $regex: regex } },
+          { description: { $regex: regex } },
+          { tags: { $regex: regex } },
+        ];
       }
+
+      let sortOptions = {};
+      if (sortBy === "Price: Low to High") sortOptions.price = 1;
+      else if (sortBy === "Price: High to Low") sortOptions.price = -1;
+      else sortOptions._id = -1; // Default/Newest
 
       const pageNumber = parseInt(page) || 1;
       const productsPerPage = parseInt(limit) || 8;
@@ -260,26 +234,20 @@ async function run() {
       try {
         const result = await productsCollection
           .aggregate([
-            // Initial match stage to filter products before any other operations
-            // This ensures that category/brand counts reflect the currently filtered set
             { $match: matchQuery },
             {
               $facet: {
-                // Pipeline 1: Get paginated, sorted products
                 products: [
                   { $sort: sortOptions },
                   { $skip: skip },
                   { $limit: productsPerPage },
                 ],
-                // Pipeline 2: Get total count of filtered products
                 totalCount: [{ $count: "count" }],
-                // Pipeline 3: Get category counts based on the filtered products
                 categoryCounts: [
                   { $group: { _id: "$category", count: { $sum: 1 } } },
                   { $project: { name: "$_id", count: 1, _id: 0 } },
                   { $sort: { name: 1 } },
                 ],
-                // Pipeline 4: Get brand counts based on the filtered products
                 brandCounts: [
                   { $group: { _id: "$brand", count: { $sum: 1 } } },
                   { $project: { name: "$_id", count: 1, _id: 0 } },
@@ -290,10 +258,7 @@ async function run() {
           ])
           .toArray();
 
-        // The result of $facet is an array containing a single document
         const aggregatedData = result[0];
-
-        // Extract data, handling cases where counts might be empty if no products match
         const products = aggregatedData.products || [];
         const totalProducts =
           aggregatedData.totalCount.length > 0
@@ -315,6 +280,7 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product data" });
       }
     });
+
     app.get("/products", async (req, res) => {
       const category = req.query.category;
       const excludeId = req.query.excludeId;
@@ -351,7 +317,83 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product" });
       }
     });
+    // manage products
+    app.get("/manage-products", async (req, res) => {
+      try {
+        let { page = 1, limit = 10, sellerEmail } = req.query;
 
+        page = parseInt(page);
+        limit = parseInt(limit);
+
+        if (!sellerEmail) {
+          return res.status(400).json({ message: "Seller email is required" });
+        }
+
+        const skip = (page - 1) * limit;
+
+        const total = await productsCollection.countDocuments({ sellerEmail });
+
+        const products = await productsCollection
+          .find({ sellerEmail })
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.json({
+          products,
+          total,
+          page,
+          totalPages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // seller ordered products here
+    app.get("/seller-stats", async (req, res) => {
+      const { email } = req.query;
+      try {
+        const totalProducts = await productsCollection.countDocuments({
+          sellerEmail: email,
+        });
+
+        const totalOrdersResult = await orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": email } },
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: "$products.price" },
+              },
+            },
+          ])
+          .toArray();
+
+        const totalOrders =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
+        const totalSales =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
+
+        const pendingOrders = await orderCollection.countDocuments({
+          "products.sellerEmail": email,
+          status: { $ne: "Delivered" }, // Assuming 'Delivered' is the final status
+        });
+
+        res.send({
+          totalProducts,
+          totalOrders,
+          totalSales,
+          pendingOrders,
+        });
+      } catch (error) {
+        console.error("Error fetching seller stats:", error);
+        res.status(500).send({ message: "Failed to fetch seller statistics" });
+      }
+    });
     // Endpoint to add a new product (remains as is)
     app.post("/products", async (req, res) => {
       const product = req.body;
@@ -368,7 +410,9 @@ async function run() {
     app.delete("/products/:id", async (req, res) => {
       const { id } = req.params;
       try {
-        const result = await productsCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await productsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
         if (result.deletedCount === 0) {
           return res.status(404).send({ message: "Product not found" });
         }
@@ -382,7 +426,7 @@ async function run() {
     // Endpoint to update a product
     app.put("/products/:id", async (req, res) => {
       const { id } = req.params;
-      const product = req.body;
+      const { _id, ...product } = req.body;
       try {
         const result = await productsCollection.updateOne(
           { _id: new ObjectId(id) },
@@ -398,7 +442,6 @@ async function run() {
       }
     });
 
-    // ---------get all added products
     //  ------cart API START -----------------------
     // Get cart items for a user
     app.get("/cart/:email", async (req, res) => {
@@ -877,7 +920,7 @@ async function run() {
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
-      const { message  } = req.body; 
+      const { message } = req.body;
       try {
         const n8nResponse = await fetch(
           "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
@@ -931,12 +974,96 @@ async function run() {
         });
       }
     });
-
     // -------------------------- AI ASSISTANT  API END -----------------------
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // -------------------------- ADMIN API START -----------------------
+    // get all seller applications
+    app.get("/seller-application", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalDocs = await becomeASellerApplication.countDocuments();
+        const applications = await becomeASellerApplication
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.status(200).send({
+          data: applications,
+          totalPages: Math.ceil(totalDocs / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller applications:", error);
+        res.status(500).send({ error: "Failed to fetch seller applications." });
+      }
+    });
+
+    app.post("/seller-application", async (req, res) => {
+      const applicationData = req.body;
+      try {
+        const existingApplication = await becomeASellerApplication.findOne({
+          sellerEmail: applicationData.sellerEmail,
+        });
+        if (existingApplication) {
+          return res.send({ message: "You have already applied to become a seller." });
+        }
+        const result = await becomeASellerApplication.insertOne(
+          applicationData
+        );
+        res
+          .status(201)
+          .send({ success: true, applicationId: result.insertedId });
+      } catch (error) {
+        console.error("Error creating seller application:", error);
+        res.status(500).send({ error: "Failed to create seller application." });
+      }
+    });
+
+    app.put("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      try {
+        const result = await becomeASellerApplication.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        const changeUserRole = await usersCollection.updateOne(
+          { email: updatedData.email },
+          { $set: { role: "seller" } }
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application updated." });
+      } catch (error) {
+        console.error("Error updating seller application:", error);
+        res.status(500).send({ error: "Failed to update seller application." });
+      }
+    });
+
+    app.delete("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await becomeASellerApplication.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application deleted." });
+      } catch (error) {
+        console.error("Error deleting seller application:", error);
+        res.status(500).send({ error: "Failed to delete seller application." });
+      }
+    });
+    // -------------------------- ADMIN API END -----------------------
   } finally {
   }
 }
