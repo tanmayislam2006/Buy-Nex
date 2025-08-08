@@ -23,9 +23,9 @@ const ManageProducts = () => {
   });
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["products", pagination.pageIndex, pagination.pageSize, user?.email],
+    queryKey: ["manage-products", pagination.pageIndex, pagination.pageSize, user?.email],
     queryFn: async () => {
-      const response = await axios.get("/products", {
+      const response = await axios.get("/manage-products", {
         params: {
           page: pagination.pageIndex + 1,
           limit: pagination.pageSize,
