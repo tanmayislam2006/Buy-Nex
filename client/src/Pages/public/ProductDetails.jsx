@@ -58,6 +58,7 @@ const ProductDetails = () => {
   const cartInfo = {
     productId: _id,
     name: product.name,
+    sellerEmail: product.sellerEmail,
     image:
       selectedImage % product.images.length
         ? product.images[selectedImage % product.images.length]

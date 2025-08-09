@@ -724,8 +724,6 @@ async function run() {
       }
     });
 
-    // -------------------------- BLOGS API END -----------------------
-
     // Add a comment to a blog
     app.post("/blog/:id/comments", async (req, res) => {
       const blogId = req.params.id;
@@ -917,6 +915,224 @@ async function run() {
         }
       }
     );
+
+    // -------------------------- BLOGS API END -----------------------
+    app.get("/order", async (req, res) => {
+      const result = await orderCollection.find().toArray();
+      res.send(result);
+    })
+    
+        app.delete("/order", async (req, res) => {
+          try {
+            const result = await orderCollection.deleteMany({});
+            res.send(result);
+          } catch (error) {
+            console.error("Error deleting orders:", error);
+            res.status(500).send({ message: "Failed to delete orders" });
+          }
+        });
+    // -------------------------- SELLER API START -----------------------
+app.get("/seller-dashboard-data/:email", async (req, res) => {
+  const { email } = req.params;
+  const sellerEmail = email;
+
+  if (!sellerEmail) {
+    return res.status(400).json({ message: "Seller email is required" });
+  }
+
+  try {
+    // Fetch various data points in parallel for efficiency
+    const [totalProductsCount, ordersData, productsData, commentsData] =
+      await Promise.all([
+        productsCollection.countDocuments({ sellerEmail }),
+        orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": sellerEmail } }, // Corrected match field
+            {
+              $addFields: {
+                orderDateAsDate: { $toDate: "$createdAt" }, // Convert string to date
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: "$products.price" },
+                ordersByMonth: {
+                  $push: {
+                    month: { $month: "$orderDateAsDate" },
+                    year: { $year: "$orderDateAsDate" },
+                  },
+                },
+                salesByCountry: {
+                  $push: {
+                    // Using city as a proxy for country based on available data
+                    city: "$shippingAddress.city",
+                    price: "$products.price",
+                  },
+                },
+                topSoldProducts: {
+                  $push: {
+                    productId: "$products.productId",
+                    productName: "$products.name",
+                    productImage: "$products.image",
+                    productPrice: "$products.price",
+                  },
+                },
+                recentOrders: { $push: "$$ROOT" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalOrders: 1,
+                totalSales: { $round: ["$totalSales", 2] },
+                ordersByMonth: 1,
+                salesByCountry: 1,
+                topSoldProducts: 1,
+                recentOrders: { $slice: ["$recentOrders", 5] },
+              },
+            },
+          ])
+          .toArray(),
+        productsCollection.find({ sellerEmail }).limit(6).toArray(),
+        commentsCollection
+          .aggregate([
+            {
+              $lookup: {
+                from: "blogs",
+                localField: "blogId",
+                foreignField: "_id",
+                as: "blogInfo",
+              },
+            },
+            { $unwind: "$blogInfo" }, // Assuming sellerEmail is linked to the blog's author // { $match: { "blogInfo.authorEmail": sellerEmail } },
+            { $sort: { createdAt: -1 } },
+            { $limit: 4 },
+            {
+              $project: {
+                _id: 1,
+                author: "$author",
+                text: "$text",
+                avatar: `https://ui-avatars.com/api/?name=$author&background=random&color=fff&bold=true`,
+                stars: { $add: [3, { $multiply: [2, { $rand: {} }] }] }, // Mocking stars
+              },
+            },
+          ])
+          .toArray(),
+      ]); // Process orders data from aggregation
+
+    const ordersAggData = ordersData[0] || {};
+    const totalOrders = ordersAggData.totalOrders || 0;
+    const totalSales = ordersAggData.totalSales || 0;
+    const totalProfit = totalSales * 0.8; // Mocking profit as 80% of sales // Calculate Monthly Order Chart Data
+
+    const monthlyOrders = Array(12).fill(0);
+    if (ordersAggData.ordersByMonth) {
+      ordersAggData.ordersByMonth.forEach((item) => {
+        monthlyOrders[item.month - 1]++;
+      });
+    }
+    const recentOrdersChart = monthlyOrders.map((orders, index) => ({
+      name: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ][index],
+      orders: orders,
+    })); // Calculate Top Products
+
+    const topProductsMap = {};
+    if (ordersAggData.topSoldProducts) {
+      ordersAggData.topSoldProducts.forEach((item) => {
+        if (!topProductsMap[item.productId]) {
+          topProductsMap[item.productId] = {
+            name: item.productName,
+            soldCount: 0,
+            image: item.productImage,
+            price: item.productPrice,
+          };
+        }
+        topProductsMap[item.productId].soldCount++;
+      });
+    }
+    const topProducts = Object.values(topProductsMap)
+      .sort((a, b) => b.soldCount - a.soldCount)
+      .slice(0, 5); // Calculate Top Countries
+
+    const salesByCountry = {};
+    if (ordersAggData.salesByCountry) {
+      ordersAggData.salesByCountry.forEach((item) => {
+        if (!salesByCountry[item.city]) {
+          salesByCountry[item.city] = 0;
+        }
+        salesByCountry[item.city] += item.price;
+      });
+    }
+    const topCountries = Object.entries(salesByCountry)
+      .map(([city, totalSales]) => ({ _id: city, totalSales }))
+      .sort((a, b) => b.totalSales - a.totalSales); // Prepare product overview data
+
+    const productOverview = {
+      products: productsData.map((p) => ({
+        ...p,
+        imageURL:
+          p.images && p.images.length > 0
+            ? p.images[0]
+            : "https://placehold.co/100x100", // Fallback image
+        stockQuantity: p.inventory, // inventory is the correct field name for quantity
+        revenue: 0, // Assuming this is not tracked per product in your schema
+      })),
+      totalProducts: totalProductsCount,
+      currentPage: 1,
+      totalPages: Math.ceil(totalProductsCount / 12),
+    }; // Final response object
+
+    const dashboardData = {
+      summary: {
+        totalSales: `$${totalSales.toFixed(2)}`,
+        totalIncome: `$${totalProfit.toFixed(2)}`,
+        totalOrders: totalOrders,
+        totalVisitors: "N/A",
+        summaryChart: recentOrdersChart.slice(0, 8),
+      },
+      recentOrdersChart: recentOrdersChart,
+      topProducts: topProducts,
+      topCountries: topCountries,
+      productOverview: productOverview,
+      recentOrders: ordersAggData.recentOrders,
+      earnings: {
+        chartData: recentOrdersChart.map((d) => ({
+          name: d.name,
+          revenue: d.orders * 100, // Mocking a higher revenue
+          profit: d.orders * 70, // Mocking a higher profit
+        })),
+        totalRevenue: totalSales,
+        totalProfit: totalProfit,
+      },
+      newComments: commentsData, // Added back comments data
+    };
+
+    res.json(dashboardData);
+  } catch (err) {
+    console.error("Error fetching seller dashboard data:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch dashboard data", error: err.message });
+  }
+});
+    // -------------------------- SELLER API END -----------------------
+
     // -------------------------- AI ASSISTANT  API START -----------------------
     app.post("/api/ai-chat", async (req, res) => {
       const { message } = req.body;
