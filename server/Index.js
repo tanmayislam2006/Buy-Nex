@@ -153,7 +153,12 @@ async function run() {
 
     // -------------------------- user api is here-----------------------
     app.get("/users", async (req, res) => {
-      const user = await usersCollection.find().toArray();
+      const role = req.query.role;
+      const query = {};
+      if (role) {
+        query.role = role;
+      }
+      const user = await usersCollection.find(query).toArray();
       res.send(user);
     });
     app.get("/user/:email", async (req, res) => {
@@ -1271,15 +1276,31 @@ app.get("/seller-dashboard-data/:email", async (req, res) => {
     // -------------------------- SELLER API END -----------------------
 
     // -------------------------- AI ASSISTANT  API START -----------------------
+    // Ensure you have express.json() middleware for parsing request bodies
+    // app.use(express.json({ limit: '5mb' })); // Increase limit to handle larger Base64 images
+
     app.post("/api/ai-chat", async (req, res) => {
-      const { message } = req.body;
+      const { message, image } = req.body;
+
+      // Check if a message or an image was provided
+      if (!message && !image) {
+        return res.status(400).send({ error: "No message or image provided." });
+      }
+
+      // Construct the payload to send to n8n
+      // Only include the fields that are present
+      const n8nPayload = {
+        ...(message && { message: message }),
+        ...(image && { image: image }),
+      };
+
       try {
         const n8nResponse = await fetch(
           "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message }), // Pass the user's UID as sessionId to n8n
+            body: JSON.stringify(n8nPayload),
           }
         );
 
@@ -1326,6 +1347,7 @@ app.get("/seller-dashboard-data/:email", async (req, res) => {
         });
       }
     });
+
     // -------------------------- AI ASSISTANT  API END -----------------------
     // -------------------------- ADMIN API START -----------------------
     // get all seller applications
@@ -1359,7 +1381,9 @@ app.get("/seller-dashboard-data/:email", async (req, res) => {
           sellerEmail: applicationData.sellerEmail,
         });
         if (existingApplication) {
-          return res.send({ message: "You have already applied to become a seller." });
+          return res.send({
+            message: "You have already applied to become a seller.",
+          });
         }
         const result = await becomeASellerApplication.insertOne(
           applicationData
@@ -1413,6 +1437,27 @@ app.get("/seller-dashboard-data/:email", async (req, res) => {
       } catch (error) {
         console.error("Error deleting seller application:", error);
         res.status(500).send({ error: "Failed to delete seller application." });
+      }
+    });
+    app.patch("/admin-update/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const result = await usersCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .json({ message: "User not found or no changes" });
+        }
+
+        res.json({ message: "User updated successfully" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update user", error });
       }
     });
     // -------------------------- ADMIN API END -----------------------

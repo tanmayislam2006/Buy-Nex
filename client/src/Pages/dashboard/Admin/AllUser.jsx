@@ -1,50 +1,61 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DataTable from "../../../shared/DataTable";
 import DataCardGrid from "../../../shared/DataCardGrid.jsx";
-import { FaUsers } from "react-icons/fa";
-import { MdError } from "react-icons/md";
-import { ImSpinner2 } from "react-icons/im";
+import { FaUsers, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import useAxios from "../../../Hooks/useAxios.jsx";
-
+import Loading from "../../../components/Loading.jsx";
 
 const AllUser = () => {
-  const axiosInstance = useAxios()
-  const {
-    data: users = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["users"],
+  const axiosInstance = useAxios();
+  const queryClient = useQueryClient();
+
+  const { data: customerUsers = [], isLoading, isError, error } = useQuery({
+    queryKey: ["users-customers"],
     queryFn: async () => {
-      const res = await axiosInstance.get("/users");
+      const res = await axiosInstance.get("/users?role=customer");
       return res.data;
     },
   });
 
-  const customerUsers = users.filter((user) => user.role === "customer");
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, updates }) => {
+      await axiosInstance.patch(`/admin-update/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users-customers"]);
+    },
+  });
+
+  const handleVerifyToggle = (id, currentStatus) => {
+    updateUserMutation.mutate({ id, updates: { isVerified: !currentStatus } });
+  };
 
   const columns = [
-    {
-      header: "Name",
-      accessorKey: "name",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "Email",
-      accessorKey: "email",
-      cell: (info) => info.getValue(),
-    },
+    { header: "Name", accessorKey: "name" },
+    { header: "Email", accessorKey: "email" },
     {
       header: "Verified",
       accessorKey: "isVerified",
-      cell: (info) =>
-        info.getValue() ? (
-          <span className="badge badge-success text-white">Yes</span>
-        ) : (
-          <span className="badge badge-error text-white">No</span>
-        ),
+      cell: (info) => {
+        const value = info.getValue();
+        const row = info.row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleVerifyToggle(row._id, value)}
+              className={`p-2 rounded-full ${
+                value
+                  ? "bg-green-100 hover:bg-green-200 text-green-700"
+                  : "bg-red-100 hover:bg-red-200 text-red-500"
+              } shadow transition cursor-pointer`}
+              title={value ? "Mark as Unverified" : "Mark as Verified"}
+            >
+              {value ? <FaCheckCircle size={18} /> : <FaTimesCircle size={18} />}
+            </button>
+          </div>
+        );
+      },
     },
     {
       header: "Joined",
@@ -58,22 +69,8 @@ const AllUser = () => {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <ImSpinner2 className="text-primary animate-spin text-4xl" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-error">
-        <MdError className="text-4xl" />
-        <p className="mt-2 font-semibold">Error: {error.message}</p>
-      </div>
-    );
-  }
+  if (isLoading) return <Loading />;
+  if (isError) return <div className="text-error">{error.message}</div>;
 
   return (
     <div className="space-y-6 px-4 py-6">
@@ -81,13 +78,9 @@ const AllUser = () => {
         <FaUsers className="text-3xl" />
         <h2>All Customers ({customerUsers.length})</h2>
       </div>
-
-      {/* Table view for large screens */}
       <div className="hidden md:block">
         <DataTable columns={columns} data={customerUsers} />
       </div>
-
-      {/* Card view for small screens */}
       <div className="block md:hidden">
         <DataCardGrid columns={columns} data={customerUsers} />
       </div>

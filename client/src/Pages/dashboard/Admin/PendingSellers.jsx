@@ -4,18 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import useAxios from "../../../Hooks/useAxios";
 import DataTable from "../../../shared/DataTable";
 import DataCardGrid from "../../../shared/DataCardGrid";
-import { FaCheckCircle, FaTimesCircle, FaTrash } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaTrash, FaInbox } from "react-icons/fa";
 import Loading from "../../../components/Loading";
 
 const PendingSellers = () => {
   const axiosInstance = useAxios();
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-  // Fetch seller applications
+  // Fetch seller applications with error handling
   const {
     data: appliedSellerData = [],
     refetch,
     isLoading,
+    isError,
+    error,
   } = useQuery({
     queryKey: ["appliedSeller", pagination.pageIndex, pagination.pageSize],
     queryFn: async () => {
@@ -151,11 +153,49 @@ const PendingSellers = () => {
     },
   ];
 
+  // Beautiful empty state message
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-16">
+      <FaInbox size={48} className="text-gray-300 mb-4" />
+      <h3 className="text-xl font-semibold text-gray-600 mb-2">
+        No Seller Applications Found
+      </h3>
+      <p className="text-gray-400">
+        There are currently no pending seller applications to review.
+      </p>
+    </div>
+  );
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <span className="text-4xl text-red-400 mb-4">⚠️</span>
+        <h3 className="text-xl font-semibold text-red-600 mb-2">
+          Failed to load seller applications
+        </h3>
+        <p className="text-gray-400">
+          {error?.message || "An unexpected error occurred."}
+        </p>
+      </div>
+    );
+  }
+
+  // Loading state for all devices
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <Loading />
+        <span className="mt-4 text-gray-500">Loading seller applications...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-semibold">Pending Seller Applications</h2>
-      {isLoading ? (
-        <Loading />
+      {appliedSeller.length === 0 ? (
+        <EmptyState />
       ) : (
         <>
           <div className="hidden lg:block">
