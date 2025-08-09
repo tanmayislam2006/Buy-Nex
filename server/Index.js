@@ -55,6 +55,8 @@ async function run() {
     const orderCollection = BuyNexDB.collection("orders");
     const messagesCollection = BuyNexDB.collection("messages");
     const visitorsCollection = BuyNexDB.collection("visitors");
+    const becomeASellerApplication = BuyNexDB.collection("application");
+
     // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
@@ -1324,12 +1326,96 @@ app.get("/seller-dashboard-data/:email", async (req, res) => {
         });
       }
     });
-
     // -------------------------- AI ASSISTANT  API END -----------------------
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // -------------------------- ADMIN API START -----------------------
+    // get all seller applications
+    app.get("/seller-application", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalDocs = await becomeASellerApplication.countDocuments();
+        const applications = await becomeASellerApplication
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.status(200).send({
+          data: applications,
+          totalPages: Math.ceil(totalDocs / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller applications:", error);
+        res.status(500).send({ error: "Failed to fetch seller applications." });
+      }
+    });
+
+    app.post("/seller-application", async (req, res) => {
+      const applicationData = req.body;
+      try {
+        const existingApplication = await becomeASellerApplication.findOne({
+          sellerEmail: applicationData.sellerEmail,
+        });
+        if (existingApplication) {
+          return res.send({ message: "You have already applied to become a seller." });
+        }
+        const result = await becomeASellerApplication.insertOne(
+          applicationData
+        );
+        res
+          .status(201)
+          .send({ success: true, applicationId: result.insertedId });
+      } catch (error) {
+        console.error("Error creating seller application:", error);
+        res.status(500).send({ error: "Failed to create seller application." });
+      }
+    });
+
+    app.put("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      try {
+        const result = await becomeASellerApplication.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        const changeUserRole = await usersCollection.updateOne(
+          { email: updatedData.email },
+          { $set: { role: "seller" } }
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application updated." });
+      } catch (error) {
+        console.error("Error updating seller application:", error);
+        res.status(500).send({ error: "Failed to update seller application." });
+      }
+    });
+
+    app.delete("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await becomeASellerApplication.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application deleted." });
+      } catch (error) {
+        console.error("Error deleting seller application:", error);
+        res.status(500).send({ error: "Failed to delete seller application." });
+      }
+    });
+    // -------------------------- ADMIN API END -----------------------
   } finally {
   }
 }
