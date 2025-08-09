@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
@@ -44,6 +44,25 @@ const ProductDetails = () => {
     enabled: !!product?.category && !!product?._id,
   });
 
+    useEffect(() => {
+      if (!id || !user?.email) return;
+
+      const visitData = {
+        productId: id,
+        userEmail: user.email,
+        sellerEmail: product?.sellerEmail,
+      };
+
+      axiosInstance
+        .post("http://localhost:5000/track-visit", visitData)
+        .then((res) => {
+          console.log("Visitor data recorded:", res.data);
+        })
+        .catch((err) => {
+          console.error("Failed to record visitor:", err);
+        });
+    }, [id, user, axiosInstance, product?.sellerEmail]);
+
 
   if (isLoading || isSimilarLoading) return <Loading />;
 
@@ -58,6 +77,7 @@ const ProductDetails = () => {
   const cartInfo = {
     productId: _id,
     name: product.name,
+    sellerEmail: product.sellerEmail,
     image:
       selectedImage % product.images.length
         ? product.images[selectedImage % product.images.length]
