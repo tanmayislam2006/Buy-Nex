@@ -54,7 +54,7 @@ const ProductDetails = () => {
       };
 
       axiosInstance
-        .post("http://localhost:5000/track-visit", visitData)
+        .post("/track-visit", visitData)
         .then((res) => {
           console.log("Visitor data recorded:", res.data);
         })
