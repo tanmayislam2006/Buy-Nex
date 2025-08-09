@@ -113,6 +113,22 @@ const SellerOverview = () => {
     newComments,
   } = data || {};
 
+  const summaryChart = summary?.summaryChart || [];
+
+  const currentMonthIndex = new Date().getMonth();
+
+  const currentValue = summaryChart[currentMonthIndex]?.orders || 0;
+  const previousValue = summaryChart[currentMonthIndex - 1]?.orders || 0;
+
+  let changePercentage = "0.00%";
+
+  if (previousValue !== 0) {
+    const change = ((currentValue - previousValue) / previousValue) * 100;
+    changePercentage = `${change.toFixed(2)}%`;
+  } else if (currentValue > 0) {
+    changePercentage = "100%";
+  }
+
   return (
     <div className="min-h-screen">
       {/* Top Bar */}
@@ -164,19 +180,19 @@ const SellerOverview = () => {
 
       {/* Summary Cards */}
       {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           <SummaryCard
             title="Total Sales"
-            value={summary.totalSales} // No change needed, API returns string
-            change="1.56%"
+            value={summary.totalSales}
+            change={changePercentage}
             icon="💵"
             chartColor="#34d399"
             chartData={summary.summaryChart}
           />
           <SummaryCard
             title="Total Income"
-            value={summary.totalIncome} // No change needed, API returns string
-            change="1.56%"
+            value={summary.totalIncome}
+            change={changePercentage}
             icon="💰"
             chartColor="#fb923c"
             chartData={summary.summaryChart}
@@ -184,17 +200,25 @@ const SellerOverview = () => {
           <SummaryCard
             title="Orders Paid"
             value={summary.totalOrders}
-            change="0.00%"
+            change={changePercentage}
             icon="🧾"
             chartColor="#60a5fa"
             chartData={summary.summaryChart}
           />
           <SummaryCard
-            title="Total Visitor"
-            value="N/A"
-            change="1.56%"
-            icon="👤"
+            title="Total Visitors"
+            value={summary.totalVisitors}
+            change={changePercentage}
+            icon="👥"
             chartColor="#6366f1"
+            chartData={summary.summaryChart}
+          />
+          <SummaryCard
+            title="Total Visits"
+            value={summary.totalVisits}
+            change={changePercentage}
+            icon="👣"
+            chartColor="#8b5cf6"
             chartData={summary.summaryChart}
           />
         </div>
@@ -392,7 +416,13 @@ const SellerOverview = () => {
                   </div>
                 </div>
                 <div className="text-right text-xs text-gray-500">
-                  {new Date(o.createdAt).toLocaleDateString()}{" "}
+                  {new Date(o.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                   {/* Corrected from o.orderDate to o.createdAt */}
                 </div>
               </li>
