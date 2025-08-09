@@ -94,7 +94,12 @@ async function run() {
     // -----------------------------SOCKET IO CODE END----------------
     // -------------------------- user api is here-----------------------
     app.get("/users", async (req, res) => {
-      const user = await usersCollection.find().toArray();
+      const role = req.query.role;
+      const query = {};
+      if (role) {
+        query.role = role;
+      }
+      const user = await usersCollection.find(query).toArray();
       res.send(user);
     });
     app.get("/user/:email", async (req, res) => {
@@ -1007,7 +1012,9 @@ async function run() {
           sellerEmail: applicationData.sellerEmail,
         });
         if (existingApplication) {
-          return res.send({ message: "You have already applied to become a seller." });
+          return res.send({
+            message: "You have already applied to become a seller.",
+          });
         }
         const result = await becomeASellerApplication.insertOne(
           applicationData
@@ -1061,6 +1068,27 @@ async function run() {
       } catch (error) {
         console.error("Error deleting seller application:", error);
         res.status(500).send({ error: "Failed to delete seller application." });
+      }
+    });
+    app.patch("/admin-update/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const result = await usersCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .json({ message: "User not found or no changes" });
+        }
+
+        res.json({ message: "User updated successfully" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update user", error });
       }
     });
     // -------------------------- ADMIN API END -----------------------
