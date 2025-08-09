@@ -924,15 +924,31 @@ async function run() {
       }
     );
     // -------------------------- AI ASSISTANT  API START -----------------------
+    // Ensure you have express.json() middleware for parsing request bodies
+    // app.use(express.json({ limit: '5mb' })); // Increase limit to handle larger Base64 images
+
     app.post("/api/ai-chat", async (req, res) => {
-      const { message } = req.body;
+      const { message, image } = req.body;
+
+      // Check if a message or an image was provided
+      if (!message && !image) {
+        return res.status(400).send({ error: "No message or image provided." });
+      }
+
+      // Construct the payload to send to n8n
+      // Only include the fields that are present
+      const n8nPayload = {
+        ...(message && { message: message }),
+        ...(image && { image: image }),
+      };
+
       try {
         const n8nResponse = await fetch(
           "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message }), // Pass the user's UID as sessionId to n8n
+            body: JSON.stringify(n8nPayload),
           }
         );
 
@@ -979,6 +995,7 @@ async function run() {
         });
       }
     });
+
     // -------------------------- AI ASSISTANT  API END -----------------------
     // -------------------------- ADMIN API START -----------------------
     // get all seller applications
