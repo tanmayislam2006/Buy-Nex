@@ -14,7 +14,6 @@ const OrderedProducts = () => {
   const axios = useAxios();
   const navigate = useNavigate();
   const queryClient = useQueryClient(); // Get the query client instance
-
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -37,8 +36,8 @@ const OrderedProducts = () => {
 
   // Step 2: Define the mutation for updating the status
   const { mutate: updateOrderStatus, isPending: isUpdating } = useMutation({
-    mutationFn: ({ orderId, status }) => {
-      return axios.patch(`/orders/${orderId}/status`, { status });
+    mutationFn: ({ orderId, status, orderNumber }) => {
+      return axios.patch(`/orders/${orderId}/status`, { status, orderNumber });
     },
     onSuccess: () => {
       toast.success("Order status updated successfully!");
@@ -72,7 +71,7 @@ const OrderedProducts = () => {
           <select
             value={row.original.status}
             onChange={(e) => {
-              updateOrderStatus({ orderId: row.original._id, status: e.target.value });
+              updateOrderStatus({ orderId: row.original._id, status: e.target.value, orderNumber: row.original.orderNumber });
             }}
             // The entire dropdown is disabled if an update is pending or status is Delivered
             disabled={isUpdating || row.original.status === "Delivered"}

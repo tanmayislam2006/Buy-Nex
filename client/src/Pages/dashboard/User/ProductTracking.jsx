@@ -1,96 +1,80 @@
-// TrackingTable.jsx
+// ProductTracking.jsx
 import React from "react";
 import { Link } from "react-router";
-// import { trackingData } from "./mockTrackingData";
-
-const trackingData = [
-  {
-    trackingId: "T001",
-    productId: "P1001",
-    productName: "Wireless Mouse",
-    userEmail: "user@example.com",
-    step: 1,
-    status: "Order Placed",
-    estimatedDelivery: "2025-08-01",
-    lastUpdated: "2025-07-30 14:00",
-  },
-  {
-    trackingId: "T002",
-    productId: "P1002",
-    productName: "Bluetooth Speaker",
-    userEmail: "user@example.com",
-    step: 2,
-    status: "Seller Confirmed",
-    estimatedDelivery: "2025-08-02",
-    lastUpdated: "2025-07-30 16:00",
-  },
-  {
-    trackingId: "T003",
-    productId: "P1003",
-    productName: "Gaming Keyboard",
-    userEmail: "user@example.com",
-    step: 3,
-    status: "Out for Delivery",
-    estimatedDelivery: "2025-08-01",
-    lastUpdated: "2025-07-31 10:30",
-  },
-  {
-    trackingId: "T004",
-    productId: "P1004",
-    productName: "Smart Watch",
-    userEmail: "user@example.com",
-    step: 4,
-    status: "Delivered",
-    estimatedDelivery: "2025-07-30",
-    lastUpdated: "2025-07-30 18:00",
-  },
-  {
-    trackingId: "T005",
-    productId: "P1005",
-    productName: "Laptop Stand",
-    userEmail: "user@example.com",
-    step: 2,
-    status: "Seller Confirmed",
-    estimatedDelivery: "2025-08-03",
-    lastUpdated: "2025-07-31 08:00",
-  },
-];
+import useAuth from "../../../Hooks/useAuth";
+import useAxios from "../../../Hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
 
 const ProductTracking = () => {
-  const userEmail = "user@example.com"; // mock user
-  // const products = trackingData.filter(item => item.userEmail === userEmail);
-  const products = [...trackingData];
+  const { user } = useAuth();
+  const axiosInstance = useAxios();
+  const {
+    data: products,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["tracking", user.email],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/tracking?email=${user.email}`);
+      return response.data; // Axios throws if error
+    },
+    enabled: !!user?.email, // only run if email is available
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-16">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center text-red-500 py-16">
+        Error loading orders: {error.message}
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-16 md:p-8">
       <h2 className="text-2xl font-bold mb-6">Recent Orders</h2>
       <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Status</th>
-              <th>Estimated Delivery</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((item) => (
-              <tr key={item.trackingId}>
-                <td>{item.productName}</td>
-                <td>{item.status}</td>
-                <td>{item.estimatedDelivery}</td>
-                <td>
-                  <Link
-                    to={`/Product-status/${item.trackingId}`}
-                    className="btn btn-sm btn-primary">
-                    View Details
-                  </Link>
-                </td>
+        {products?.length > 0 ? (
+          <table className="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Tracking ID</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((item) => (
+                <tr key={item.trackingId} className="bg-gray-100">
+                  <td>{item.orderId}</td>
+                  <td>{item.trackingId}</td>
+                  <td>{item.status}</td>
+                  <td>
+                    <Link
+                      to={`/Product-status/${item.trackingId}`}
+                      className="btn bg-primary cursor-pointer text-white"
+                    >
+                      View Details
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            No orders found.
+          </div>
+        )}
       </div>
     </div>
   );
