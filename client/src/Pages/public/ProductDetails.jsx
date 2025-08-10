@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import useAxios from "../../Hooks/useAxios";
@@ -9,9 +9,11 @@ import { FiShoppingBag } from "react-icons/fi";
 import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
 import Chat from "../../components/Chat/Chat";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const ProductDetails = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const { user } = useAuth();
   const { id } = useParams();
   const axiosInstance = useAxios();
@@ -33,9 +35,6 @@ const ProductDetails = () => {
     },
     enabled: !!id,
   });
-
-  console.log(product);
-
   const { data: similarProducts = [], isLoading: isSimilarLoading } = useQuery({
     queryKey: ["similar-products", product?.category],
     queryFn: async () => {
@@ -46,6 +45,25 @@ const ProductDetails = () => {
     },
     enabled: !!product?.category && !!product?._id,
   });
+
+  useEffect(() => {
+    if (!id || !user?.email) return;
+
+    const visitData = {
+      productId: id,
+      userEmail: user.email,
+      sellerEmail: product?.sellerEmail,
+    };
+
+    axiosInstance
+      .post("/track-visit", visitData)
+      .then((res) => {
+        console.log("Visitor data recorded:", res.data);
+      })
+      .catch((err) => {
+        console.error("Failed to record visitor:", err);
+      });
+  }, [id, user, axiosInstance, product?.sellerEmail]);
 
   if (isLoading || isSimilarLoading) return <Loading />;
 
@@ -60,6 +78,7 @@ const ProductDetails = () => {
   const cartInfo = {
     productId: _id,
     name: product.name,
+    sellerEmail: product.sellerEmail,
     image:
       selectedImage % product.images.length
         ? product.images[selectedImage % product.images.length]
@@ -95,7 +114,6 @@ const ProductDetails = () => {
     }
   };
 
-
   // Function to handle chat button click
   const handleChat = () => {
     if (!user) {
@@ -104,6 +122,30 @@ const ProductDetails = () => {
       return;
     }
     setIsChatOpen(!isChatOpen);
+  };
+
+  // Wishlist handler
+  const handleWishlist = async () => {
+    if (!user) {
+      toast.error("Please log in to add items to your wishlist.");
+      navigate("/auth/login");
+      return;
+    }
+    const wishlistObj = {
+      productId: product._id,
+      name: product.name,
+      image: product.images?.[0],
+      price: product.price,
+      sellerEmail: product.sellerEmail,
+      userEmail: user.email,
+    };
+    try {
+      await axiosInstance.post("/wishlist", wishlistObj);
+      setIsWishlisted(true);
+      toast.success("Added to wishlist!");
+    } catch (error) {
+      toast.error("Error adding to wishlist: " + error.message);
+    }
   };
 
   // Helper functions
@@ -165,6 +207,7 @@ const ProductDetails = () => {
       );
     }
 
+    console.log(similarProducts);
     return (
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Thumbnails - vertical on desktop */}
@@ -330,7 +373,22 @@ const ProductDetails = () => {
 
       <div className="flex flex-col md:flex-row gap-8 sm:border-b sm:border-r border-gray-200 pb-10 sm:pr-6 rounded">
         {/* Image Section */}
-        <div className="w-full md:w-1/2">{renderImageGallery()}</div>
+        <div className="w-full md:w-1/2 relative">
+          {renderImageGallery()}
+          {/* Wishlist Button */}
+          <button
+            onClick={handleWishlist}
+            className="absolute top-4 right-4 z-20 bg-white rounded-full p-3 shadow-lg hover:bg-pink-100 transition cursor-pointer"
+            title={isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+            disabled={isWishlisted}
+          >
+            {isWishlisted ? (
+              <FaHeart className="text-pink-500 text-2xl" />
+            ) : (
+              <FaRegHeart className="text-gray-400 text-2xl" />
+            )}
+          </button>
+        </div>
 
         {/* Product Info */}
         <div className="w-full md:w-1/2 space-y-4">
@@ -483,7 +541,7 @@ const ProductDetails = () => {
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></span>
           </h3>
           <div className="space-y-2 text-gray-600">
-            {similarProducts.map((item) => (
+            {similarProducts?.map((item) => (
               <div
                 key={item._id}
                 className="flex gap-4 p-3 border border-secondary rounded-lg hover:shadow-sm shadow-secondary duration-500 transition cursor-pointer"
@@ -525,23 +583,24 @@ const ProductDetails = () => {
       <div>
         <button
           onClick={handleChat}
-          className="btn btn-primary fixed bottom-5 border-none right-5 md:right-12 z-50 rounded-full text-2xl py-6 px-3 shadow-lg hover:bg-accent transition duration-300"
+          className="btn btn-primary fixed bottom-24 border-none right-6 z-50 rounded-full text-2xl py-7 px-4 shadow-lg hover:bg-accent transition duration-300"
         >
           <IoMdChatboxes />
         </button>
         {/* Chat Popup Animation */}
         <div
-          className={`fixed bottom-5 right-5 z-40`}
+          className={`fixed bottom-6 right-5 z-40`}
           style={{
+            transition:
+              "opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.68,-0.55,.27,1.55)",
             transform: isChatOpen
-              ? "scale(1)"
-              : "scale(0.2)",
+              ? "scale(1) translateY(-150px) translateX(-6px)"
+              : "scale(0.85) translateY(-100px) translateX(0)",
             opacity: isChatOpen ? 1 : 0,
             pointerEvents: isChatOpen ? "auto" : "none",
-            transition:
-              "transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.3s",
             transformOrigin: "bottom right",
             maxWidth: "95vw",
+            willChange: "opacity, transform",
           }}
         >
           <Chat

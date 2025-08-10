@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { PiChatsDuotone } from "react-icons/pi";
 import { Outlet, NavLink, useNavigate } from "react-router";
 import {
@@ -21,37 +21,98 @@ const DashboardLayout = () => {
   const { user, logoutUser } = useAuth();
   const navigate = useNavigate();
 
+  // Make sure your user object has a 'role' property, e.g., 'customer', 'seller', 'admin'
+  const userRole = user?.role || "customer";
+
   const defaultAvtar = `https://ui-avatars.com/api/?name=${
     user?.name || "Buy Nex"
   }&background=random&color=fff&bold=true`;
 
-  // Dummy user role, replace with context/props if needed
-  // 'user', 'admin', 'seller'
-
-  // Sidebar links by role
-  // Remove profile from links to avoid duplicate
-  const links = [
-    { to: "/dashboard", label: "Dashboard", icon: <FiHome /> },
+  // Define all links with a 'roles' array
+  const allLinks = [
+    // Customer links
+    {
+      to: "/dashboard",
+      label: "Dashboard",
+      icon: <FiHome />,
+      roles: ["customer", "seller", "admin"],
+    },
     {
       to: "/product-tracking",
       label: "Product Tracking",
       icon: <FiClipboard />,
+      roles: ["customer"],
     },
-    { to: "/order-history", label: "Order History", icon: <FiBox /> },
+    {
+      to: "/order-history",
+      label: "Order History",
+      icon: <FiBox />,
+      roles: ["customer"],
+    },
     {
       to: "/payment-history",
       label: "Payment History",
       icon: <FiDollarSign />,
+      roles: ["customer"],
     },
-    { to: "/add-product", label: "Add Product", icon: <FiBox /> },
-    { to: "/manage-products", label: "Manage Products", icon: <FiClipboard /> },
-    { to: "/ordered-products", label: "Ordered Products", icon: <FiBox /> },
-    { to: "/customer-chats", label: "Customer's Chat", icon: <PiChatsDuotone size={20} /> },
-    { to: "/pending-sellers", label: "Pending Sellers", icon: <FiClipboard /> },
-    { to: "/all-user", label: "All Users", icon: <FiUsers /> },
-    { to: "/all-seller", label: "All Sellers", icon: <FiUsers /> },
-    { to: "/total-orders", label: "Total Orders", icon: <FiBox /> },
+
+    // Seller links
+    {
+      to: "/add-product",
+      label: "Add Product",
+      icon: <FiBox />,
+      roles: ["seller"],
+    },
+    {
+      to: "/manage-products",
+      label: "Manage Products",
+      icon: <FiClipboard />,
+      roles: ["seller"],
+    },
+    {
+      to: "/ordered-products",
+      label: "Ordered Products",
+      icon: <FiBox />,
+      roles: ["seller"],
+    },
+    {
+      to: "/customer-chats",
+      label: "Customer's Chat",
+      icon: <PiChatsDuotone size={20} />,
+      roles: ["seller"],
+    },
+
+    // Admin links
+    {
+      to: "/pending-sellers",
+      label: "Pending Sellers",
+      icon: <FiClipboard />,
+      roles: ["admin"],
+    },
+    {
+      to: "/all-user",
+      label: "All Users",
+      icon: <FiUsers />,
+      roles: ["admin"],
+    },
+    {
+      to: "/all-seller",
+      label: "All Sellers",
+      icon: <FiUsers />,
+      roles: ["admin"],
+    },
+    {
+      to: "/total-orders",
+      label: "Total Orders",
+      icon: <FiBox />,
+      roles: ["admin"],
+    }
   ];
+
+  // Filter links based on the user's role
+  const filteredLinks = allLinks.filter((link) =>
+    link.roles.includes(userRole)
+  );
 
   if (!user) {
     return <Loading />;
@@ -66,7 +127,7 @@ const DashboardLayout = () => {
         </div>
         <div className="flex flex-col flex-1 min-h-0">
           <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto min-h-0">
-            {links.map((link) => (
+            {filteredLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
@@ -85,8 +146,7 @@ const DashboardLayout = () => {
           <div className="flex flex-col gap-2 p-4 border-t border-gray-200">
             <NavLink
               to="/profile"
-              className={`flex items-center gap-3 py-2 rounded text-gray-700 font-medium 
-                  `}
+              className={`flex items-center gap-3 py-2 rounded text-gray-700 font-medium`}
             >
               <img
                 className="w-8 h-8 rounded-full"
@@ -143,7 +203,7 @@ const DashboardLayout = () => {
         </div>
         <div className="flex flex-col flex-1 min-h-0">
           <nav className="flex-1 flex flex-col gap-2 p-4 overflow-y-auto min-h-0">
-            {links.map((link) => (
+            {filteredLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
@@ -163,8 +223,7 @@ const DashboardLayout = () => {
           <div className="flex flex-col gap-2 p-4 border-t border-gray-200">
             <NavLink
               to="/profile"
-              className={`flex items-center gap-3 py-2 rounded text-gray-700 font-medium 
-                  `}
+              className={`flex items-center gap-3 py-2 rounded text-gray-700 font-medium`}
             >
               <img
                 className="w-8 h-8 rounded-full"

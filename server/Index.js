@@ -54,6 +54,9 @@ async function run() {
     const cartCollection = BuyNexDB.collection("cart");
     const orderCollection = BuyNexDB.collection("orders");
     const messagesCollection = BuyNexDB.collection("messages");
+    const visitorsCollection = BuyNexDB.collection("visitors");
+    const becomeASellerApplication = BuyNexDB.collection("application");
+    const wishlistCollection = BuyNexDB.collection("wishlist");
     // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
@@ -91,9 +94,71 @@ async function run() {
     });
 
     // -----------------------------SOCKET IO CODE END----------------
+
+    // visitor track
+    app.post("/track-visit", async (req, res) => {
+      try {
+        const { sellerEmail, productId, userEmail } = req.body;
+
+        if (!sellerEmail || !productId || !userEmail) {
+          return res.status(400).json({
+            error: "Seller email, productId, and userEmail are required",
+          });
+        }
+
+        const ip =
+          req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const userAgent = req.headers["user-agent"];
+
+        // Check if this user already visited this product for this seller
+        const existingVisit = await visitorsCollection.findOne({
+          sellerEmail,
+          productId,
+          userEmail,
+        });
+
+        if (existingVisit) {
+          // Update visit count
+          await visitorsCollection.updateOne(
+            { _id: existingVisit._id },
+            {
+              $set: { visitedAt: new Date(), ip, userAgent },
+              $inc: { visitCount: 1 },
+            }
+          );
+        } else {
+          // Create new visit record
+          await visitorsCollection.insertOne({
+            sellerEmail,
+            productId,
+            userEmail,
+            ip,
+            userAgent,
+            visitedAt: new Date(),
+            visitCount: 1,
+          });
+        }
+
+        res.json({ message: "Visit tracked successfully" });
+      } catch (error) {
+        console.error("Error tracking visit:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    app.get("/visitor", async (req, res) => {
+      const result = await visitorsCollection.find().toArray();
+      res.send(result);
+    });
+
     // -------------------------- user api is here-----------------------
     app.get("/users", async (req, res) => {
-      const user = await usersCollection.find().toArray();
+      const role = req.query.role;
+      const query = {};
+      if (role) {
+        query.role = role;
+      }
+      const user = await usersCollection.find(query).toArray();
       res.send(user);
     });
     app.get("/user/:email", async (req, res) => {
@@ -106,6 +171,36 @@ async function run() {
       const { userEmail } = req.params;
       const orderHistory = await orderCollection.find({ userEmail }).toArray();
       res.send(orderHistory);
+    });
+
+    app.get("/seller-orders/:sellerEmail", async (req, res) => {
+      const { sellerEmail } = req.params;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      try {
+        const query = {
+          "products.sellerEmail": sellerEmail,
+        };
+
+        const totalOrders = await orderCollection.countDocuments(query);
+        const sellerOrders = await orderCollection
+          .find(query)
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.send({
+          orders: sellerOrders,
+          totalOrders,
+          currentPage: page,
+          totalPages: Math.ceil(totalOrders / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller orders:", error);
+        res.status(500).send({ message: "Failed to fetch seller orders" });
+      }
     });
     app.post("/register", async (req, res) => {
       const email = req.body.email;
@@ -153,6 +248,161 @@ async function run() {
       );
       res.send(result);
     });
+    app.post("/wishlist", async (req, res) => {
+      const wishlistItem = req.body;
+      const result = await wishlistCollection.insertOne(wishlistItem);
+      res.send(result);
+    });
+    app.get("/user-dashboard", async (req, res) => {
+      try {
+        const { email } = req.query; // ?email=user@11.com
+
+        // 1️⃣ Orders aggregation
+        const ordersAgg = await orderCollection
+          .aggregate([
+            { $match: { userEmail: email } },
+            {
+              $facet: {
+                summary: [
+                  {
+                    $group: {
+                      _id: null,
+                      totalOrders: { $sum: 1 },
+                      totalSpent: { $sum: { $toDouble: "$totalAmount" } },
+                      confirmOrders: {
+                        $sum: {
+                          $cond: [{ $eq: ["$status", "Confirmed"] }, 1, 0],
+                        },
+                      },
+                    },
+                  },
+                ],
+                recentOrders: [
+                  { $sort: { createdAt: -1 } },
+                  { $limit: 5 },
+                  {
+                    $project: {
+                      _id: 0,
+                      orderId: "$orderNumber",
+                      product: { $first: "$products.name" },
+                      date: "$createdAt",
+                      status: "$status",
+                      amount: "$totalAmount",
+                    },
+                  },
+                ],
+                monthlySpend: [
+                  {
+                    $group: {
+                      _id: { $month: { $toDate: "$createdAt" } },
+                      spending: { $sum: { $toDouble: "$totalAmount" } },
+                    },
+                  },
+                  { $sort: { _id: 1 } },
+                  {
+                    $project: {
+                      _id: 0,
+                      month: {
+                        $arrayElemAt: [
+                          [
+                            "Jan",
+                            "Feb",
+                            "Mar",
+                            "Apr",
+                            "May",
+                            "Jun",
+                            "Jul",
+                            "Aug",
+                            "Sep",
+                            "Oct",
+                            "Nov",
+                            "Dec",
+                          ],
+                          { $subtract: ["$_id", 1] },
+                        ],
+                      },
+                      spending: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ])
+          .toArray();
+
+        const orderData = ordersAgg[0];
+
+        // 2️⃣ Wishlist aggregation
+        const wishlistAgg = await wishlistCollection
+          .aggregate([
+            { $match: { userEmail: email } },
+            {
+              $facet: {
+                total: [{ $count: "totalWishlist" }],
+                recent: [
+                  { $sort: { _id: -1 } },
+                  { $limit: 3 },
+                  {
+                    $project: {
+                      _id: 0,
+                      id: "$productId",
+                      name: 1,
+                      price: 1,
+                      image: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ])
+          .toArray();
+
+        const wishlistData = wishlistAgg[0];
+
+        // 3️⃣ Fill in missing months for monthlySpend
+        const allMonths = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        const monthlySpendMap = {};
+        (orderData.monthlySpend || []).forEach((m) => {
+          monthlySpendMap[m.month] = m.spending;
+        });
+
+        const fullMonthlySpend = allMonths.map((month) => ({
+          month,
+          spending: monthlySpendMap[month] || 0,
+        }));
+
+        // 4️⃣ Send final JSON
+        res.json({
+          summary: {
+            totalOrders: orderData.summary[0]?.totalOrders || 0,
+            totalSpent: orderData.summary[0]?.totalSpent || 0,
+            confirmOrders: orderData.summary[0]?.confirmOrders || 0,
+            totalWishlist: wishlistData.total[0]?.totalWishlist || 0,
+          },
+          recentOrders: orderData.recentOrders,
+          wishlist: wishlistData.recent,
+          monthlySpend: fullMonthlySpend,
+        });
+      } catch (error) {
+        console.error("Error fetching user dashboard:", error);
+        res.status(500).json({ error: "Failed to fetch user dashboard data" });
+      }
+    });
+
     // ---------------------------- user api is here-----------------------
 
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
@@ -168,9 +418,10 @@ async function run() {
         sortBy,
         page,
         limit,
+        search,
       } = req.query;
 
-      let matchQuery = {}; // This will be the $match stage for all facets
+      let matchQuery = {};
 
       if (category) matchQuery.category = category;
       if (brand) matchQuery.brand = brand;
@@ -181,17 +432,19 @@ async function run() {
         if (maxPrice) matchQuery.price.$lte = parseFloat(maxPrice);
       }
 
-      let sortOptions = {};
-      // Default sort by _id descending (newest) if no sortBy specified
-      if (sortBy === "Newest") {
-        sortOptions._id = -1;
-      } else if (sortBy === "Price: Low to High") {
-        sortOptions.price = 1;
-      } else if (sortBy === "Price: High to Low") {
-        sortOptions.price = -1;
-      } else {
-        sortOptions._id = -1; // Fallback default
+      if (search) {
+        const regex = new RegExp(search, "i");
+        matchQuery.$or = [
+          { name: { $regex: regex } },
+          { description: { $regex: regex } },
+          { tags: { $regex: regex } },
+        ];
       }
+
+      let sortOptions = {};
+      if (sortBy === "Price: Low to High") sortOptions.price = 1;
+      else if (sortBy === "Price: High to Low") sortOptions.price = -1;
+      else sortOptions._id = -1; // Default/Newest
 
       const pageNumber = parseInt(page) || 1;
       const productsPerPage = parseInt(limit) || 8;
@@ -200,26 +453,20 @@ async function run() {
       try {
         const result = await productsCollection
           .aggregate([
-            // Initial match stage to filter products before any other operations
-            // This ensures that category/brand counts reflect the currently filtered set
             { $match: matchQuery },
             {
               $facet: {
-                // Pipeline 1: Get paginated, sorted products
                 products: [
                   { $sort: sortOptions },
                   { $skip: skip },
                   { $limit: productsPerPage },
                 ],
-                // Pipeline 2: Get total count of filtered products
                 totalCount: [{ $count: "count" }],
-                // Pipeline 3: Get category counts based on the filtered products
                 categoryCounts: [
                   { $group: { _id: "$category", count: { $sum: 1 } } },
                   { $project: { name: "$_id", count: 1, _id: 0 } },
                   { $sort: { name: 1 } },
                 ],
-                // Pipeline 4: Get brand counts based on the filtered products
                 brandCounts: [
                   { $group: { _id: "$brand", count: { $sum: 1 } } },
                   { $project: { name: "$_id", count: 1, _id: 0 } },
@@ -230,10 +477,7 @@ async function run() {
           ])
           .toArray();
 
-        // The result of $facet is an array containing a single document
         const aggregatedData = result[0];
-
-        // Extract data, handling cases where counts might be empty if no products match
         const products = aggregatedData.products || [];
         const totalProducts =
           aggregatedData.totalCount.length > 0
@@ -259,9 +503,7 @@ async function run() {
     app.get("/products", async (req, res) => {
       const category = req.query.category;
       const excludeId = req.query.excludeId;
-
       const query = {};
-
       if (category) {
         query.category = category;
       }
@@ -294,7 +536,83 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch product" });
       }
     });
+    // manage products
+    app.get("/manage-products", async (req, res) => {
+      try {
+        let { page = 1, limit = 10, sellerEmail } = req.query;
 
+        page = parseInt(page);
+        limit = parseInt(limit);
+
+        if (!sellerEmail) {
+          return res.status(400).json({ message: "Seller email is required" });
+        }
+
+        const skip = (page - 1) * limit;
+
+        const total = await productsCollection.countDocuments({ sellerEmail });
+
+        const products = await productsCollection
+          .find({ sellerEmail })
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.json({
+          products,
+          total,
+          page,
+          totalPages: Math.ceil(total / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // seller ordered products here
+    app.get("/seller-stats", async (req, res) => {
+      const { email } = req.query;
+      try {
+        const totalProducts = await productsCollection.countDocuments({
+          sellerEmail: email,
+        });
+
+        const totalOrdersResult = await orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": email } },
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: "$products.price" },
+              },
+            },
+          ])
+          .toArray();
+
+        const totalOrders =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalOrders : 0;
+        const totalSales =
+          totalOrdersResult.length > 0 ? totalOrdersResult[0].totalSales : 0;
+
+        const pendingOrders = await orderCollection.countDocuments({
+          "products.sellerEmail": email,
+          status: { $ne: "Delivered" }, // Assuming 'Delivered' is the final status
+        });
+
+        res.send({
+          totalProducts,
+          totalOrders,
+          totalSales,
+          pendingOrders,
+        });
+      } catch (error) {
+        console.error("Error fetching seller stats:", error);
+        res.status(500).send({ message: "Failed to fetch seller statistics" });
+      }
+    });
     // Endpoint to add a new product (remains as is)
     app.post("/products", async (req, res) => {
       const product = req.body;
@@ -306,6 +624,43 @@ async function run() {
         res.status(500).send({ message: "Failed to add product" });
       }
     });
+
+    // Endpoint to delete a product
+    app.delete("/products/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await productsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        res.status(200).send({ message: "Product deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).send({ message: "Failed to delete product" });
+      }
+    });
+
+    // Endpoint to update a product
+    app.put("/products/:id", async (req, res) => {
+      const { id } = req.params;
+      const { _id, ...product } = req.body;
+      try {
+        const result = await productsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: product }
+        );
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: "Product not found" });
+        }
+        res.status(200).send({ message: "Product updated successfully" });
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).send({ message: "Failed to update product" });
+      }
+    });
+
     //  ------cart API START -----------------------
     // Get cart items for a user
     app.get("/cart/:email", async (req, res) => {
@@ -589,8 +944,6 @@ async function run() {
       }
     });
 
-    // -------------------------- BLOGS API END -----------------------
-
     // Add a comment to a blog
     app.post("/blog/:id/comments", async (req, res) => {
       const blogId = req.params.id;
@@ -782,16 +1135,331 @@ async function run() {
         }
       }
     );
+
+    // -------------------------- BLOGS API END -----------------------
+    app.get("/order", async (req, res) => {
+      const result = await orderCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.delete("/order", async (req, res) => {
+      try {
+        const result = await orderCollection.deleteMany({});
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting orders:", error);
+        res.status(500).send({ message: "Failed to delete orders" });
+      }
+    });
+    // -------------------------- SELLER API START -----------------------
+    // Seller Dashboard Data API
+    app.get("/seller-dashboard-data/:email", async (req, res) => {
+      const { email } = req.params;
+      const sellerEmail = email;
+
+      if (!sellerEmail) {
+        return res.status(400).json({ message: "Seller email is required" });
+      }
+
+      try {
+        const totalProductsCountPromise = productsCollection.countDocuments({
+          sellerEmail,
+        });
+
+        const ordersDataPromise = orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": sellerEmail } },
+            {
+              $addFields: {
+                orderDateAsDate: { $toDate: "$createdAt" },
+                totalAmountNum: { $toDouble: "$totalAmount" },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: "$totalAmountNum" },
+                totalIncome: { $sum: "$subtotal" },
+                salesByCountry: {
+                  $push: {
+                    city: "$shippingAddress.city",
+                    price: {
+                      $multiply: ["$products.price", "$products.quantity"],
+                    },
+                  },
+                },
+                topSoldProducts: {
+                  $push: {
+                    productId: "$products.productId",
+                    productName: "$products.name",
+                    productImage: "$products.image",
+                    productPrice: "$products.price",
+                    quantity: "$products.quantity",
+                  },
+                },
+                recentOrders: { $push: "$$ROOT" },
+              },
+            },
+            {
+              $addFields: {
+                recentOrdersSorted: {
+                  $sortArray: {
+                    input: "$recentOrders",
+                    sortBy: { createdAt: -1 },
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                recentOrders: { $slice: ["$recentOrdersSorted", 6] },
+                totalOrders: 1,
+                totalSales: { $round: ["$totalSales", 2] },
+                totalIncome: { $round: ["$totalIncome", 2] },
+                ordersByMonth: 1,
+                salesByCountry: 1,
+                topSoldProducts: 1,
+              },
+            },
+          ])
+          .toArray();
+
+        const ordersByMonthPromise = orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            { $match: { "products.sellerEmail": sellerEmail } },
+            {
+              $group: {
+                _id: {
+                  year: { $year: { $toDate: "$createdAt" } },
+                  month: { $month: { $toDate: "$createdAt" } },
+                },
+                count: { $sum: 1 },
+              },
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+          ])
+          .toArray();
+
+        const productsDataPromise = productsCollection
+          .find({ sellerEmail })
+          .limit(6)
+          .toArray();
+
+        const commentsDataPromise = commentsCollection
+          .aggregate([
+            {
+              $lookup: {
+                from: "blogs",
+                localField: "blogId",
+                foreignField: "_id",
+                as: "blogInfo",
+              },
+            },
+            { $unwind: "$blogInfo" },
+            { $sort: { createdAt: -1 } },
+            { $limit: 4 },
+            {
+              $project: {
+                _id: 1,
+                author: "$author",
+                text: "$text",
+                avatar: {
+                  $concat: [
+                    "https://ui-avatars.com/api/?name=",
+                    "$author",
+                    "&background=random&color=fff&bold=true",
+                  ],
+                },
+                stars: { $add: [3, { $multiply: [2, { $rand: {} }] }] },
+              },
+            },
+          ])
+          .toArray();
+
+        const visitorsAggPromise = visitorsCollection
+          .aggregate([
+            { $match: { sellerEmail } },
+            {
+              $group: {
+                _id: "$userEmail",
+                totalVisitsByUser: { $sum: "$visitCount" },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                totalVisitors: { $sum: 1 },
+                totalVisits: { $sum: "$totalVisitsByUser" },
+              },
+            },
+          ])
+          .toArray();
+
+        const [
+          totalProductsCount,
+          ordersData,
+          ordersByMonthData,
+          productsData,
+          commentsData,
+          visitorsAgg,
+        ] = await Promise.all([
+          totalProductsCountPromise,
+          ordersDataPromise,
+          ordersByMonthPromise,
+          productsDataPromise,
+          commentsDataPromise,
+          visitorsAggPromise,
+        ]);
+
+        const ordersAggData = ordersData[0] || {};
+        const totalOrders = ordersAggData.totalOrders || 0;
+        const totalSales = ordersAggData.totalSales || 0;
+        const totalIncome = ordersAggData.totalIncome || 0;
+
+        const monthlyOrders = Array(12).fill(0);
+        ordersByMonthData.forEach(({ _id, count }) => {
+          if (_id.month >= 1 && _id.month <= 12) {
+            monthlyOrders[_id.month - 1] += count;
+          }
+        });
+
+        const recentOrdersChart = monthlyOrders.map((orders, index) => ({
+          name: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ][index],
+          orders,
+        }));
+
+        // Top Products Map & Sorting
+        const topProductsMap = {};
+        if (ordersAggData.topSoldProducts) {
+          ordersAggData.topSoldProducts.forEach((item) => {
+            if (!topProductsMap[item.productId]) {
+              topProductsMap[item.productId] = {
+                name: item.productName,
+                soldCount: 0,
+                image: item.productImage,
+                price: item.productPrice,
+              };
+            }
+            topProductsMap[item.productId].soldCount += item.quantity || 1;
+          });
+        }
+        const topProducts = Object.values(topProductsMap)
+          .sort((a, b) => b.soldCount - a.soldCount)
+          .slice(0, 5);
+
+        // Top Countries By Sales
+        const salesByCountry = {};
+        if (ordersAggData.salesByCountry) {
+          ordersAggData.salesByCountry.forEach((item) => {
+            if (!salesByCountry[item.city]) {
+              salesByCountry[item.city] = 0;
+            }
+            salesByCountry[item.city] += item.price;
+          });
+        }
+        const topCountries = Object.entries(salesByCountry)
+          .map(([city, totalSales]) => ({ _id: city, totalSales }))
+          .sort((a, b) => b.totalSales - a.totalSales);
+
+        // Product Overview Data
+        const productOverview = {
+          products: productsData.map((p) => ({
+            ...p,
+            imageURL: p.images?.[0] || "https://placehold.co/100x100",
+            stockQuantity: p.inventory,
+            revenue: 0,
+          })),
+          totalProducts: totalProductsCount,
+          currentPage: 1,
+          totalPages: Math.ceil(totalProductsCount / 12),
+        };
+
+        // Visitor Data
+        const visitorsData = visitorsAgg[0] || {
+          totalVisitors: 0,
+          totalVisits: 0,
+        };
+
+        // Prepare Final Dashboard Data Response
+        const dashboardData = {
+          summary: {
+            totalSales: `$${totalSales.toFixed(2)}`,
+            totalIncome: `$${totalIncome.toFixed(2)}`,
+            totalOrders,
+            totalVisitors: visitorsData.totalVisitors,
+            totalVisits: visitorsData.totalVisits,
+            summaryChart: recentOrdersChart.slice(0, 8),
+          },
+          recentOrdersChart,
+          topProducts,
+          topCountries,
+          productOverview,
+          recentOrders: ordersAggData.recentOrders,
+          earnings: {
+            chartData: recentOrdersChart.map((d) => ({
+              name: d.name,
+              revenue: d.orders * 100,
+              profit: d.orders * 70,
+            })),
+            totalRevenue: totalSales,
+            totalProfit: totalIncome,
+          },
+          newComments: commentsData,
+        };
+
+        res.json(dashboardData);
+      } catch (err) {
+        console.error("Error fetching seller dashboard data:", err);
+        res.status(500).json({
+          message: "Failed to fetch dashboard data",
+          error: err.message,
+        });
+      }
+    });
+    // -------------------------- SELLER API END -----------------------
+
     // -------------------------- AI ASSISTANT  API START -----------------------
+    // Ensure you have express.json() middleware for parsing request bodies
+    // app.use(express.json({ limit: '5mb' })); // Increase limit to handle larger Base64 images
+
     app.post("/api/ai-chat", async (req, res) => {
-      const { message  } = req.body; 
+      const { message, image } = req.body;
+
+      // Check if a message or an image was provided
+      if (!message && !image) {
+        return res.status(400).send({ error: "No message or image provided." });
+      }
+
+      // Construct the payload to send to n8n
+      // Only include the fields that are present
+      const n8nPayload = {
+        ...(message && { message: message }),
+        ...(image && { image: image }),
+      };
+
       try {
         const n8nResponse = await fetch(
           "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message }), // Pass the user's UID as sessionId to n8n
+            body: JSON.stringify(n8nPayload),
           }
         );
 
@@ -840,10 +1508,118 @@ async function run() {
     });
 
     // -------------------------- AI ASSISTANT  API END -----------------------
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // -------------------------- ADMIN API START -----------------------
+    // get all seller applications
+    app.get("/seller-application", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalDocs = await becomeASellerApplication.countDocuments();
+        const applications = await becomeASellerApplication
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+
+        res.status(200).send({
+          data: applications,
+          totalPages: Math.ceil(totalDocs / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller applications:", error);
+        res.status(500).send({ error: "Failed to fetch seller applications." });
+      }
+    });
+
+    app.post("/seller-application", async (req, res) => {
+      const applicationData = req.body;
+      try {
+        const existingApplication = await becomeASellerApplication.findOne({
+          sellerEmail: applicationData.sellerEmail,
+        });
+        if (existingApplication) {
+          return res.send({
+            message: "You have already applied to become a seller.",
+          });
+        }
+        const result = await becomeASellerApplication.insertOne(
+          applicationData
+        );
+        res
+          .status(201)
+          .send({ success: true, applicationId: result.insertedId });
+      } catch (error) {
+        console.error("Error creating seller application:", error);
+        res.status(500).send({ error: "Failed to create seller application." });
+      }
+    });
+
+    app.put("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      try {
+        const result = await becomeASellerApplication.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        const changeUserRole = await usersCollection.updateOne(
+          { email: updatedData.email },
+          { $set: { role: "seller" } }
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application updated." });
+      } catch (error) {
+        console.error("Error updating seller application:", error);
+        res.status(500).send({ error: "Failed to update seller application." });
+      }
+    });
+
+    app.delete("/seller-application/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const result = await becomeASellerApplication.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ error: "Application not found." });
+        }
+        res
+          .status(200)
+          .send({ success: true, message: "Application deleted." });
+      } catch (error) {
+        console.error("Error deleting seller application:", error);
+        res.status(500).send({ error: "Failed to delete seller application." });
+      }
+    });
+    app.patch("/admin-update/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const result = await usersCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .json({ message: "User not found or no changes" });
+        }
+
+        res.json({ message: "User updated successfully" });
+      } catch (error) {
+        res.status(500).json({ message: "Failed to update user", error });
+      }
+    });
+    // -------------------------- ADMIN API END -----------------------
   } finally {
   }
 }

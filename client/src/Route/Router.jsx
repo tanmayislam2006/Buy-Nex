@@ -35,6 +35,7 @@ import PaymentSuccess from "../Pages/dashboard/User/Order/PaymentSuccess";
 import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
 import CustomerChat from "../Pages/dashboard/Seller/CustomerChat";
 import AdminOverview from "../Pages/dashboard/Admin/AdminOverview";
+import UpdateProduct from "../Pages/dashboard/Seller/UpdateProduct";
 
 const router = createBrowserRouter([
   // Public routes
@@ -152,12 +153,12 @@ const router = createBrowserRouter([
         Component: PaymentHistory,
       },
       {
-        path: "dashboard/seller",
-        Component: SellerOverview,
-      },
-      {
         path: "add-product",
         Component: AddProduct,
+      },
+      {
+        path: "update-product/:id",
+        Component: UpdateProduct,
       },
       {
         path: "manage-products",
@@ -170,10 +171,6 @@ const router = createBrowserRouter([
       {
         path: "customer-chats",
         Component: CustomerChat,
-      },
-      {
-        path: "dashboard/admin",
-        Component: AdminOverview,
       },
       {
         path: "pending-sellers",

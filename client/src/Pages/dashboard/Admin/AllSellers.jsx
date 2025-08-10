@@ -1,54 +1,77 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DataTable from "../../../shared/DataTable";
 import DataCardGrid from "../../../shared/DataCardGrid";
 import { FaStore } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
-import { ImSpinner2 } from "react-icons/im";
-
-const fetchUsers = async () => {
-  const res = await axios.get("http://localhost:5000/users");
-  return res.data;
-};
+import useAxios from "../../../Hooks/useAxios";
+import Loading from "../../../components/Loading";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const AllSellers = () => {
+  const axiosInstance = useAxios();
+  const queryClient = useQueryClient();
+
   const {
-    data: users = [],
+    data: sellerUsers = [],
     isLoading,
     isError,
     error,
   } = useQuery({
     queryKey: ["users"],
-    queryFn: fetchUsers,
+    queryFn: async () => {
+      const res = await axiosInstance.get("/users?role=seller");
+      return res.data;
+    },
   });
 
-  const sellerUsers = users.filter((user) => user.role === "seller");
+  // ✅ Mutation to update user
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, updates }) => {
+      await axiosInstance.patch(`/admin-update/${id}`, updates);
+    },
+    onSuccess: () => {
+      toast.success("User updated successfully");
+      queryClient.invalidateQueries(["users"]);
+    },
+    onError: () => {
+      toast.error("Failed to update user");
+    },
+  });
+
+  const handleFireSeller = (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to fire this seller?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, fire seller!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateUserMutation.mutate({ id, updates: { role: "customer" } });
+      }
+    });
+    return;
+  };
 
   const columns = [
+    { header: "Name", accessorKey: "name" },
+    { header: "Email", accessorKey: "email" },
     {
-      header: "Name",
-      accessorKey: "name",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "Email",
-      accessorKey: "email",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "Phone",
-      accessorKey: "phone",
-      cell: (info) => info.getValue() || "N/A",
-    },
-    {
-      header: "Verified",
+      header: "Is Verified",
       accessorKey: "isVerified",
       cell: (info) =>
         info.getValue() ? (
-          <span className="badge badge-success text-white">Yes</span>
+          <span className="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">
+            Verified
+          </span>
         ) : (
-          <span className="badge badge-error text-white">No</span>
+          <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">
+            Not Verified
+          </span>
         ),
     },
     {
@@ -56,24 +79,24 @@ const AllSellers = () => {
       accessorKey: "createdAt",
       cell: (info) => new Date(info.getValue()).toLocaleDateString(),
     },
+    {
+      header: "Actions",
+      cell: (info) => {
+        const row = info.row.original;
+        return (
+          <button
+            className="btn btn-error btn-sm text-white"
+            onClick={() => handleFireSeller(row._id)}
+          >
+            Fire Seller
+          </button>
+        );
+      },
+    },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <ImSpinner2 className="text-primary animate-spin text-4xl" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-error">
-        <MdError className="text-4xl" />
-        <p className="mt-2 font-semibold">Error: {error.message}</p>
-      </div>
-    );
-  }
+  if (isLoading) return <Loading />;
+  if (isError) return <div className="text-error">{error.message}</div>;
 
   return (
     <div className="space-y-6 px-4 py-6">
@@ -81,13 +104,9 @@ const AllSellers = () => {
         <FaStore className="text-3xl" />
         <h2>All Sellers ({sellerUsers.length})</h2>
       </div>
-
-      {/* Table view for large screens */}
       <div className="hidden md:block">
         <DataTable columns={columns} data={sellerUsers} />
       </div>
-
-      {/* Card view for small screens */}
       <div className="block md:hidden">
         <DataCardGrid columns={columns} data={sellerUsers} />
       </div>
