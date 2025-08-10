@@ -253,11 +253,156 @@ async function run() {
       const result = await wishlistCollection.insertOne(wishlistItem);
       res.send(result);
     });
-    app.get("/wishlist/:email", async (req, res) => {
-      const email = req.params.email;
-      const wishlistItems = await wishlistCollection.find({ userEmail: email }).toArray();
-      res.send(wishlistItems);
+    app.get("/user-dashboard", async (req, res) => {
+      try {
+        const { email } = req.query; // ?email=user@11.com
+
+        // 1️⃣ Orders aggregation
+        const ordersAgg = await orderCollection
+          .aggregate([
+            { $match: { userEmail: email } },
+            {
+              $facet: {
+                summary: [
+                  {
+                    $group: {
+                      _id: null,
+                      totalOrders: { $sum: 1 },
+                      totalSpent: { $sum: { $toDouble: "$totalAmount" } },
+                      confirmOrders: {
+                        $sum: {
+                          $cond: [{ $eq: ["$status", "Confirmed"] }, 1, 0],
+                        },
+                      },
+                    },
+                  },
+                ],
+                recentOrders: [
+                  { $sort: { createdAt: -1 } },
+                  { $limit: 5 },
+                  {
+                    $project: {
+                      _id: 0,
+                      orderId: "$orderNumber",
+                      product: { $first: "$products.name" },
+                      date: "$createdAt",
+                      status: "$status",
+                      amount: "$totalAmount",
+                    },
+                  },
+                ],
+                monthlySpend: [
+                  {
+                    $group: {
+                      _id: { $month: { $toDate: "$createdAt" } },
+                      spending: { $sum: { $toDouble: "$totalAmount" } },
+                    },
+                  },
+                  { $sort: { _id: 1 } },
+                  {
+                    $project: {
+                      _id: 0,
+                      month: {
+                        $arrayElemAt: [
+                          [
+                            "Jan",
+                            "Feb",
+                            "Mar",
+                            "Apr",
+                            "May",
+                            "Jun",
+                            "Jul",
+                            "Aug",
+                            "Sep",
+                            "Oct",
+                            "Nov",
+                            "Dec",
+                          ],
+                          { $subtract: ["$_id", 1] },
+                        ],
+                      },
+                      spending: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ])
+          .toArray();
+
+        const orderData = ordersAgg[0];
+
+        // 2️⃣ Wishlist aggregation
+        const wishlistAgg = await wishlistCollection
+          .aggregate([
+            { $match: { userEmail: email } },
+            {
+              $facet: {
+                total: [{ $count: "totalWishlist" }],
+                recent: [
+                  { $sort: { _id: -1 } },
+                  { $limit: 3 },
+                  {
+                    $project: {
+                      _id: 0,
+                      id: "$productId",
+                      name: 1,
+                      price: 1,
+                      image: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ])
+          .toArray();
+
+        const wishlistData = wishlistAgg[0];
+
+        // 3️⃣ Fill in missing months for monthlySpend
+        const allMonths = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        const monthlySpendMap = {};
+        (orderData.monthlySpend || []).forEach((m) => {
+          monthlySpendMap[m.month] = m.spending;
+        });
+
+        const fullMonthlySpend = allMonths.map((month) => ({
+          month,
+          spending: monthlySpendMap[month] || 0,
+        }));
+
+        // 4️⃣ Send final JSON
+        res.json({
+          summary: {
+            totalOrders: orderData.summary[0]?.totalOrders || 0,
+            totalSpent: orderData.summary[0]?.totalSpent || 0,
+            confirmOrders: orderData.summary[0]?.confirmOrders || 0,
+            totalWishlist: wishlistData.total[0]?.totalWishlist || 0,
+          },
+          recentOrders: orderData.recentOrders,
+          wishlist: wishlistData.recent,
+          monthlySpend: fullMonthlySpend,
+        });
+      } catch (error) {
+        console.error("Error fetching user dashboard:", error);
+        res.status(500).json({ error: "Failed to fetch user dashboard data" });
+      }
     });
+
     // ---------------------------- user api is here-----------------------
 
     // -------------------------- PRODUCT API WITH SINGLE ENDPOINT -----------------------
