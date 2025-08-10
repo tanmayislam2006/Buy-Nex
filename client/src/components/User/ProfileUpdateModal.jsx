@@ -142,22 +142,6 @@ const ProfileUpdateModal = ({ user, onClose, refetchProfile }) => {
         }&background=random&color=fff&bold=true`;
 
     return (
-        // <dialog open className="modal modal-open" onClick={handleBackdropClick}>
-        //     <div className="modal-box w-full max-w-2xl">
-        //         <div className="py-2 px-2 text-sm max-h-[80vh] overflow-y-auto space-y-3">
-        //             <div className="flex items-center mb-4 gap-4">
-        //                 <button className="btn p-2" onClick={onClose} disabled={isSaving}>
-        //                     <IoMdArrowRoundBack className="w-6 h-6" />
-        //                 </button>
-        //                 <div>
-        //                     <h3 className="text-xl font-bold">Update Profile</h3>
-        //                     <p className="text-sm text-gray-500">
-        //                         Modify your account information
-        //                     </p>
-        //                 </div>
-        //             </div>
-
-        //             <div className="bg-gradient-to-r from-primary to-orange-400 text-white p-4 rounded-lg mb-6 text-center">
         <dialog open className="modal modal-open" onClick={handleBackdropClick}>
             <div className="modal-box w-full max-w-2xl bg-white shadow-2xl rounded-xl p-0 overflow-hidden">
                 <div className="bg-gradient-to-r from-primary to-orange-400 p-4 flex items-center gap-4 text-white">
