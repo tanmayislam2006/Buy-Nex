@@ -66,6 +66,9 @@ const AdminOverview = () => {
     orderStatusCounts,
     recentProducts,
   } = data || {};
+  const getStatusCount = (status) => {
+    return orderStatusCounts?.find((s) => s.status === status)?.count || 0;
+  };
   return (
     <div className="bg-[#F1F2F7] min-h-screen p-4 font-['Inter'] text-[#1B2544]">
       <div className="max-w-[1500px] mx-auto space-y-6">
@@ -325,7 +328,7 @@ const AdminOverview = () => {
                       <p className="text-sm">Wish Count</p>
                     </div>
                   </div>
-                    <p className="font-bold">{product.wishCount} times</p>
+                  <p className="font-bold">{product.wishCount} times</p>
                 </div>
               ))}
             </div>
@@ -340,24 +343,32 @@ const AdminOverview = () => {
               Activity Overview
             </h2>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
-              <span className="text-3xl text-[#9660ff]"><FaBox /></span>
+              <span className="text-3xl text-[#9660ff]">
+                <FaBox />
+              </span>
               <h3 className="text-lg font-semibold my-2">Order Placed</h3>
-              <p className="text-sm text-[#8B8B8B]">10 New Packages</p>
+              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Order Placed")} New Packages</p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
-              <span className="text-3xl text-[#F85606]"><FaCheckCircle /></span>
+              <span className="text-3xl text-[#F85606]">
+                <FaCheckCircle />
+              </span>
               <h3 className="text-lg font-semibold my-2">Confirmed</h3>
-              <p className="text-sm text-[#8B8B8B]">72 New Items</p>
+              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Confirmed")} New Items</p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
-              <span className="text-3xl text-[#00C49F]"><FaPaperPlane /></span>
+              <span className="text-3xl text-[#00C49F]">
+                <FaPaperPlane />
+              </span>
               <h3 className="text-lg font-semibold my-2">Shipped</h3>
-              <p className="text-sm text-[#8B8B8B]">50 Support New Cases</p>
+              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Shipped")} Support New Cases</p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
-              <span className="text-3xl text-[#F58742]"><FaTruck /></span>
+              <span className="text-3xl text-[#F58742]">
+                <FaTruck />
+              </span>
               <h3 className="text-lg font-semibold my-2">Delivery</h3>
-              <p className="text-sm text-[#8B8B8B]">34 Upgraded Boxed</p>
+              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Delivery")} Upgraded Boxed</p>
             </div>
           </div>
           {/* Recent Products Table */}
