@@ -1619,6 +1619,164 @@ async function run() {
         res.status(500).json({ message: "Failed to update user", error });
       }
     });
+    app.get('/admin-dashboard', async (req, res) => {
+  try {
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // 1. Total Admin Revenue Today (shippingCost sum)
+    const revenueTodayAgg = await orderCollection.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfToday },
+          paymentStatus: "Paid"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenueToday: { $sum: "$shippingCost" }
+        }
+      }
+    ]).toArray();
+    const totalRevenueToday = revenueTodayAgg[0]?.totalRevenueToday || 0;
+
+    // 2. Total Orders Today
+    const totalOrdersToday = await orderCollection.countDocuments({
+      createdAt: { $gte: startOfToday },
+      paymentStatus: "Paid"
+    });
+
+    // 3. Total Registered Users
+    const totalUsers = await usersCollection.countDocuments({});
+
+    // 4. Total Approved Sellers
+    const totalApprovedSellers = await becomeASellerApplication.countDocuments({ status: "approved" });
+
+    // 5. Total Products Listed
+    const totalProducts = await productsCollection.countDocuments({});
+
+    // 6. Pending Seller Applications
+    const pendingSellerApplications = await becomeASellerApplication.countDocuments({ status: { $ne: "approved" } });
+
+    // 7. Revenue Trend Last 7 Days
+    const revenueTrend7Days = await orderCollection.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+          paymentStatus: "Paid"
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          dailyRevenue: { $sum: "$shippingCost" },
+          orderCount: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]).toArray();
+
+    // 8. Top Selling Products (last 30 days)
+    const topSellingProducts = await orderCollection.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: thirtyDaysAgo },
+          paymentStatus: "Paid"
+        }
+      },
+      { $unwind: "$products" },
+      {
+        $group: {
+          _id: "$products.productId",
+          productName: { $first: "$products.name" },
+          totalQuantitySold: { $sum: "$products.quantity" }
+        }
+      },
+      { $sort: { totalQuantitySold: -1 } },
+      { $limit: 10 }
+    ]).toArray();
+
+    // 9. Order Status Summary
+    const orderStatusSummary = await orderCollection.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]).toArray();
+
+    // 10. Wishlist Top Products
+    const wishlistTopProducts = await wishlistCollection.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          wishCount: { $sum: 1 },
+          productName: { $first: "$name" }
+        }
+      },
+      { $sort: { wishCount: -1 } },
+      { $limit: 10 }
+    ]).toArray();
+
+    // 11. Visitors Count Per Product
+    const visitorsCount = await visitorsCollection.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          uniqueVisitors: { $sum: 1 },
+          totalVisits: { $sum: "$visitCount" }
+        }
+      },
+      { $sort: { totalVisits: -1 } },
+      { $limit: 10 }
+    ]).toArray();
+
+    // 12. New Users Last 30 Days
+    const newUsersLast30Days = await usersCollection.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    // 13. Average Order Value Last 30 Days (convert totalAmount string to double)
+    const avgOrderValueAgg = await orderCollection.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: thirtyDaysAgo },
+          paymentStatus: "Paid"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgOrderValue: { $avg: { $toDouble: "$totalAmount" } }
+        }
+      }
+    ]).toArray();
+    const avgOrderValue = avgOrderValueAgg[0]?.avgOrderValue || 0;
+
+    res.json({
+      totalRevenueToday,
+      totalOrdersToday,
+      totalUsers,
+      totalApprovedSellers,
+      totalProducts,
+      pendingSellerApplications,
+      revenueTrend7Days,
+      topSellingProducts,
+      orderStatusSummary,
+      wishlistTopProducts,
+      visitorsCount,
+      newUsersLast30Days,
+      avgOrderValue
+    });
+  } catch (error) {
+    console.error("Error in /admin-dashboard:", error);
+    res.status(500).json({ error: "Failed to fetch admin dashboard data" });
+  }
+});
     // -------------------------- ADMIN API END -----------------------
   } finally {
   }
