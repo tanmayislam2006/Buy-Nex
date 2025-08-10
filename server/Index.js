@@ -1661,8 +1661,7 @@ async function run() {
             { $project: { _id: 0, totalOrders: 1, totalSales: 1 } },
           ])
           .toArray();
-
-        // 3. Products Sold Count
+        // 3. Products Sold Count (Top 7)
         const productSoldCount = await orderCollection
           .aggregate([
             { $unwind: "$products" },
@@ -1672,6 +1671,8 @@ async function run() {
                 totalSold: { $sum: "$products.quantity" },
               },
             },
+            { $sort: { totalSold: -1 } }, // Sorts from most sold to least sold
+            { $limit: 10 }, // Limits the result to the top 10 products
             { $addFields: { productIdObj: { $toObjectId: "$_id" } } },
             {
               $lookup: {
@@ -1689,7 +1690,6 @@ async function run() {
                 totalSold: 1,
               },
             },
-            { $sort: { totalSold: -1 } },
           ])
           .toArray();
 

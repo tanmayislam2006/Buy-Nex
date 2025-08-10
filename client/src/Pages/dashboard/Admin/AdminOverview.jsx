@@ -16,7 +16,8 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { FaBox, FaCheckCircle, FaPaperPlane, FaTruck } from "react-icons/fa";
+import { FaBox, FaCheckCircle, FaMoneyBillWave, FaPaperPlane, FaTruck } from "react-icons/fa";
+import { FaBagShopping, FaShop } from "react-icons/fa6";
 const salesChartData = [
   { name: "01 May", sales: 78, orders: 60 },
   { name: "02 May", sales: 75, orders: 65 },
@@ -38,16 +39,6 @@ const channelsData = [
   { name: "Email", value: 22 },
 ];
 const CHANNEL_COLORS = ["#F85606", "#25B1D2", "#42A0D8", "#8974D0"];
-
-const productsSoldData = [
-  { name: "Mon", count: 35 },
-  { name: "Tue", count: 25 },
-  { name: "Wed", count: 28 },
-  { name: "Thu", count: 25 },
-  { name: "Fri", count: 35 },
-  { name: "Sat", count: 20 },
-  { name: "Sun", count: 30 },
-];
 
 const AdminOverview = () => {
   const axiosInstance = useAxios();
@@ -92,10 +83,10 @@ const AdminOverview = () => {
 
             <div className="flex items-center mb-4 space-x-4">
               <div className="flex items-center text-xl font-bold">
-                <span className="p-2 bg-[#F1F2F7] rounded-lg mr-2">🛒</span>
+                <span className="p-2 bg-[#F1F2F7] rounded-lg mr-2 text-primary text-2xl"><FaShop /></span>
                 <div>
                   <p className="text-sm font-normal text-[#8B8B8B]">Orders</p>
-                  <p>${totalSales.toFixed(2)}</p>
+                  <p>${totalSales?.toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center text-sm font-semibold text-[#11B981]">
@@ -198,7 +189,7 @@ const AdminOverview = () => {
           {/* Orders Metric Card */}
           <div className="bg-white p-6 rounded-[20px] shadow-sm">
             <div className="flex justify-between items-start mb-4">
-              <span className="text-3xl">🛍️</span>
+              <span className="text-4xl text-blue-500"><FaBagShopping /></span>
               <span className="text-[#8B8B8B]">...</span>
             </div>
             <h3 className="text-xl font-bold">Orders</h3>
@@ -208,11 +199,11 @@ const AdminOverview = () => {
           {/* Sales Metric Card */}
           <div className="bg-white p-6 rounded-[20px] shadow-sm">
             <div className="flex justify-between items-start mb-4">
-              <span className="text-3xl">💰</span>
+              <span className="text-4xl text-yellow-500"><FaMoneyBillWave /></span>
               <span className="text-[#8B8B8B]">...</span>
             </div>
             <h3 className="text-xl font-bold">Sales</h3>
-            <p className="text-2xl font-bold mt-2">${totalSales.toFixed(2)}</p>
+            <p className="text-2xl font-bold mt-2">${totalSales?.toFixed(2)}</p>
             <p className="text-xs text-[#E04040] mt-1">
               Over last month 2.4% ↓
             </p>
@@ -275,15 +266,13 @@ const AdminOverview = () => {
           {/* Products Sold Bar Chart */}
           <div className="bg-[#9660ff] p-6 rounded-[20px] shadow-sm text-white">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-3xl">📦</span>
               <span className="text-[#8B8B8B] text-sm">...</span>
             </div>
-            <h2 className="text-xl font-bold">Products Sold</h2>
-            <p className="text-3xl font-bold mb-4">88 Sold</p>
-            <div className="h-[200px] w-full">
+            <h2 className="text-xl font-bold">Top 10 Trending Products</h2>
+            <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={productsSoldData}
+                  data={productSoldCount}
                   barSize={20}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
@@ -293,15 +282,31 @@ const AdminOverview = () => {
                     vertical={false}
                   />
                   <XAxis
-                    dataKey="name"
+                    dataKey="productName"
                     stroke="#FFFFFF"
-                    tick={{ fill: "#FFFFFF" }}
+                    tick={{ fill: "#FFFFFF", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
+                    angle={-30}
+                    textAnchor="end"
                   />
-                  <YAxis hide domain={[0, 40]} />
+                  <YAxis hide />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#FFFFFF" radius={[10, 10, 0, 0]} />
+                  <Legend
+                    wrapperStyle={{ top: 0, right: 0 }}
+                    verticalAlign="top"
+                    align="right"
+                    // This is the key change: explicitly set the legend text color
+                    formatter={(value) => (
+                      <span style={{ color: "#FFFFFF" }}>{value}</span>
+                    )}
+                  />
+                  <Bar
+                    dataKey="totalSold"
+                    name="Sold"
+                    fill="#FFFFFF"
+                    radius={[10, 10, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -315,9 +320,9 @@ const AdminOverview = () => {
               </a>
             </div>
             <div className="space-y-4">
-              {topWishlistProducts?.map((product) => (
-                <div className="flex justify-between mx-2">
-                  <div key={product.id} className="flex">
+              {topWishlistProducts?.map((product, idx) => (
+                <div key={idx} className="flex justify-between mx-2">
+                  <div className="flex">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -347,28 +352,36 @@ const AdminOverview = () => {
                 <FaBox />
               </span>
               <h3 className="text-lg font-semibold my-2">Order Placed</h3>
-              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Order Placed")} New Packages</p>
+              <p className="text-sm text-[#8B8B8B]">
+                {getStatusCount("Order Placed")} New Packages
+              </p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
               <span className="text-3xl text-[#F85606]">
                 <FaCheckCircle />
               </span>
               <h3 className="text-lg font-semibold my-2">Confirmed</h3>
-              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Confirmed")} New Items</p>
+              <p className="text-sm text-[#8B8B8B]">
+                {getStatusCount("Confirmed")} New Items
+              </p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
               <span className="text-3xl text-[#00C49F]">
                 <FaPaperPlane />
               </span>
               <h3 className="text-lg font-semibold my-2">Shipped</h3>
-              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Shipped")} Support New Cases</p>
+              <p className="text-sm text-[#8B8B8B]">
+                {getStatusCount("Shipped")} Support New Cases
+              </p>
             </div>
             <div className="bg-white p-6 rounded-[20px] shadow-sm">
               <span className="text-3xl text-[#F58742]">
                 <FaTruck />
               </span>
               <h3 className="text-lg font-semibold my-2">Delivery</h3>
-              <p className="text-sm text-[#8B8B8B]">{getStatusCount("Delivery")} Upgraded Boxed</p>
+              <p className="text-sm text-[#8B8B8B]">
+                {getStatusCount("Delivery")} Upgraded Boxed
+              </p>
             </div>
           </div>
           {/* Recent Products Table */}
