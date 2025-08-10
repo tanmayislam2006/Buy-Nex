@@ -380,7 +380,7 @@ const AdminOverview = () => {
               </span>
               <h3 className="text-lg font-semibold my-2">Delivery</h3>
               <p className="text-sm text-[#8B8B8B]">
-                {getStatusCount("Delivery")} Upgraded Boxed
+                {getStatusCount("Delivered")} Upgraded Boxed
               </p>
             </div>
           </div>

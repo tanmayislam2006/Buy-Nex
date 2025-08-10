@@ -1,5 +1,4 @@
 import React from "react";
-import { useParams } from "react-router";
 import {
   FaBox,
   FaCheckCircle,
@@ -7,71 +6,20 @@ import {
   FaShippingFast,
   FaTruck,
 } from "react-icons/fa";
-
-const trackingData = [
-  {
-    trackingId: "T001",
-    productId: "P1001",
-    productName: "Wireless Mouse",
-    userEmail: "user@example.com",
-    step: 1,
-    status: "Order Placed",
-    estimatedDelivery: "2025-08-01",
-    lastUpdated: "2025-07-30 14:00",
-  },
-  {
-    trackingId: "T002",
-    productId: "P1002",
-    productName: "Bluetooth Speaker",
-    userEmail: "user@example.com",
-    step: 2,
-    status: "Confirmed",
-    estimatedDelivery: "2025-08-02",
-    lastUpdated: "2025-07-30 16:00",
-  },
-  {
-    trackingId: "T003",
-    productId: "P1003",
-    productName: "Gaming Keyboard",
-    userEmail: "user@example.com",
-    step: 4,
-    status: "Out for Delivery",
-    estimatedDelivery: "2025-08-01",
-    lastUpdated: "2025-07-31 10:30",
-  },
-  {
-    trackingId: "T004",
-    productId: "P1004",
-    productName: "Smart Watch",
-    userEmail: "user@example.com",
-    step: 5,
-    status: "Delivered",
-    estimatedDelivery: "2025-07-30",
-    lastUpdated: "2025-07-30 18:00",
-  },
-  {
-    trackingId: "T005",
-    productId: "P1005",
-    productName: "Laptop Stand",
-    userEmail: "user@example.com",
-    step: 3,
-    status: "Shipped",
-    estimatedDelivery: "2025-08-03",
-    lastUpdated: "2025-07-31 08:00",
-  },
-];
+import { useParams } from "react-router";
+import useAxios from "../../../Hooks/useAxios";
+import { useQuery } from "@tanstack/react-query";
 
 const ProductStatus = () => {
   const { id } = useParams();
-  const trackingInfo = trackingData.find((item) => item.trackingId === id);
-
-  if (!trackingInfo) {
-    return (
-      <div className="text-center mt-16 text-red-500 text-lg">
-        No tracking info found.
-      </div>
-    );
-  }
+    const axiosInstance = useAxios();
+  const { data: trackingInfo } = useQuery({
+    queryKey: ["tracking", id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/tracking/${id}`);
+      return response.data;
+    },
+  });
 
   const steps = [
     { label: "Order Placed", icon: <FaBox size={18} /> },
@@ -83,17 +31,14 @@ const ProductStatus = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 md:p-8">
-      <h2 className="text-3xl font-bold mb-6">{trackingInfo.productName}</h2>
+      <h2 className="text-3xl font-bold mb-6">{trackingInfo?.productName}</h2>
 
       <div className="bg-base-100 shadow-md rounded-lg p-6 space-y-3">
         <p>
-          <strong>Status:</strong> {trackingInfo.status}
+          <strong>Status:</strong> {trackingInfo?.status}
         </p>
         <p>
-          <strong>Estimated Delivery:</strong> {trackingInfo.estimatedDelivery}
-        </p>
-        <p>
-          <strong>Last Updated:</strong> {trackingInfo.lastUpdated}
+          <strong>Last Updated:</strong> {new Date(trackingInfo?.updatedAt).toLocaleString()}
         </p>
       </div>
 
@@ -107,8 +52,8 @@ const ProductStatus = () => {
               className="h-1 w-[90%] left-3 -top-[2px] bg-gray-300 relative"
               style={{
                 background: `linear-gradient(to right, #F85606 ${
-                  (trackingInfo.step - 1) * 25
-                }%, #d1d5db ${(trackingInfo.step - 1) * 25}%)`,
+                  (trackingInfo?.step - 1) * 25
+                }%, #d1d5db ${(trackingInfo?.step - 1) * 25}%)`,
               }}
             />
           </div>
@@ -119,14 +64,14 @@ const ProductStatus = () => {
               className="w-1 h-[370px] relative -left-1 bg-gray-300"
               style={{
                 background: `linear-gradient(to bottom, #F85606 ${
-                  (trackingInfo.step - 1) * 25
-                }%, #d1d5db ${(trackingInfo.step - 1) * 25}%)`,
+                  (trackingInfo?.step - 1) * 25
+                }%, #d1d5db ${(trackingInfo?.step - 1) * 25}%)`,
               }}
             />
           </div>
 
           {steps.map((step, index) => {
-            const isActive = trackingInfo.step >= index + 1;
+            const isActive = trackingInfo?.step >= index + 1;
 
             return (
               <div
@@ -140,7 +85,7 @@ const ProductStatus = () => {
                         : "bg-gray-300 text-gray-500 border-gray-300"
                     }
                   `}>
-                  {step.icon}
+                  {step?.icon}
                 </div>
 
                 {/* Label beside icon in mobile, under icon in desktop */}
@@ -148,7 +93,7 @@ const ProductStatus = () => {
                   className={`ml-4 md:ml-0 md:mt-2 text-sm font-medium text-start md:text-center w-28
                     ${isActive ? "text-primary" : "text-gray-500"}
                   `}>
-                  {step.label}
+                  {step?.label}
                 </span>
               </div>
             );

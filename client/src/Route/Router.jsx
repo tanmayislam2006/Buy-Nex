@@ -15,7 +15,6 @@ import OrderedProducts from "../Pages/dashboard/Seller/OrderedProducts";
 import PendingSellers from "../Pages/dashboard/Admin/PendingSellers";
 import AllUser from "../Pages/dashboard/Admin/AllUser";
 import AllSellers from "../Pages/dashboard/Admin/AllSellers";
-import TotalOrders from "../Pages/dashboard/Admin/TotalOrders";
 import AuthLayout from "../Layouts/AuthLayout/AuthLayout";
 import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
@@ -36,6 +35,7 @@ import PaymentFail from "../Pages/dashboard/User/Order/PaymentFail";
 import CustomerChat from "../Pages/dashboard/Seller/CustomerChat";
 import AdminOverview from "../Pages/dashboard/Admin/AdminOverview";
 import UpdateProduct from "../Pages/dashboard/Seller/UpdateProduct";
+import OrderedProductDetails from "../Pages/dashboard/Seller/OrderedProductDetails";
 
 const router = createBrowserRouter([
   // Public routes
@@ -169,6 +169,10 @@ const router = createBrowserRouter([
         Component: OrderedProducts,
       },
       {
+        path: "ordered-product-details",
+        Component: OrderedProductDetails,
+      },
+      {
         path: "customer-chats",
         Component: CustomerChat,
       },
@@ -183,10 +187,6 @@ const router = createBrowserRouter([
       {
         path: "all-seller",
         Component: AllSellers,
-      },
-      {
-        path: "total-orders",
-        Component: TotalOrders,
       },
     ],
   },
