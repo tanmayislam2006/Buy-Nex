@@ -38,11 +38,9 @@ const OrderedProducts = () => {
   // Step 2: Define the mutation for updating the status
   const { mutate: updateOrderStatus, isPending: isUpdating } = useMutation({
     mutationFn: ({ orderId, status }) => {
-      // IMPORTANT: Adjust this API endpoint to match your backend route for updating an order
       return axios.patch(`/orders/${orderId}/status`, { status });
     },
     onSuccess: () => {
-      // When update is successful, refetch the orders to show the latest data
       toast.success("Order status updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["sellerOrders"] });
     },
@@ -62,7 +60,7 @@ const OrderedProducts = () => {
     { header: "Customer Email", accessorKey: "userEmail" },
     { header: "Total Amount", accessorKey: "totalAmount" },
 
-    // Step 3: Modify the "Order Status" column to be a dropdown
+    //Modify the "Order Status" column to be a dropdown
     {
       header: "Order Status",
       accessorKey: "status",

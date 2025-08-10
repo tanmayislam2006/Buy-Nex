@@ -6,12 +6,14 @@ import OrderDetailsModal from "../../../components/User/OrderDetailsModal";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../../Hooks/useAuth";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
+import { useNavigate } from "react-router";
 
 const OrderHistory = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const { data: orderHistory=[] } = useQuery({
+  const navigate = useNavigate();
+
+  const { data: orderHistory = [] } = useQuery({
     queryKey: ["order-history"],
     queryFn: async () => {
       const response = await axiosSecure.get(`/order-history/${user?.email}`);
@@ -40,12 +42,14 @@ const OrderHistory = () => {
       accessorKey: "paymentStatus",
     },
     {
-      header: "Actions",
+      header: "Details",
       cell: ({ row }) => (
         <div className="flex gap-2">
           <button
             className="btn btn-sm btn-info"
-            onClick={() => setSelectedOrder(row.original)}
+            onClick={() =>
+              navigate('/ordered-product-details', { state: { order: row.original } })
+            }
             title="View Details"
           >
             <FaEye />
@@ -68,13 +72,6 @@ const OrderHistory = () => {
           <div className=" lg:hidden">
             <DataCardGrid columns={columns} data={orderHistory} />
           </div>
-          {/* Modal */}
-          {selectedOrder && (
-            <OrderDetailsModal
-              order={selectedOrder}
-              onClose={() => setSelectedOrder(null)}
-            />
-          )}
         </div>
       </div>
     </div>
