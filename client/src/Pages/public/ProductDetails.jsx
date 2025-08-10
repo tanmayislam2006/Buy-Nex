@@ -9,9 +9,11 @@ import { FiShoppingBag } from "react-icons/fi";
 import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
 import Chat from "../../components/Chat/Chat";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const ProductDetails = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const { user } = useAuth();
   const { id } = useParams();
   const axiosInstance = useAxios();
@@ -44,25 +46,24 @@ const ProductDetails = () => {
     enabled: !!product?.category && !!product?._id,
   });
 
-    useEffect(() => {
-      if (!id || !user?.email) return;
+  useEffect(() => {
+    if (!id || !user?.email) return;
 
-      const visitData = {
-        productId: id,
-        userEmail: user.email,
-        sellerEmail: product?.sellerEmail,
-      };
+    const visitData = {
+      productId: id,
+      userEmail: user.email,
+      sellerEmail: product?.sellerEmail,
+    };
 
-      axiosInstance
-        .post("/track-visit", visitData)
-        .then((res) => {
-          console.log("Visitor data recorded:", res.data);
-        })
-        .catch((err) => {
-          console.error("Failed to record visitor:", err);
-        });
-    }, [id, user, axiosInstance, product?.sellerEmail]);
-
+    axiosInstance
+      .post("/track-visit", visitData)
+      .then((res) => {
+        console.log("Visitor data recorded:", res.data);
+      })
+      .catch((err) => {
+        console.error("Failed to record visitor:", err);
+      });
+  }, [id, user, axiosInstance, product?.sellerEmail]);
 
   if (isLoading || isSimilarLoading) return <Loading />;
 
@@ -113,7 +114,6 @@ const ProductDetails = () => {
     }
   };
 
-
   // Function to handle chat button click
   const handleChat = () => {
     if (!user) {
@@ -124,12 +124,34 @@ const ProductDetails = () => {
     setIsChatOpen(!isChatOpen);
   };
 
+  // Wishlist handler
+  const handleWishlist = async () => {
+    if (!user) {
+      toast.error("Please log in to add items to your wishlist.");
+      navigate("/auth/login");
+      return;
+    }
+    const wishlistObj = {
+      productId: product._id,
+      name: product.name,
+      image: product.images?.[0],
+      price: product.price,
+      sellerEmail: product.sellerEmail,
+      userEmail: user.email,
+    };
+    try {
+      await axiosInstance.post("/wishlist", wishlistObj);
+      setIsWishlisted(true);
+      toast.success("Added to wishlist!");
+    } catch (error) {
+      toast.error("Error adding to wishlist: " + error.message);
+    }
+  };
+
   // Helper functions
   const renderSpecifications = () => {
     if (!product.specifications) return null;
 
-
-   
     return Object.entries(product.specifications).map(([key, value]) => (
       <tr key={key} className="border-b border-gray-200">
         <td className="px-4 py-2 w-1/3 capitalize">
@@ -144,7 +166,6 @@ const ProductDetails = () => {
     if (!product.specifications?.color) return null;
 
     const colors = product.specifications.color.split(",").map((c) => c.trim());
-
 
     return (
       <div className="flex gap-2 items-center mt-3">
@@ -186,7 +207,7 @@ const ProductDetails = () => {
       );
     }
 
-    console.log(similarProducts)
+    console.log(similarProducts);
     return (
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Thumbnails - vertical on desktop */}
@@ -352,7 +373,22 @@ const ProductDetails = () => {
 
       <div className="flex flex-col md:flex-row gap-8 sm:border-b sm:border-r border-gray-200 pb-10 sm:pr-6 rounded">
         {/* Image Section */}
-        <div className="w-full md:w-1/2">{renderImageGallery()}</div>
+        <div className="w-full md:w-1/2 relative">
+          {renderImageGallery()}
+          {/* Wishlist Button */}
+          <button
+            onClick={handleWishlist}
+            className="absolute top-4 right-4 z-20 bg-white rounded-full p-3 shadow-lg hover:bg-pink-100 transition cursor-pointer"
+            title={isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+            disabled={isWishlisted}
+          >
+            {isWishlisted ? (
+              <FaHeart className="text-pink-500 text-2xl" />
+            ) : (
+              <FaRegHeart className="text-gray-400 text-2xl" />
+            )}
+          </button>
+        </div>
 
         {/* Product Info */}
         <div className="w-full md:w-1/2 space-y-4">

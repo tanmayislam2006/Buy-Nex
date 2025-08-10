@@ -19,13 +19,6 @@ import {
 import { MdMoreHoriz, MdArrowUpward, MdArrowDownward } from "react-icons/md";
 import useAuth from "../../../Hooks/useAuth";
 
-// Dummy data for customer dashboard
-const user = {
-  name: "John Doe",
-  email: "johndoe@example.com",
-  avatar: "https://placehold.co/100x100/E5E7EB/1F2937?text=JD",
-};
-
 const orderSummary = {
   totalOrders: 42,
   totalSpent: "$1,542.75",
