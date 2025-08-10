@@ -1619,6 +1619,157 @@ async function run() {
         res.status(500).json({ message: "Failed to update user", error });
       }
     });
+    app.get("/admin-dashboard", async (req, res) => {
+      try {
+        // 1. Sales Chart: Orders vs. Revenue
+        const salesChartData = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: { $toDate: "$createdAt" },
+                  },
+                },
+                orders: { $sum: 1 },
+                revenue: { $sum: { $toDouble: "$shippingCost" } },
+              },
+            },
+            { $sort: { _id: 1 } },
+            {
+              $project: {
+                _id: 0,
+                name: "$_id",
+                orders: 1,
+                revenue: 1,
+              },
+            },
+          ])
+          .toArray();
+
+        // 2. Total Orders & Total Sales
+        const totalSalesAndOrders = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: { $toDouble: "$totalAmount" } },
+              },
+            },
+            { $project: { _id: 0, totalOrders: 1, totalSales: 1 } },
+          ])
+          .toArray();
+        // 3. Products Sold Count (Top 7)
+        const productSoldCount = await orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            {
+              $group: {
+                _id: "$products.productId",
+                totalSold: { $sum: "$products.quantity" },
+              },
+            },
+            { $sort: { totalSold: -1 } }, // Sorts from most sold to least sold
+            { $limit: 10 }, // Limits the result to the top 10 products
+            { $addFields: { productIdObj: { $toObjectId: "$_id" } } },
+            {
+              $lookup: {
+                from: "products",
+                localField: "productIdObj",
+                foreignField: "_id",
+                as: "productDetails",
+              },
+            },
+            { $unwind: "$productDetails" },
+            {
+              $project: {
+                _id: 0,
+                productName: "$productDetails.name",
+                totalSold: 1,
+              },
+            },
+          ])
+          .toArray();
+
+        // 4. Top Wishlist Products
+        const topWishlistProducts = await wishlistCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$productId",
+                wishCount: { $sum: 1 },
+              },
+            },
+            { $sort: { wishCount: -1 } },
+            { $limit: 4 },
+            { $addFields: { productIdObj: { $toObjectId: "$_id" } } },
+            {
+              $lookup: {
+                from: "products",
+                localField: "productIdObj",
+                foreignField: "_id",
+                as: "productDetails",
+              },
+            },
+            { $unwind: "$productDetails" },
+            {
+              $project: {
+                _id: 0,
+                productName: "$productDetails.name",
+                wishCount: 1,
+              },
+            },
+          ])
+          .toArray();
+
+        // 5. Order Status Breakdown
+        const orderStatusCounts = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$status",
+                count: { $sum: 1 },
+              },
+            },
+            { $project: { _id: 0, status: "$_id", count: 1 } },
+          ])
+          .toArray();
+
+        // 6. Recent Products (limit 5)
+        const recentProducts = await productsCollection
+          .find(
+            {},
+            { projection: { name: 1, inventory: 1, price: 1, images: 1 } }
+          )
+          .sort({ _id: -1 })
+          .limit(5)
+          .toArray();
+
+        const dashboardData = {
+          totalOrders: totalSalesAndOrders[0]?.totalOrders || 0,
+          totalSales: totalSalesAndOrders[0]?.totalSales || 0,
+          totalProducts: await productsCollection.countDocuments(),
+          salesChartData,
+          productSoldCount,
+          topWishlistProducts,
+          orderStatusCounts,
+          recentProducts: recentProducts.map((p) => ({
+            name: p.name,
+            inventory: p.inventory,
+            price: p.price,
+            image: p.images?.[0] || null,
+          })),
+        };
+
+        res.status(200).json(dashboardData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
+
     // -------------------------- ADMIN API END -----------------------
   } finally {
   }
