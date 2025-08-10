@@ -15,7 +15,6 @@ import OrderedProducts from "../Pages/dashboard/Seller/OrderedProducts";
 import PendingSellers from "../Pages/dashboard/Admin/PendingSellers";
 import AllUser from "../Pages/dashboard/Admin/AllUser";
 import AllSellers from "../Pages/dashboard/Admin/AllSellers";
-import TotalOrders from "../Pages/dashboard/Admin/TotalOrders";
 import AuthLayout from "../Layouts/AuthLayout/AuthLayout";
 import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
@@ -188,10 +187,6 @@ const router = createBrowserRouter([
       {
         path: "all-seller",
         Component: AllSellers,
-      },
-      {
-        path: "total-orders",
-        Component: TotalOrders,
       },
     ],
   },

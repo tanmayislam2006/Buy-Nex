@@ -1,55 +1,14 @@
 import React from 'react';
 import { FiPhone, FiPhoneIncoming } from 'react-icons/fi';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 
 
 const OrderedProductDetails = () => {
-    // Data from the JSON you provided
-    // const order = {
-    //     orderNumber: "ORD-BN-687",
-    //     trackingNumber: "TRC-BN-623",
-    //     products: [{
-    //         name: "Wireless Bluetooth Headphones",
-    //         image: "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-    //         price: 69.99,
-    //         quantity: 1,
-    //     }, {
-    //         name: "Wireless Bluetooth Headphones",
-    //         image: "https://assets.gadgetandgear.com/upload/product/20230530_1685430710_183928.jpeg",
-    //         price: 69.99,
-    //         quantity: 1,
-    //     }],
-    //     subtotal: 69.99,
-    //     shippingCost: 80,
-    //     taxAmount: 1,
-    //     totalAmount: "135.99",
-    //     paymentMethod: "SSl comarch",
-    //     shippingAddress: {
-    //         name: "TANMAY ISLAM",
-    //         email: "tanmayislam823@gmail.com",
-    //         phone: "01997337756",
-    //         addressLine1: "=, dgvdg",
-    //         addressLine2: "Dhaka, fdbfb, Dhaka",
-    //     },
-    //     billingAddress: {
-    //         name: "TANMAY ISLAM",
-    //         phone: "01997337756",
-    //         addressLine1: "=, dgvdg",
-    //         addressLine2: "Dhaka, fdbfb, Dhaka",
-    //     },
-    //     status: "Order Placed",
-    //     createdAt: "2025-08-10T10:55:59.037Z",
-    // };
     const location = useLocation();
-
-    // Access the order object from the location's state
     const order = location.state?.order;
-
-    // If someone navigates to this page directly without data, redirect them
     if (!order) {
         return <Navigate to="/dashboard/ordered-products" replace />;
     }
-
     // Now you have the full 'order' object!
     // You can pass this object as a prop to a display component.
     // console.log(order);
