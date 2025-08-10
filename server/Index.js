@@ -1619,164 +1619,157 @@ async function run() {
         res.status(500).json({ message: "Failed to update user", error });
       }
     });
-    app.get('/admin-dashboard', async (req, res) => {
-  try {
-    const today = new Date();
-    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    app.get("/admin-dashboard", async (req, res) => {
+      try {
+        // 1. Sales Chart: Orders vs. Revenue
+        const salesChartData = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: { $toDate: "$createdAt" },
+                  },
+                },
+                orders: { $sum: 1 },
+                revenue: { $sum: { $toDouble: "$shippingCost" } },
+              },
+            },
+            { $sort: { _id: 1 } },
+            {
+              $project: {
+                _id: 0,
+                name: "$_id",
+                orders: 1,
+                revenue: 1,
+              },
+            },
+          ])
+          .toArray();
 
-    // 1. Total Admin Revenue Today (shippingCost sum)
-    const revenueTodayAgg = await orderCollection.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startOfToday },
-          paymentStatus: "Paid"
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenueToday: { $sum: "$shippingCost" }
-        }
+        // 2. Total Orders & Total Sales
+        const totalSalesAndOrders = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalSales: { $sum: { $toDouble: "$totalAmount" } },
+              },
+            },
+            { $project: { _id: 0, totalOrders: 1, totalSales: 1 } },
+          ])
+          .toArray();
+
+        // 3. Products Sold Count
+        const productSoldCount = await orderCollection
+          .aggregate([
+            { $unwind: "$products" },
+            {
+              $group: {
+                _id: "$products.productId",
+                totalSold: { $sum: "$products.quantity" },
+              },
+            },
+            { $addFields: { productIdObj: { $toObjectId: "$_id" } } },
+            {
+              $lookup: {
+                from: "products",
+                localField: "productIdObj",
+                foreignField: "_id",
+                as: "productDetails",
+              },
+            },
+            { $unwind: "$productDetails" },
+            {
+              $project: {
+                _id: 0,
+                productName: "$productDetails.name",
+                totalSold: 1,
+              },
+            },
+            { $sort: { totalSold: -1 } },
+          ])
+          .toArray();
+
+        // 4. Top Wishlist Products
+        const topWishlistProducts = await wishlistCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$productId",
+                wishCount: { $sum: 1 },
+              },
+            },
+            { $sort: { wishCount: -1 } },
+            { $limit: 4 },
+            { $addFields: { productIdObj: { $toObjectId: "$_id" } } },
+            {
+              $lookup: {
+                from: "products",
+                localField: "productIdObj",
+                foreignField: "_id",
+                as: "productDetails",
+              },
+            },
+            { $unwind: "$productDetails" },
+            {
+              $project: {
+                _id: 0,
+                productName: "$productDetails.name",
+                wishCount: 1,
+              },
+            },
+          ])
+          .toArray();
+
+        // 5. Order Status Breakdown
+        const orderStatusCounts = await orderCollection
+          .aggregate([
+            {
+              $group: {
+                _id: "$status",
+                count: { $sum: 1 },
+              },
+            },
+            { $project: { _id: 0, status: "$_id", count: 1 } },
+          ])
+          .toArray();
+
+        // 6. Recent Products (limit 5)
+        const recentProducts = await productsCollection
+          .find(
+            {},
+            { projection: { name: 1, inventory: 1, price: 1, images: 1 } }
+          )
+          .sort({ _id: -1 })
+          .limit(5)
+          .toArray();
+
+        const dashboardData = {
+          totalOrders: totalSalesAndOrders[0]?.totalOrders || 0,
+          totalSales: totalSalesAndOrders[0]?.totalSales || 0,
+          totalProducts: await productsCollection.countDocuments(),
+          salesChartData,
+          productSoldCount,
+          topWishlistProducts,
+          orderStatusCounts,
+          recentProducts: recentProducts.map((p) => ({
+            name: p.name,
+            inventory: p.inventory,
+            price: p.price,
+            image: p.images?.[0] || null,
+          })),
+        };
+
+        res.status(200).json(dashboardData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        res.status(500).json({ message: "Internal Server Error" });
       }
-    ]).toArray();
-    const totalRevenueToday = revenueTodayAgg[0]?.totalRevenueToday || 0;
-
-    // 2. Total Orders Today
-    const totalOrdersToday = await orderCollection.countDocuments({
-      createdAt: { $gte: startOfToday },
-      paymentStatus: "Paid"
     });
 
-    // 3. Total Registered Users
-    const totalUsers = await usersCollection.countDocuments({});
-
-    // 4. Total Approved Sellers
-    const totalApprovedSellers = await becomeASellerApplication.countDocuments({ status: "approved" });
-
-    // 5. Total Products Listed
-    const totalProducts = await productsCollection.countDocuments({});
-
-    // 6. Pending Seller Applications
-    const pendingSellerApplications = await becomeASellerApplication.countDocuments({ status: { $ne: "approved" } });
-
-    // 7. Revenue Trend Last 7 Days
-    const revenueTrend7Days = await orderCollection.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: sevenDaysAgo },
-          paymentStatus: "Paid"
-        }
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          dailyRevenue: { $sum: "$shippingCost" },
-          orderCount: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]).toArray();
-
-    // 8. Top Selling Products (last 30 days)
-    const topSellingProducts = await orderCollection.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: thirtyDaysAgo },
-          paymentStatus: "Paid"
-        }
-      },
-      { $unwind: "$products" },
-      {
-        $group: {
-          _id: "$products.productId",
-          productName: { $first: "$products.name" },
-          totalQuantitySold: { $sum: "$products.quantity" }
-        }
-      },
-      { $sort: { totalQuantitySold: -1 } },
-      { $limit: 10 }
-    ]).toArray();
-
-    // 9. Order Status Summary
-    const orderStatusSummary = await orderCollection.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 }
-        }
-      }
-    ]).toArray();
-
-    // 10. Wishlist Top Products
-    const wishlistTopProducts = await wishlistCollection.aggregate([
-      {
-        $group: {
-          _id: "$productId",
-          wishCount: { $sum: 1 },
-          productName: { $first: "$name" }
-        }
-      },
-      { $sort: { wishCount: -1 } },
-      { $limit: 10 }
-    ]).toArray();
-
-    // 11. Visitors Count Per Product
-    const visitorsCount = await visitorsCollection.aggregate([
-      {
-        $group: {
-          _id: "$productId",
-          uniqueVisitors: { $sum: 1 },
-          totalVisits: { $sum: "$visitCount" }
-        }
-      },
-      { $sort: { totalVisits: -1 } },
-      { $limit: 10 }
-    ]).toArray();
-
-    // 12. New Users Last 30 Days
-    const newUsersLast30Days = await usersCollection.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo }
-    });
-
-    // 13. Average Order Value Last 30 Days (convert totalAmount string to double)
-    const avgOrderValueAgg = await orderCollection.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: thirtyDaysAgo },
-          paymentStatus: "Paid"
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          avgOrderValue: { $avg: { $toDouble: "$totalAmount" } }
-        }
-      }
-    ]).toArray();
-    const avgOrderValue = avgOrderValueAgg[0]?.avgOrderValue || 0;
-
-    res.json({
-      totalRevenueToday,
-      totalOrdersToday,
-      totalUsers,
-      totalApprovedSellers,
-      totalProducts,
-      pendingSellerApplications,
-      revenueTrend7Days,
-      topSellingProducts,
-      orderStatusSummary,
-      wishlistTopProducts,
-      visitorsCount,
-      newUsersLast30Days,
-      avgOrderValue
-    });
-  } catch (error) {
-    console.error("Error in /admin-dashboard:", error);
-    res.status(500).json({ error: "Failed to fetch admin dashboard data" });
-  }
-});
     // -------------------------- ADMIN API END -----------------------
   } finally {
   }
