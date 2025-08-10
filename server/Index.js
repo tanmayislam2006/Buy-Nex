@@ -57,6 +57,7 @@ async function run() {
     const visitorsCollection = BuyNexDB.collection("visitors");
     const becomeASellerApplication = BuyNexDB.collection("application");
     const wishlistCollection = BuyNexDB.collection("wishlist");
+    const trackingCollection = BuyNexDB.collection("productTracking");
     // -----------------------------SOCKET IO CODE END----------------
     // Handle socket connection
     // Map of active users: { email: socketId }
@@ -206,10 +207,44 @@ async function run() {
     // --- API to Update Order Status ---
     app.patch("/orders/:id/status", async (req, res) => {
       const { id } = req.params; // The order's unique _id
-      const { status } = req.body; // The new status from the request body, e.g., "Shipped"
-
-      // --- Basic Validation ---
-      // Check if the provided ID is a valid MongoDB ObjectId
+      const { status, orderNumber } = req.body;
+      // using the order number update the tracking status
+      const orderId = orderNumber || id;
+      let trackingData = {};
+      if (status === "Confirmed") {
+        trackingData = {
+          orderId,
+          step: 2,
+          status,
+          updatedAt: new Date(),
+        };
+      } else if (status === "Shipped") {
+        trackingData = {
+          orderId,
+          step: 3,
+          status,
+          updatedAt: new Date(),
+        };
+      } else if (status === "Out for Delivery") {
+        trackingData = {
+          orderId,
+          step: 4,
+          status,
+          updatedAt: new Date(),
+        };
+      } else if (status === "Delivered") {
+        trackingData = {
+          orderId,
+          step: 5,
+          status,
+          updatedAt: new Date(),
+        };
+      }
+      const changeTrackingData = await trackingCollection.findOneAndUpdate(
+        { orderId },
+        { $set: trackingData },
+        { upsert: true, returnDocument: "after" }
+      );
       if (!ObjectId.isValid(id)) {
         return res.status(400).send({ message: "Invalid Order ID format." });
       }
@@ -232,22 +267,24 @@ async function run() {
 
         // --- Check if the update was successful ---
         if (result.matchedCount === 0) {
-          return res.status(404).send({ message: "No order found with this ID." });
+          return res
+            .status(404)
+            .send({ message: "No order found with this ID." });
         }
 
         if (result.modifiedCount === 0) {
-          return res.status(200).send({ message: "Order status is already up to date." });
+          return res
+            .status(200)
+            .send({ message: "Order status is already up to date." });
         }
 
         // Send a success response
         res.send({ message: "Order status updated successfully", result });
-
       } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).send({ message: "Failed to update order status" });
       }
     });
-
 
     app.post("/register", async (req, res) => {
       const email = req.body.email;
@@ -447,6 +484,40 @@ async function run() {
       } catch (error) {
         console.error("Error fetching user dashboard:", error);
         res.status(500).json({ error: "Failed to fetch user dashboard data" });
+      }
+    });
+    // get user order tracking data
+    app.get("/tracking", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      try {
+        const trackingData = await trackingCollection
+          .find({ userEmail: email })
+          .toArray();
+        res.send(trackingData);
+      } catch (error) {
+        console.error("Error fetching tracking data:", error);
+        res.status(500).json({ error: "Failed to fetch tracking data" });
+      }
+    });
+    app.get("/tracking/:id", async (req, res) => {
+      const  id  = req.params.id;
+      if (!id) {
+        return res.status(400).json({ error: "Tracking ID is required" });
+      }
+      try {
+        const trackingData = await trackingCollection.findOne({
+          trackingId: id,
+        });
+        if (!trackingData) {
+          return res.status(404).json({ error: "Tracking data not found" });
+        }
+        res.send(trackingData);
+      } catch (error) {
+        console.error("Error fetching tracking data:", error);
+        res.status(500).json({ error: "Failed to fetch tracking data" });
       }
     });
 
@@ -838,6 +909,16 @@ async function run() {
 
         // Save order in DB
         await orderCollection.insertOne(orderData);
+        // save the tracking info here
+        const trackingData = {
+          orderId: orderData.orderNumber,
+          trackingId: orderData.trackingNumber,
+          userEmail: orderData.userEmail,
+          step: 1,
+          status: "Order Placed",
+          updatedAt: new Date().toISOString(),
+        };
+        await trackingCollection.insertOne(trackingData);
       } catch (error) {
         console.error("Init Payment Error:", error);
         res.status(500).send({ error: "Failed to initialize payment" });
@@ -877,9 +958,9 @@ async function run() {
 
     app.post("/payment/fail/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;
-
       try {
         await orderCollection.deleteOne({ orderNumber });
+        await trackingCollection.deleteOne({ orderId: orderNumber });
         res.redirect(`http://localhost:5173/payment-fail/${orderNumber}`);
       } catch (err) {
         console.error("Payment Fail Error:", err);

@@ -101,12 +101,6 @@ const DashboardLayout = () => {
       icon: <FiUsers />,
       roles: ["admin"],
     },
-    {
-      to: "/total-orders",
-      label: "Total Orders",
-      icon: <FiBox />,
-      roles: ["admin"],
-    }
   ];
 
   // Filter links based on the user's role
