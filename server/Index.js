@@ -202,6 +202,53 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch seller orders" });
       }
     });
+
+    // --- API to Update Order Status ---
+    app.patch("/orders/:id/status", async (req, res) => {
+      const { id } = req.params; // The order's unique _id
+      const { status } = req.body; // The new status from the request body, e.g., "Shipped"
+
+      // --- Basic Validation ---
+      // Check if the provided ID is a valid MongoDB ObjectId
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: "Invalid Order ID format." });
+      }
+
+      // Check if a status was provided in the body
+      if (!status) {
+        return res.status(400).send({ message: "Status is required." });
+      }
+
+      try {
+        // Find the order by its ID and update it
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            status: status, // Update the status field with the new value
+          },
+        };
+
+        const result = await orderCollection.updateOne(filter, updateDoc);
+
+        // --- Check if the update was successful ---
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: "No order found with this ID." });
+        }
+
+        if (result.modifiedCount === 0) {
+          return res.status(200).send({ message: "Order status is already up to date." });
+        }
+
+        // Send a success response
+        res.send({ message: "Order status updated successfully", result });
+
+      } catch (error) {
+        console.error("Error updating order status:", error);
+        res.status(500).send({ message: "Failed to update order status" });
+      }
+    });
+
+
     app.post("/register", async (req, res) => {
       const email = req.body.email;
       const user = req.body;
