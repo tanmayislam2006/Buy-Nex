@@ -11,7 +11,6 @@ const OrderedProductDetails = () => {
     }
     // Now you have the full 'order' object!
     // You can pass this object as a prop to a display component.
-    // console.log(order);
 
     // --- Helper Functions ---
     const formatDate = (dateString) => {

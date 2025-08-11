@@ -204,7 +204,6 @@ const ProductDetails = () => {
       );
     }
 
-    console.log(similarProducts);
     return (
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Thumbnails - vertical on desktop */}

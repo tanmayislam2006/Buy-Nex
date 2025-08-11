@@ -3,7 +3,6 @@ import ComingSoon from '../../../components/ComingSoon';
 
 const AdminProfile = () => {
 
-    console.log("admin profile");
     return (
         <div>
             <ComingSoon/>

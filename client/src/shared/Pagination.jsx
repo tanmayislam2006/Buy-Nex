@@ -9,8 +9,6 @@ const Pagination = ({
 }) => {
   const visiblePages = 5;
 
-  console.log(currentPage,totalItems, totalPages, itemsPerPage);
-
   const getPageNumbers = () => {
     const pages = [];
     const half = Math.floor(visiblePages / 2);

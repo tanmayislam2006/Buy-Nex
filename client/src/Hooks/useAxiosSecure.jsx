@@ -20,7 +20,6 @@ const useAxiosSecure = () => {
     const resInterceptor = axiosSecure.interceptors.response.use(
       (res) => res,
       (err) => {
-        console.log(err);
         return Promise.reject(err);
       }
     );

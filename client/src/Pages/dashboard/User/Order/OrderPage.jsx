@@ -23,9 +23,6 @@ const OrderPage = () => {
   const axiosSecure = useAxiosSecure();
   const productData = location.state;
 
-
-  console.log(location.state);
-
   useEffect(() => {
     if (!productData) {
       navigate("/cart");

@@ -815,9 +815,9 @@ async function run() {
         total_amount: orderData.totalAmount,
         currency: "USD",
         tran_id: orderData.orderNumber,
-        success_url: `http://localhost:5000/payment/success/${orderData.orderNumber}`,
+        success_url: `https://buy-nex.vercel.app/payment/success/${orderData.orderNumber}`,
         fail_url: `https://buy-nex.vercel.app/payment/fail/${orderData.orderNumber}`,
-        cancel_url: "http://localhost:3030/cancel",
+        cancel_url: `https://buy-nex.vercel.app/payment/fail/${orderData.orderNumber}`,
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
         product_name: "Multiple Products",
@@ -900,7 +900,9 @@ async function run() {
         });
 
         // 4. Redirect if successful
-        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+        res.redirect(
+          `https://buy-nex.web.app/payment-success/${orderNumber}`
+        );
       } catch (err) {
         console.error("Payment Success Error:", err);
         res.status(500).send("Error updating order after payment success");
