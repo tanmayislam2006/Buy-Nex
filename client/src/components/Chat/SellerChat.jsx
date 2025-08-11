@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import useAxios from "../../Hooks/useAxios";
 
-const socket = io("http://localhost:5000"); // Update for production
-
+const socket = io("https://buy-nex-chat-server.onrender.com"); // Update for production
 const SellerChat = ({ sellerEmail }) => {
   const [conversations, setConversations] = useState({});
   const [inputs, setInputs] = useState({});

@@ -1,5 +1,4 @@
-const http = require("http");
-const { Server } = require("socket.io");
+
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
@@ -10,21 +9,12 @@ const app = express();
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false; //true for live, false for sandbox
-const server = http.createServer(app);
-
-// Initialize Socket.IO server
-const io = new Server(server, {
-  cors: {
-    origin: "*", // Allow all origins (change for production)
-  },
-});
 
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      // Add your production frontend URL here when deployed
-      // "https://your-production-frontend.com",
+      "https://buy-nex.web.app"
     ],
     credentials: true, // If you're sending cookies/headers from frontend
   })
@@ -58,44 +48,6 @@ async function run() {
     const becomeASellerApplication = BuyNexDB.collection("application");
     const wishlistCollection = BuyNexDB.collection("wishlist");
     const trackingCollection = BuyNexDB.collection("productTracking");
-    // -----------------------------SOCKET IO CODE END----------------
-    // Handle socket connection
-    // Map of active users: { email: socketId }
-    const users = {};
-    io.on("connection", (socket) => {
-      socket.on("register", (email) => {
-        users[email] = socket.id;
-      });
-      socket.on("send_message", async (data) => {
-        const { sellerEmail, customerEmail } = data;
-        // Save message to the database
-        try {
-          await messagesCollection.insertOne(data);
-        } catch (error) {
-          console.error("Error saving message to database:", error);
-        }
-        // Forward to the other user (based on sender)
-        const recipientEmail =
-          data.sender === "customer" ? sellerEmail : customerEmail;
-        const recipientSocketId = users[recipientEmail];
-
-        if (recipientSocketId) {
-          io.to(recipientSocketId).emit("receive_message", data);
-        }
-      });
-
-      socket.on("disconnect", () => {
-        for (const email in users) {
-          if (users[email] === socket.id) {
-            delete users[email];
-            break;
-          }
-        }
-      });
-    });
-
-    // -----------------------------SOCKET IO CODE END----------------
-
     // visitor track
     app.post("/track-visit", async (req, res) => {
       try {
@@ -296,7 +248,6 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
-
     // Get messages between a seller and a customer
     app.get("/messages/:sellerEmail/:customerEmail", async (req, res) => {
       const { sellerEmail, customerEmail } = req.params;
@@ -316,7 +267,6 @@ async function run() {
         res.status(500).send({ message: "Failed to fetch messages" });
       }
     });
-
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const updatedData = req.body;
@@ -869,8 +819,8 @@ async function run() {
         total_amount: orderData.totalAmount,
         currency: "USD",
         tran_id: orderData.orderNumber,
-        success_url: `http://localhost:5000/payment/success/${orderData.orderNumber}`,
-        fail_url: `http://localhost:5000/payment/fail/${orderData.orderNumber}`,
+        success_url: `https://buy-nex.vercel.app/payment/success/${orderData.orderNumber}`,
+        fail_url: `https://buy-nex.vercel.app/payment/fail/${orderData.orderNumber}`,
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
@@ -949,7 +899,7 @@ async function run() {
         });
 
         // 4. Redirect if successful
-        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+        res.redirect(`https://buy-nex.web.app/payment-success/${orderNumber}`);
       } catch (err) {
         console.error("Payment Success Error:", err);
         res.status(500).send("Error updating order after payment success");
@@ -961,7 +911,7 @@ async function run() {
       try {
         await orderCollection.deleteOne({ orderNumber });
         await trackingCollection.deleteOne({ orderId: orderNumber });
-        res.redirect(`http://localhost:5173/payment-fail/${orderNumber}`);
+        res.redirect(`https://buy-nex.web.app/payment-fail/${orderNumber}`);
       } catch (err) {
         console.error("Payment Fail Error:", err);
         res.status(500).send("Error handling failed payment");
@@ -1904,7 +1854,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-server.listen(port, () => {
+app.listen(port, () => {
   const time = new Date().toLocaleTimeString();
   console.log(`🚀 Server is running on http://localhost:${port} at ${time}`);
 });

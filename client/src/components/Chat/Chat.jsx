@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { Link } from "react-router";
 import useAxios from "./../../Hooks/useAxios";
 
-const socket = io("http://localhost:5000"); // Change this for production
+const socket = io("https://buy-nex-chat-server.onrender.com"); // Change this for production
 
 const Chat = ({ productId, sellerEmail, customerEmail, productName }) => {
   const axiosInstance = useAxios();
