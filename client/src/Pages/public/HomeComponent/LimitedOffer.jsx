@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./Component/ProductCard";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { motion } from "framer-motion";
-import Pagination from "../../../shared/Pagination";
 
 const products = [
   {
@@ -148,6 +144,7 @@ const products = [
     liked: false,
   },
 ];
+
 const LimitedOffer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -168,8 +165,6 @@ const LimitedOffer = () => {
   const [timeLeft, setTimeLeft] = useState(startSeconds);
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: true });
-
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
@@ -186,54 +181,45 @@ const LimitedOffer = () => {
   };
 
   return (
-    <div className="px-4 py-10 mx-auto max-w-7xl">
-      <motion.div
-        className="flex items-center justify-center gap-6 mb-6"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h2 className="text-center text-2xl whitespace-nowrap md:text-3xl font-semibold">
+    <div className="py-10 mx-auto max-w-7xl">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
           Limited Time Offer
         </h2>
-        <span className="text-lg p-2 bg-gray-700 text-white rounded-2xl">
-          {formatTime(timeLeft)}
-        </span>
-      </motion.div>
+        <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-full shadow">
+          <span className="text-sm md:text-lg font-semibold text-gray-800">
+            Ends in:
+          </span>
+          <span className="text-lg md:text-xl font-mono text-white bg-red-600 px-4 py-2 rounded-full">
+            {formatTime(timeLeft)}
+          </span>
+        </div>
+      </div>
 
-      <div className="divider" />
+      <hr className="my-6 border-t border-gray-200" />
 
-      <div
-        className="mt-8 grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-        data-aos="fade-up"
-      >
-        {currentProducts.map((product, index) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <ProductCard product={product} offers={50} />
-          </motion.div>
+      {/* Product Grid */}
+      <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+        {currentProducts.map((product) => (
+          <div key={product.id}>
+            <ProductCard product={product} offers={50} isTrue={false} />
+          </div>
         ))}
       </div>
 
-      <div
-        className="flex justify-center mt-10 space-x-3"
-        data-aos="fade-up"
-        data-aos-delay="200"
-      >
+      {/* Pagination */}
+      <div className="flex justify-center mt-10 space-x-2 md:space-x-3">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-4 py-1 rounded ${
+          className={`px-4 py-2 text-sm md:text-base rounded-full font-medium transition-colors duration-300 ${
             currentPage === 1
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-700 text-white hover:bg-gray-800"
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-gray-800 text-white hover:bg-gray-900"
           }`}
         >
-          Prev
+          Previous
         </button>
 
         {[...Array(totalPages)].map((_, index) => {
@@ -242,10 +228,10 @@ const LimitedOffer = () => {
             <button
               key={pageNum}
               onClick={() => goToPage(pageNum)}
-              className={`px-3 py-1 rounded transition ${
+              className={`w-9 h-9 md:w-10 md:h-10 rounded-full font-semibold transition-colors duration-300 ${
                 currentPage === pageNum
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
               {pageNum}
@@ -256,10 +242,10 @@ const LimitedOffer = () => {
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-4 py-1 rounded ${
+          className={`px-4 py-2 text-sm md:text-base rounded-full font-medium transition-colors duration-300 ${
             currentPage === totalPages
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-700 text-white hover:bg-gray-800"
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-gray-800 text-white hover:bg-gray-900"
           }`}
         >
           Next

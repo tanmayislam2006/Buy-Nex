@@ -67,7 +67,7 @@ const Banner = () => {
   }, []);
 
   return (
-    <div className="min-h-[80vh] pt-10">
+    <div className="min-h-[30vh] md:min-h-[50vh]">
       <Swiper
         pagination={{ dynamicBullets: true }}
         modules={[Pagination, Autoplay]}
@@ -77,7 +77,7 @@ const Banner = () => {
         className="mySwiper h-full"
       >
         {bannerDetails.map((banner) => (
-          <SwiperSlide key={banner.id} className="relative h-full">
+          <SwiperSlide key={banner.id} className="relative border">
             <div
               className="h-[80vh] w-full flex items-center px-4"
               style={{

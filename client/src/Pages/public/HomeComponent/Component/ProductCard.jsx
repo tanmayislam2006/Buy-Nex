@@ -1,11 +1,11 @@
 import React from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-const ProductCard = ({ product, offers }) => {
+const ProductCard = ({ product, offers, isTrue }) => {
   return (
-    <div className="p-4 w-[240px] flex flex-col border border-gray-300 rounded-2xl bg-white transition duration-300 ease-in-out hover:shadow-xl hover:scale-[1.02]">
+    <div className={`p-1  flex flex-col border border-gray-300 rounded-2xl bg-white transition duration-300 ease-in-out hover:shadow-xl hover:scale-[1.02] ${isTrue ? "w-[240px]" : "w-full"}`}>
       {/* Image */}
-      <div className="p-2 relative">
+      <div className="p-1 relative">
         <img
           src={product.image}
           alt={product.title}
@@ -20,7 +20,7 @@ const ProductCard = ({ product, offers }) => {
       </div>
 
       {/* Content */}
-      <div className="px-2 py-3 space-y-3 text-sm text-gray-700">
+      <div className="px-2 py-1 space-y-1 text-sm text-gray-700">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span className="uppercase">{product.category}</span>
           <div className="flex gap-1.5">

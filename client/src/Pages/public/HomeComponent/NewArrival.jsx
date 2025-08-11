@@ -160,7 +160,7 @@ const NewArrival = () => {
         <div className="divider my-4"></div>
 
         <Swiper
-          spaceBetween={24}
+          spaceBetween={18}
           freeMode={true}
           autoplay={{ delay: 2000, disableOnInteraction: false }}
           modules={[Autoplay, FreeMode]}
@@ -172,7 +172,7 @@ const NewArrival = () => {
             640: { slidesPerView: 2.5 },
             768: { slidesPerView: 3 },
             1024: { slidesPerView: 4 },
-            1280: { slidesPerView: 4 },
+            1280: { slidesPerView: 5 },
             1536: { slidesPerView: 6 },
           }}
           className="mySwiper"
@@ -185,7 +185,7 @@ const NewArrival = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ scale: 1.05 }}
               >
-                <ProductCard product={product} />
+                <ProductCard product={product} isTrue={true} />
               </motion.div>
             </SwiperSlide>
           ))}
