@@ -77,7 +77,7 @@ const Banner = () => {
         className="mySwiper h-full"
       >
         {bannerDetails.map((banner) => (
-          <SwiperSlide key={banner.id} className="relative border">
+          <SwiperSlide key={banner.id} className="relative">
             <div
               className="h-[80vh] w-full flex items-center px-4"
               style={{
