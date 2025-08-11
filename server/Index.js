@@ -1,4 +1,3 @@
-
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
@@ -12,10 +11,7 @@ const is_live = false; //true for live, false for sandbox
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://buy-nex.web.app"
-    ],
+    origin: ["http://localhost:5173", "https://buy-nex.web.app"],
     credentials: true, // If you're sending cookies/headers from frontend
   })
 );
@@ -453,7 +449,7 @@ async function run() {
       }
     });
     app.get("/tracking/:id", async (req, res) => {
-      const  id  = req.params.id;
+      const id = req.params.id;
       if (!id) {
         return res.status(400).json({ error: "Tracking ID is required" });
       }
@@ -819,7 +815,7 @@ async function run() {
         total_amount: orderData.totalAmount,
         currency: "USD",
         tran_id: orderData.orderNumber,
-        success_url: `https://buy-nex.vercel.app/payment/success/${orderData.orderNumber}`,
+        success_url: `http://localhost:5000/payment/success/${orderData.orderNumber}`,
         fail_url: `https://buy-nex.vercel.app/payment/fail/${orderData.orderNumber}`,
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
@@ -877,6 +873,7 @@ async function run() {
 
     app.post("/payment/success/:orderNumber", async (req, res) => {
       const { orderNumber } = req.params;
+      console.log(orderNumber);
       try {
         // 1. Update the order status
         const result = await orderCollection.updateOne(
@@ -892,14 +889,18 @@ async function run() {
         // 2. Find the updated order
         const findOrder = await orderCollection.findOne({ orderNumber });
 
-        // 3. Delete each product from the cart collection
-        const productIds = findOrder.products.map((product) => product._id);
+        const userEmail = findOrder.userEmail;
+        const productIds = findOrder.products.map(
+          (product) => product.productId
+        );
+
         const deleteResult = await cartCollection.deleteMany({
-          _id: { $in: productIds.map((id) => new ObjectId(id)) },
+          userEmail: userEmail,
+          productId: { $in: productIds },
         });
 
         // 4. Redirect if successful
-        res.redirect(`https://buy-nex.web.app/payment-success/${orderNumber}`);
+        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
       } catch (err) {
         console.error("Payment Success Error:", err);
         res.status(500).send("Error updating order after payment success");

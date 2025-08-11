@@ -9,7 +9,10 @@ const AIAssistant = () => {
   const axiosInstance = useAxios();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hi! I'm your AI shopping assistant. How can I help you today?" },
+    {
+      role: "assistant",
+      text: "Hi! I'm your AI shopping assistant. How can I help you today?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,16 +38,25 @@ const AIAssistant = () => {
   const sendImage = async () => {
     if (!previewImage) return;
 
-    setMessages((prev) => [...prev, { role: "user", text: "📷 Image sent..." }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: "📷 Image sent..." },
+    ]);
     setIsLoading(true);
 
     try {
       const res = await axiosInstance.post("/api/ai-chat", {
         image: previewImage.split(",")[1],
       });
-      setMessages((prev) => [...prev, { role: "assistant", text: res.data.reply }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: res.data.reply },
+      ]);
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", text: "❌ Failed to process image." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "❌ Failed to process image." },
+      ]);
     } finally {
       setPreviewImage(null);
       setIsLoading(false);
@@ -60,9 +72,15 @@ const AIAssistant = () => {
 
     try {
       const res = await axiosInstance.post("/api/ai-chat", { message: input });
-      setMessages((prev) => [...prev, { role: "assistant", text: res.data.reply }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: res.data.reply },
+      ]);
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", text: "❌ Something went wrong." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "❌ Something went wrong." },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +91,7 @@ const AIAssistant = () => {
       {/* Floating Button */}
       <button
         title="Chat With AI Assistant"
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-105 transform transition"
+        className="fixed bottom-6 right-2 md:right-6 z-50 bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-105 transform transition"
         onClick={() => setOpen(!open)}
       >
         {open ? <IoClose size={24} /> : <IoChatbubblesOutline size={24} />}
@@ -81,13 +99,18 @@ const AIAssistant = () => {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-20 right-6 w-11/12 md:w-5/12 lg:w-4/12 h-3/4 
+        <div
+          className="z-[99999] fixed bottom-24 right-2 md:right-6 w-[360px] sm:w-full  md:w-7/12 lg:w-4/12 h-3/4 
                         bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30
-                        flex flex-col overflow-hidden z-40 animate-fadeIn">
+                        flex flex-col overflow-hidden animate-fadeIn"
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 font-semibold flex justify-between items-center">
             AI Assistant
-            <button onClick={() => setOpen(false)} className="hover:text-gray-200">
+            <button
+              onClick={() => setOpen(false)}
+              className="hover:text-gray-200"
+            >
               <IoClose size={20} />
             </button>
           </div>
@@ -103,7 +126,9 @@ const AIAssistant = () => {
                     : "bg-gray-100 text-gray-800 self-start mr-auto"
                 }`}
               >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.text}
+                </ReactMarkdown>
               </div>
             ))}
 
@@ -120,7 +145,11 @@ const AIAssistant = () => {
           {/* Image Preview */}
           {previewImage && (
             <div className="p-3 border-t bg-white flex justify-between items-center">
-              <img src={previewImage} alt="preview" className="w-16 h-16 object-cover rounded-lg shadow-md" />
+              <img
+                src={previewImage}
+                alt="preview"
+                className="w-16 h-16 object-cover rounded-lg shadow-md"
+              />
               <div className="flex gap-2">
                 <button
                   onClick={() => setPreviewImage(null)}

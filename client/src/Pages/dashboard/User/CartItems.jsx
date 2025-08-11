@@ -7,10 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import Loading from "../../../components/Loading";
 import Swal from "sweetalert2";
 import { calculateShipping, calculateTotalAmount } from "../../../Utils/Utils";
+import useBlogs from "../../../Hooks/useBlogs";
 
 const CartItems = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
+  const { setRefreshCart } = useBlogs();
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -26,8 +28,6 @@ const CartItems = () => {
       return res.data;
     },
   });
-
-console.log(cart);
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -45,6 +45,7 @@ console.log(cart);
       try {
         await axiosSecure.delete(`/cart/delete/${id}`);
         refetch();
+        setRefreshCart((prev) => !prev);
         setSelectedItems((prev) => prev.filter((item) => item._id !== id));
         Swal.fire("Deleted!", "The item has been removed.", "success");
       } catch (error) {

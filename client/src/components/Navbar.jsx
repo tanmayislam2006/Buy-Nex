@@ -13,13 +13,11 @@ import MainLogo from "../shared/MainLogo";
 import useAuth from "../Hooks/useAuth";
 import UserDropdown from "../shared/UserDropdown";
 import CartDropdown from "./Cart/CartDropdown";
-import useAxios from "../Hooks/useAxios";
-import { useQuery } from "@tanstack/react-query";
-
+import useBlogs from "../Hooks/useBlogs";
 const Navbar = () => {
-  const axiosInstance = useAxios();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logoutUser, firebaseUser } = useAuth();
+  const { user, logoutUser } = useAuth();
+  const { cartItem } = useBlogs();
   const [scrolled, setScrolled] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const navigate = useNavigate();
@@ -31,15 +29,7 @@ const Navbar = () => {
     { label: "Help & Support", to: "/help-support" },
     { label: "About Us", to: "/about" },
   ];
-  const { data: cartItem } = useQuery({
-    queryKey: ["cartItems"],
-    queryFn: async () => {
-      if (!user) return [];
-      const response = await axiosInstance.get(`/cart/${firebaseUser?.email}`);
-      return response.data;
-    },
-  });
-
+  
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", handleScroll);

@@ -10,11 +10,13 @@ import useAuth from "../../Hooks/useAuth";
 import toast from "react-hot-toast";
 import Chat from "../../components/Chat/Chat";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import useBlogs from "../../Hooks/useBlogs";
 
 const ProductDetails = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { user } = useAuth();
+  const {  setRefreshCart } = useBlogs();
   const { id } = useParams();
   const axiosInstance = useAxios();
   const [quantity, setQuantity] = useState(1);
@@ -55,14 +57,7 @@ const ProductDetails = () => {
       sellerEmail: product?.sellerEmail,
     };
 
-    axiosInstance
-      .post("/track-visit", visitData)
-      .then((res) => {
-        console.log("Visitor data recorded:", res.data);
-      })
-      .catch((err) => {
-        console.error("Failed to record visitor:", err);
-      });
+    axiosInstance.post("/track-visit", visitData);
   }, [id, user, axiosInstance, product?.sellerEmail]);
 
   if (isLoading || isSimilarLoading) return <Loading />;
@@ -94,7 +89,8 @@ const ProductDetails = () => {
       return;
     }
     try {
-      const response = await axiosInstance.post("/cart", cartInfo);
+      await axiosInstance.post("/cart", cartInfo);
+      setRefreshCart((prev) => !prev); 
       toast.success("Item added to cart: " + product.name);
     } catch (error) {
       toast.error("Error adding item to cart: " + error.message);
@@ -106,7 +102,8 @@ const ProductDetails = () => {
       return;
     }
     try {
-      const response = await axiosInstance.post("/cart", cartInfo);
+      await axiosInstance.post("/cart", cartInfo);
+      setRefreshCart((prev) => !prev);
       toast.success("Item added to cart: " + product.name);
       navigate("/orderPage", { state: cartInfo });
     } catch (error) {
@@ -583,13 +580,13 @@ const ProductDetails = () => {
       <div>
         <button
           onClick={handleChat}
-          className="btn btn-primary fixed bottom-24 border-none right-6 z-50 rounded-full text-2xl py-7 px-4 shadow-lg hover:bg-accent transition duration-300"
+          className="btn btn-primary fixed bottom-24 border-none right-2 md:right-6 z-50 rounded-full text-2xl py-7 px-4 shadow-lg hover:bg-accent transition duration-300"
         >
           <IoMdChatboxes />
         </button>
         {/* Chat Popup Animation */}
         <div
-          className={`fixed bottom-6 right-5 z-40`}
+          className={`fixed bottom-6 right-1 md:right-5 z-40`}
           style={{
             transition:
               "opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.68,-0.55,.27,1.55)",

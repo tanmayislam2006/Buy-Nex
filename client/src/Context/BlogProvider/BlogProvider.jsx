@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BlogContext } from "../BlogContext/BlogContext.jsx";
 import { useQuery } from "@tanstack/react-query";
 import useAxios from "../../Hooks/useAxios.jsx";
+import useAuth from "../../Hooks/useAuth.jsx";
 
 const BlogProvider = ({ children }) => {
-  const axiosInstance=useAxios()
+  const axiosInstance = useAxios()
+  const {firebaseUser} = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState(""); 
   const [category, setCategory] = useState("");
   const itemsPerPage = 4;
+  const [cartItem, setCartItem] = useState([]);
+  const [refreshCart, setRefreshCart] = useState(false);
+
 
   const {
     data: blogsData,
@@ -48,6 +53,20 @@ const BlogProvider = ({ children }) => {
     setCategory(e.target.value);
   };
 
+  
+  useEffect(() => {
+    if (firebaseUser?.email) {
+      axiosInstance
+        .get(`/cart/${firebaseUser.email}`)
+        .then((response) => {
+          setCartItem(response.data);
+        })
+        .catch((error) => {
+          console.error("Error loading cart items:", error);
+        });
+    }
+  }, [firebaseUser, axiosInstance, refreshCart]);
+
   const blogData = {
     blogs,
     total,
@@ -65,6 +84,8 @@ const BlogProvider = ({ children }) => {
     setCategory,
     handleInputChange,
     handleCategoryChange,
+    cartItem,
+    setRefreshCart,
   };
 
   return <BlogContext.Provider value={blogData}>{children}</BlogContext.Provider>;

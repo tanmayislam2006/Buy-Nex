@@ -23,7 +23,8 @@ const OrderPage = () => {
   const axiosSecure = useAxiosSecure();
   const productData = location.state;
 
-  console.log(productData);
+
+  console.log(location.state);
 
   useEffect(() => {
     if (!productData) {
