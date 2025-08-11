@@ -14,8 +14,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      // Add your production frontend URL here when deployed
-      // "https://your-production-frontend.com",
+      "https://buy-nex.web.app"
     ],
     credentials: true, // If you're sending cookies/headers from frontend
   })
@@ -820,8 +819,8 @@ async function run() {
         total_amount: orderData.totalAmount,
         currency: "USD",
         tran_id: orderData.orderNumber,
-        success_url: `http://localhost:5000/payment/success/${orderData.orderNumber}`,
-        fail_url: `http://localhost:5000/payment/fail/${orderData.orderNumber}`,
+        success_url: `https://buy-nex.vercel.app/payment/success/${orderData.orderNumber}`,
+        fail_url: `https://buy-nex.vercel.app/payment/fail/${orderData.orderNumber}`,
         cancel_url: "http://localhost:3030/cancel",
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
@@ -900,7 +899,7 @@ async function run() {
         });
 
         // 4. Redirect if successful
-        res.redirect(`http://localhost:5173/payment-success/${orderNumber}`);
+        res.redirect(`https://buy-nex.web.app/payment-success/${orderNumber}`);
       } catch (err) {
         console.error("Payment Success Error:", err);
         res.status(500).send("Error updating order after payment success");
@@ -912,7 +911,7 @@ async function run() {
       try {
         await orderCollection.deleteOne({ orderNumber });
         await trackingCollection.deleteOne({ orderId: orderNumber });
-        res.redirect(`http://localhost:5173/payment-fail/${orderNumber}`);
+        res.redirect(`https://buy-nex.web.app/payment-fail/${orderNumber}`);
       } catch (err) {
         console.error("Payment Fail Error:", err);
         res.status(500).send("Error handling failed payment");

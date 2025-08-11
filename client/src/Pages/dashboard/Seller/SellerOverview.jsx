@@ -14,8 +14,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../../Hooks/useAuth";
 import { Link } from "react-router";
-import axios from "axios";
 import { IoNotifications, IoSettings } from "react-icons/io5";
+import useAxios from "../../../Hooks/useAxios";
 
 // Helper component for summary cards
 function SummaryCard({ title, value, change, icon, chartColor, chartData }) {
@@ -66,14 +66,15 @@ function SummaryCard({ title, value, change, icon, chartColor, chartData }) {
 const SellerOverview = () => {
   const { user } = useAuth();
   const sellerEmail = user?.email;
+  const axiosInstance = useAxios();
 
   // Use Tanstack Query to fetch all dashboard data with a single API call
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sellerDashboardData", sellerEmail],
     queryFn: async () => {
       if (!sellerEmail) return null;
-      const response = await axios.get(
-        `http://localhost:5000/seller-dashboard-data/${sellerEmail}`
+      const response = await axiosInstance.get(
+        `/seller-dashboard-data/${sellerEmail}`
       );
       return response.data;
     },
