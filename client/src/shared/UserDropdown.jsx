@@ -6,7 +6,7 @@ const UserDropdown = () => {
   const defaultAvtar = `https://ui-avatars.com/api/?name=${user?.name || "Buy Nex"}&background=random&color=fff&bold=true`;
   const menu = [
     { label: "My Profile", to: "/profile" },
-    { label: "Order History", to: "/dashboard/order-history" },
+    { label: "Order History", to: "/order-history" },
     { label: "Become Seller", to: "/become-seller" },
     { label: "Dashboard", to: "/dashboard" }
   ];
