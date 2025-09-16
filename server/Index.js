@@ -1536,7 +1536,7 @@ async function run() {
 
       try {
         const n8nResponse = await fetch(
-          "https://jaofor2390.app.n8n.cloud/webhook/read-chat",
+          "https://myname101.app.n8n.cloud/webhook/read-chat",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

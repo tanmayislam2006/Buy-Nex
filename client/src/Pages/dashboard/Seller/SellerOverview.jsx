@@ -275,7 +275,7 @@ const SellerOverview = () => {
         <div className="lg:col-span-3 xl:col-span-2 card bg-white shadow-md rounded-lg p-4">
           <h3 className="font-bold mb-2">Top Countries By Sales</h3>
           <ul className="text-sm">
-            {topCountries?.map((c, i) => (
+            {topCountries?.slice(0, 6).map((c, i) => (
               <li
                 key={i}
                 className="flex items-center justify-between mb-2 p-2 hover:bg-gray-50 rounded"
