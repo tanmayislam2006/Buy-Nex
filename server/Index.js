@@ -1525,8 +1525,6 @@ async function run() {
     // --- NEW: Define a temporary Session ID for testing ---
     // This static ID groups all test messages together in your MongoDB memory.
     // Replace 'default-test-user-id' with a unique ID later when implementing real users.
-    const sessionId = "default-test-user-id";
-
     // Check if a message or an image was provided
     if (!message && !image) {
         return res.status(400).send({ error: "No message or image provided." });
@@ -1534,15 +1532,13 @@ async function run() {
 
     // Construct the payload to send to n8n
     const n8nPayload = {
-        // --- NEW: Include the temporary Session ID in the payload ---
-        sessionId: sessionId,
         ...(message && { message: message }),
         ...(image && { image: image }),
     };
 
     try {
         const n8nResponse = await fetch(
-            "https://1201-498.n8n1.deltadns.xyz/webhook-test/buy-nex-req",
+            "https://1201-498.n8n1.deltadns.xyz/webhook/buy-nex-req",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
