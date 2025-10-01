@@ -15,7 +15,7 @@ const Profile = () => {
   } else if (user.role === "seller") {
     return <UserProfile />;
   } else if (user.role === "admin") {
-    return <AdminProfile />;
+    return <UserProfile />;
   }
 };
 
