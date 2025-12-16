@@ -1,13 +1,13 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create \r new branche create",
+  "description": "Modularized server code for BuyNex",
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
